@@ -4,7 +4,24 @@ To test, set the required environment variable `ROCKSET_APIKEY` and
 edit `main.tf` and add your AWS external ID. Both of them are available in the
 [Rockset Console](https://console.rockset.com/).
 
-After that you can run:
+```hcl-terraform
+data "rockset_account" "demo" {}
+
+resource "rockset_s3" "demo" {
+  name = "provider integration"
+  aws_role_arn = module.rockset.rockset-role-arn
+}
+
+module "rockset" {
+  source = "rockset/s3/integration"
+  bucket = "rockset-pme-provider-test-bucket"
+  rockset-role-name = "provider-integration-test"
+  rockset-account-id = data.rockset_account.demo.account_id
+  rockset-external-id = "<external id>"
+}
+```
+
+After that you can build and run
 ```
 $ go build && terraform init
 $ terraform apply
