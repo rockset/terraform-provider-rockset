@@ -13,3 +13,12 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+
+.env
+.envrc
+.idea
+.terraform
+
+terraform.tfstate
+terraform.tfstate.backup
+terraform-provider-rockset
