@@ -17,6 +17,9 @@ func resourceS3() *schema.Resource {
 		Create: resourceS3IntegrationCreate,
 		Read:   resourceS3IntegrationRead,
 		Delete: resourceS3IntegrationDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"name": &schema.Schema{
@@ -84,9 +87,10 @@ func resourceS3IntegrationRead(d *schema.ResourceData, m interface{}) error {
 	// https://docs.rockset.com/rest-api#getintegration
 	rc := m.(*rockset.RockClient)
 
-	name := d.Get("name").(string)
+	id := d.Id()
 
-	res, httpResp, err := rc.Integration.Get(name)
+	log.Printf("getting integration with ID %s", id)
+	res, httpResp, err := rc.Integration.Get(id)
 	if err != nil {
 		return asSwaggerMessage(err)
 	}
@@ -95,6 +99,7 @@ func resourceS3IntegrationRead(d *schema.ResourceData, m interface{}) error {
 		d.SetId("")
 		return nil
 	}
+	log.Printf("%+v", *res.Data)
 
 	if res.Data.S3 == nil && res.Data.S3.AwsRole == nil {
 		d.SetId("")
@@ -115,8 +120,6 @@ func resourceS3IntegrationRead(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return nil
 	}
-
-	d.SetId(name)
 
 	return nil
 }

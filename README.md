@@ -140,3 +140,30 @@ Do you want to perform these actions?
 
   Enter a value:
 ```
+
+## Importing an existing integration
+
+It is possible to import an existing S3 integration. First add a stub to the `main.tf` file,
+e.g. if the integration name is `foobar`
+```hcl-terraform
+resource "rockset_s3" "foobar" {
+}
+```
+
+Then run
+```bash
+$ terraform import rockset_s3.foobar foobar
+```
+
+Now you can print the existing state with
+```bash
+$ terraform show
+# rockset_s3.foobar:
+resource "rockset_s3" "foobar" {
+    aws_role_arn = "<arn>"
+    id           = "foobar"
+    name         = "foobar"
+}
+```
+
+And finally update `main.tf` with it.
