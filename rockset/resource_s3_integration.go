@@ -12,7 +12,7 @@ import (
 
 // https://www.terraform.io/docs/extend/writing-custom-providers.html
 
-func resourceS3() *schema.Resource {
+func resourceS3Integration() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceS3IntegrationCreate,
 		Read:   resourceS3IntegrationRead,
@@ -23,9 +23,10 @@ func resourceS3() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"name": &schema.Schema{
-				Type:     schema.TypeString,
-				ForceNew: true,
-				Required: true,
+				Type:         schema.TypeString,
+				ForceNew:     true,
+				Required:     true,
+				ValidateFunc: rocksetNameValidator,
 			},
 			"description": &schema.Schema{
 				Type:     schema.TypeString,
@@ -135,6 +136,8 @@ func resourceS3IntegrationDelete(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return asSwaggerMessage(err)
 	}
+
+	d.SetId("")
 
 	return nil
 }

@@ -1,8 +1,10 @@
 package rockset
 
 import (
+	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/rockset/rockset-go-client"
+	"regexp"
 )
 
 type Config struct {
@@ -13,7 +15,9 @@ type Config struct {
 func Provider() *schema.Provider {
 	provider := &schema.Provider{
 		ResourcesMap: map[string]*schema.Resource{
-			"rockset_s3": resourceS3(),
+			"rockset_workspace": resourceWorkspace(),
+			"rockset_s3_integration": resourceS3Integration(),
+			"rockset_s3_collection":  resourceS3Collection(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"rockset_account": dataSourceRocksetAccount(),
@@ -57,4 +61,14 @@ func (c *Config) Client() (interface{}, error) {
 	}
 
 	return rockset.NewClient(opts...)
+}
+
+var nameRegexp = regexp.MustCompile("^[[:alnum:]][[:alnum:]-_]*$")
+
+func rocksetNameValidator(val interface{}, key string) ([]string, []error) {
+	s := val.(string)
+	if nameRegexp.MatchString(s) {
+		return nil, nil
+	}
+	return nil, []error{fmt.Errorf("%s must start with alphanumeric, the rest can be alphanumeric, -, or _", key)}
 }
