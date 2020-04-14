@@ -8,6 +8,7 @@ import (
 	"github.com/rockset/rockset-go-client"
 	models "github.com/rockset/rockset-go-client/lib/go"
 	"log"
+	"net/http"
 	"regexp"
 	"strings"
 )
@@ -211,6 +212,7 @@ func resourceS3Collection() *schema.Resource {
 }
 
 func resourceS3CollectionCreate(d *schema.ResourceData, m interface{}) error {
+	// https://docs.rockset.com/rest-api/#createcollection
 	rc := m.(*rockset.RockClient)
 
 	workspace := d.Get("workspace").(string)
@@ -277,6 +279,7 @@ func resourceS3CollectionCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceS3CollectionRead(d *schema.ResourceData, m interface{}) error {
+	// https://docs.rockset.com/rest-api/#getcollection
 	rc := m.(*rockset.RockClient)
 
 	workspace, name := workspaceID(d.Id())
@@ -320,6 +323,7 @@ func resourceS3CollectionRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceS3CollectionDelete(d *schema.ResourceData, m interface{}) error {
+	// https://docs.rockset.com/rest-api/#deletecollection
 	rc := m.(*rockset.RockClient)
 
 	workspace := d.Get("workspace").(string)
@@ -335,12 +339,11 @@ func resourceS3CollectionDelete(d *schema.ResourceData, m interface{}) error {
 	// loop until the collection is gone as the deletion is asynchronous
 	err = resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
 		log.Printf("checking if %s in workspace %s still exist", name, workspace)
-		_, _, err = rc.Collection.Get(workspace, name)
+		_, httpResp, err := rc.Collection.Get(workspace, name)
 		if err == nil {
 			return resource.RetryableError(fmt.Errorf("collection %s still exist", name))
 		}
-		// TODO we need a better way to check the error
-		if err.Error() == "404 Not Found" {
+		if httpResp.StatusCode == http.StatusNotFound {
 			return nil
 		}
 		return resource.NonRetryableError(err)
@@ -384,8 +387,6 @@ func makeOutputField(in interface{}) *models.OutputField {
 				}
 			}
 		}
-	} else {
-		log.Println("no match")
 	}
 
 	return &of
