@@ -8,7 +8,7 @@ import (
 )
 
 func TestWorkspaceID(t *testing.T) {
-	a, b := workspaceID("foo:bar")
+	a, b := workspaceAndNameFromID("foo:bar")
 	assert.Equal(t, "foo", a)
 	assert.Equal(t, "bar", b)
 }

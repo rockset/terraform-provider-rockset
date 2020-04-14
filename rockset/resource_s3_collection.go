@@ -10,7 +10,6 @@ import (
 	"log"
 	"net/http"
 	"regexp"
-	"strings"
 )
 
 func resourceS3Collection() *schema.Resource {
@@ -273,7 +272,7 @@ func resourceS3CollectionCreate(d *schema.ResourceData, m interface{}) error {
 		return asSwaggerMessage(err)
 	}
 
-	d.SetId(toWorkspaceID(workspace, name))
+	d.SetId(toID(workspace, name))
 
 	return resourceS3CollectionRead(d, m)
 }
@@ -282,7 +281,7 @@ func resourceS3CollectionRead(d *schema.ResourceData, m interface{}) error {
 	// https://docs.rockset.com/rest-api/#getcollection
 	rc := m.(*rockset.RockClient)
 
-	workspace, name := workspaceID(d.Id())
+	workspace, name := workspaceAndNameFromID(d.Id())
 
 	res, _, err := rc.Collection.Get(workspace, name)
 	if err != nil {
@@ -317,7 +316,7 @@ func resourceS3CollectionRead(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
-	d.SetId(toWorkspaceID(workspace, name))
+	d.SetId(toID(workspace, name))
 
 	return nil
 }
@@ -353,21 +352,6 @@ func resourceS3CollectionDelete(d *schema.ResourceData, m interface{}) error {
 	}
 
 	return err
-}
-
-func toWorkspaceID(workspace, name string) string {
-	// TODO if there are multiple accounts which all have the same workspace and collection name
-	// this ID wont't work
-	return fmt.Sprintf("%s:%s", workspace, name)
-}
-
-func workspaceID(id string) (string, string) {
-	tokens := strings.SplitN(id, ":", 2)
-	if len(tokens) != 2 {
-		log.Printf("unparsable id: %s", id)
-		return "", ""
-	}
-	return tokens[0], tokens[1]
 }
 
 func makeOutputField(in interface{}) *models.OutputField {

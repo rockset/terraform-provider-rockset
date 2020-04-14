@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/rockset/rockset-go-client"
+	"log"
 	"regexp"
+	"strings"
 )
 
 type Config struct {
@@ -18,6 +20,7 @@ func Provider() *schema.Provider {
 			"rockset_workspace": resourceWorkspace(),
 			"rockset_s3_integration": resourceS3Integration(),
 			"rockset_s3_collection":  resourceS3Collection(),
+			"rockset_query_lambda": resourceQueryLambda(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"rockset_account": dataSourceRocksetAccount(),
@@ -72,3 +75,19 @@ func rocksetNameValidator(val interface{}, key string) ([]string, []error) {
 	}
 	return nil, []error{fmt.Errorf("%s must start with alphanumeric, the rest can be alphanumeric, -, or _", key)}
 }
+
+func toID(workspace, name string) string {
+	// TODO if there are multiple accounts which all have the same workspace and name
+	// this ID wont't work, so perhaps the account name should be included in the id?
+	return fmt.Sprintf("%s:%s", workspace, name)
+}
+
+func workspaceAndNameFromID(id string) (string, string) {
+	tokens := strings.SplitN(id, ":", 2)
+	if len(tokens) != 2 {
+		log.Printf("unparsable id: %s", id)
+		return "", ""
+	}
+	return tokens[0], tokens[1]
+}
+

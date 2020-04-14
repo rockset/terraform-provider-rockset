@@ -26,7 +26,9 @@ resource "rockset_s3_collection" "demo" {
   format = "csv"
   csv {
     first_line_as_column_names = false
-    column_names = ["foo", "bar"]
+    column_names               = [
+      "foo",
+      "bar"]
   }
 
   field_mapping {
@@ -63,6 +65,19 @@ resource "rockset_s3_collection" "demo" {
       field_name = "col3_bool"
       on_error   = "SKIP"
       sql        = "CAST(:val as bool)"
+    }
+  }
+}
+
+resource "rockset_query_lambda" "test" {
+  workspace = "commons"
+  name      = "foobar"
+  sql {
+    query = file("${path.module}/query.sql")
+    default_parameter {
+      name  = "country"
+      type  = "string"
+      value = "Brazil"
     }
   }
 }
