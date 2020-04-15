@@ -2,6 +2,7 @@ package rockset
 
 import (
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
@@ -255,6 +256,7 @@ func resourceS3CollectionCreate(d *schema.ResourceData, m interface{}) error {
 			}
 
 			if v, ok := cfg["output_field"]; ok {
+				log.Printf("output_field(%T): %+v", v, v)
 				fm.OutputField = makeOutputField(v)
 			}
 
@@ -266,7 +268,7 @@ func resourceS3CollectionCreate(d *schema.ResourceData, m interface{}) error {
 		}
 		request.FieldMappings = mappings
 	}
-
+	log.Println(spew.Sdump(request))
 	_, _, err := rc.Collection.Create(workspace, request)
 	if err != nil {
 		return asSwaggerMessage(err)
@@ -357,16 +359,15 @@ func resourceS3CollectionDelete(d *schema.ResourceData, m interface{}) error {
 func makeOutputField(in interface{}) *models.OutputField {
 	of := models.OutputField{}
 
-	if list, ok := in.([]interface{}); ok {
-		for _, v := range list {
-			if cfg, ok := v.(map[string]interface{}); ok {
-				if v, ok := cfg["field_name"]; ok {
+	for _, i := range in.(*schema.Set).List() {
+		if val, ok := i.(map[string]interface{}); ok {
+			for k, v := range val {
+				switch k {
+				case "field_name":
 					of.FieldName = v.(string)
-				}
-				if v, ok := cfg["on_error"]; ok {
+				case "on_error":
 					of.OnError = v.(string)
-				}
-				if v, ok := cfg["sql"]; ok {
+				case "sql":
 					of.Value = &models.SqlExpression{Sql: v.(string)}
 				}
 			}
@@ -417,7 +418,6 @@ func makeCsvParams(in interface{}) *models.CsvParams {
 	for _, i := range in.(*schema.Set).List() {
 		if val, ok := i.(map[string]interface{}); ok {
 			for k, v := range val {
-				log.Printf("%s: %T %v", k, v, v)
 				switch k {
 				case "first_line_as_column_names":
 					m.FirstLineAsColumnNames = v.(bool)
