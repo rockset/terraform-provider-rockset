@@ -41,14 +41,6 @@ func TestFlattenFieldMappings(t *testing.T) {
 
 	flat := flattenFieldMappings(fm)
 	assert.Len(t, flat, 1)
-
-	f := flat[0].(map[string]interface{})
-
-	of := makeOutputField(f["output_field"])
-	assert.Equal(t, "out1", of.FieldName)
-
-	ifs := makeInputFields(f["input_fields"])
-	assert.Len(t, ifs, 2)
 }
 
 func TestGetCollection(t *testing.T) {
