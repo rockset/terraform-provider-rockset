@@ -1,6 +1,19 @@
 # Terraform Provider for Rockset
 
-This terraform provider implements a subset of the Rockset components available.
+This terraform provider implements a subset of the Rockset components available, see below for exact list.
+
+## Installation
+
+As it hasn't been published yet, it needs to be manually installed as follows:
+
+```
+mkdir -p ~/.terraform.d/plugins
+wget -O /tmp/tpr.tgz https://github.com/rockset/terraform-provider-rockset/releases/download/latest/terraform-provider-rockset_0.1.0_Darwin_x86_64.tar.gz
+cd ~/.terraform.d/plugins
+tar /tmp/tpr.tgz terraform-provider-rockset
+```
+
+This will make the rockset provider available when you run `terraform init`.
 
 ## Data sources
 
@@ -120,20 +133,20 @@ resource "rockset_query_lambda" "test" {
 It is possible to import an existing S3 integration. First add a stub to the `main.tf` file,
 e.g. if the integration name is `foobar`
 ```hcl-terraform
-resource "rockset_s3" "foobar" {
+resource "rockset_s3_integration" "foobar" {
 }
 ```
 
 Then run
 ```bash
-$ terraform import rockset_s3.foobar foobar
+$ terraform import rockset_s3_integration.foobar foobar
 ```
 
 Now you can print the existing state with
 ```bash
 $ terraform show
-# rockset_s3.foobar:
-resource "rockset_s3" "foobar" {
+# rockset_s3_integration.foobar:
+resource "rockset_s3_integration" "foobar" {
     aws_role_arn = "<arn>"
     id           = "foobar"
     name         = "foobar"
