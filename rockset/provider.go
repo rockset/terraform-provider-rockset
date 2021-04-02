@@ -21,6 +21,7 @@ func Provider() *schema.Provider {
 			"rockset_s3_integration": resourceS3Integration(),
 			"rockset_s3_collection":  resourceS3Collection(),
 			"rockset_query_lambda": resourceQueryLambda(),
+			"rockset_collection": resourceCollection(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"rockset_account": dataSourceRocksetAccount(),
