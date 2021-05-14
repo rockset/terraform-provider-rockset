@@ -16,6 +16,10 @@ func resourceIpAllowlist() *schema.Resource {
 		UpdateContext: resourceIpAllowlistUpdate,
 		DeleteContext: resourceIpAllowlistDelete,
 
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
+
 		Schema: map[string]*schema.Schema{
 			"sample_attribute": {
 				Description: "Sample attribute.",

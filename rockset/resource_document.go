@@ -16,6 +16,10 @@ func resourceDocument() *schema.Resource {
 		UpdateContext: resourceDocumentUpdate,
 		DeleteContext: resourceDocumentDelete,
 
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
+
 		Schema: map[string]*schema.Schema{
 			"sample_attribute": {
 				Description: "Sample attribute.",

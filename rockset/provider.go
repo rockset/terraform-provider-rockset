@@ -20,8 +20,10 @@ type Config struct {
 func Provider() *schema.Provider {
 	return &schema.Provider{
 		ResourcesMap: map[string]*schema.Resource{
-			"rockset_workspace":      resourceWorkspace(),
+			"rockset_alias":          resourceAlias(),
+			"rockset_api_key":        resourceApiKey(),
 			"rockset_s3_integration": resourceS3Integration(),
+			// "rockset_workspace":      resourceWorkspace(),
 			// "rockset_s3_collection":  resourceS3Collection(),
 			// "rockset_query_lambda": resourceQueryLambda(),
 			// "rockset_collection": resourceCollection(),
@@ -99,4 +101,13 @@ func workspaceAndNameFromID(id string) (string, string) {
 		return "", ""
 	}
 	return tokens[0], tokens[1]
+}
+
+// convert an array of interface{} to an array of string
+func toStringArray(a []interface{}) []string {
+	r := make([]string, len(a))
+	for i, v := range a {
+		r[i] = v.(string)
+	}
+	return r
 }

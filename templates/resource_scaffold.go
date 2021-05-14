@@ -16,6 +16,10 @@ func resourceScaffold() *schema.Resource {
 		UpdateContext: resourceScaffoldUpdate,
 		DeleteContext: resourceScaffoldDelete,
 
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
+
 		Schema: map[string]*schema.Schema{
 			"sample_attribute": {
 				Description: "Sample attribute.",

@@ -16,6 +16,10 @@ func resourceQueryLambda() *schema.Resource {
 		UpdateContext: resourceQueryLambdaUpdate,
 		DeleteContext: resourceQueryLambdaDelete,
 
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
+
 		Schema: map[string]*schema.Schema{
 			"sample_attribute": {
 				Description: "Sample attribute.",

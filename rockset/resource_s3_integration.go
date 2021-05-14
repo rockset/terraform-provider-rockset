@@ -11,12 +11,16 @@ import (
 
 func resourceS3Integration() *schema.Resource {
 	return &schema.Resource{
-		Description: "Sample resource in the Terraform provider S3Integration.",
+		Description: "Manages a Rockset S3 Integration.",
 
 		// No updateable fields at this time, all fields require recreation.
 		CreateContext: resourceS3IntegrationCreate,
 		ReadContext:   resourceS3IntegrationRead,
 		DeleteContext: resourceS3IntegrationDelete,
+
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"name": &schema.Schema{
@@ -60,7 +64,9 @@ func resourceS3IntegrationRead(ctx context.Context, d *schema.ResourceData, meta
 	rc := meta.(*rockset.RockClient)
 	var diags diag.Diagnostics
 
-	getReq := rc.IntegrationsApi.GetIntegration(ctx, d.Get("name").(string))
+	name := d.Id()
+
+	getReq := rc.IntegrationsApi.GetIntegration(ctx, name)
 	response, _, err := getReq.Execute()
 	if err != nil {
 		return diag.FromErr(err)
@@ -70,8 +76,6 @@ func resourceS3IntegrationRead(ctx context.Context, d *schema.ResourceData, meta
 	d.Set("description", response.Data.Description)
 	d.Set("aws_role_arn", response.Data.S3.AwsRole.AwsRoleArn)
 
-	d.SetId(response.Data.Name)
-
 	return diags
 }
 
@@ -79,7 +83,9 @@ func resourceS3IntegrationDelete(ctx context.Context, d *schema.ResourceData, me
 	rc := meta.(*rockset.RockClient)
 	var diags diag.Diagnostics
 
-	err := rc.DeleteIntegration(ctx, d.Get("name").(string))
+	name := d.Id()
+
+	err := rc.DeleteIntegration(ctx, name)
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -16,6 +16,10 @@ func resourceVirtualInstanceProperties() *schema.Resource {
 		UpdateContext: resourceVirtualInstancePropertiesUpdate,
 		DeleteContext: resourceVirtualInstancePropertiesDelete,
 
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
+
 		Schema: map[string]*schema.Schema{
 			"sample_attribute": {
 				Description: "Sample attribute.",
