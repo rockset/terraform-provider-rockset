@@ -1,17 +1,17 @@
-provider "rockset" {}
+provider rockset {}
 
-data "rockset_account" "example" {}
+data rockset_account example {}
 
-resource "rockset_workspace" "example" {
+resource rockset_workspace example {
   name = "example"
 }
 
-resource "rockset_s3_integration" "example" {
+resource rockset_s3_integration example {
   name         = "s3-integration"
   aws_role_arn = aws_iam_role.rockset.arn
 }
 
-resource "rockset_s3_collection" "demo" {
+resource rockset_s3_collection demo {
   workspace        = rockset_workspace.example.name
   name             = "cities"
   integration_name = rockset_s3_integration.example.name
@@ -62,7 +62,7 @@ resource "rockset_s3_collection" "demo" {
   }
 }
 
-resource "rockset_query_lambda" "test" {
+resource rockset_query_lambda test {
   workspace = rockset_workspace.example.name
   name      = "test"
   sql {

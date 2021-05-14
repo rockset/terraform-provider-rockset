@@ -1,28 +1,28 @@
 // this file contains the required configuration to create an S3 bucket and role
 // configured to allow a Rockset integration to be created
 // https://docs.rockset.com/amazon-s3
-provider "aws" {
+provider aws {
   region  = var.region
-  version = "~> 2.47"
+  version = "~> 3.0"
 }
 
-resource "aws_s3_bucket" "rockset" {
+resource aws_s3_bucket rockset {
   bucket = var.bucket
 }
 
-resource "aws_s3_bucket_object" "cities" {
+resource aws_s3_bucket_object cities {
   bucket = aws_s3_bucket.rockset.bucket
   key = var.csv
   source = var.csv
   etag = filemd5(var.csv)
 }
 
-resource "aws_iam_policy" "rockset-s3-integration" {
+resource aws_iam_policy rockset-s3-integration {
   name   = "terraform-provider-rockset"
   policy = data.aws_iam_policy_document.s3-bucket-policy.json
 }
 
-data "aws_iam_policy_document" "s3-bucket-policy" {
+data aws_iam_policy_document s3-bucket-policy {
   statement {
     sid       = "RocksetS3IntegrationPolicy"
     actions   = [
@@ -36,12 +36,12 @@ data "aws_iam_policy_document" "s3-bucket-policy" {
   }
 }
 
-resource "aws_iam_role" "rockset" {
+resource aws_iam_role rockset {
   name               = var.role-name
   assume_role_policy = data.aws_iam_policy_document.rockset-trust-policy.json
 }
 
-data "aws_iam_policy_document" "rockset-trust-policy" {
+data aws_iam_policy_document rockset-trust-policy {
   statement {
     sid     = ""
     effect  = "Allow"
@@ -61,7 +61,7 @@ data "aws_iam_policy_document" "rockset-trust-policy" {
   }
 }
 
-resource "aws_iam_role_policy_attachment" "rockset-s3-integration" {
+resource aws_iam_role_policy_attachment rockset-s3-integration {
   role       = aws_iam_role.rockset.name
   policy_arn = aws_iam_policy.rockset-s3-integration.arn
 }

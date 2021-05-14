@@ -1,25 +1,22 @@
 package rockset
 
 import (
-	"encoding/json"
-	"errors"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/rockset/rockset-go-client"
-	models "github.com/rockset/rockset-go-client/lib/go"
-	"log"
-	"net/http"
-)
+	"context"
 
-// https://www.terraform.io/docs/extend/writing-custom-providers.html
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/rockset/rockset-go-client"
+	"github.com/rockset/rockset-go-client/option"
+)
 
 func resourceS3Integration() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceS3IntegrationCreate,
-		Read:   resourceS3IntegrationRead,
-		Delete: resourceS3IntegrationDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+		Description: "Sample resource in the Terraform provider S3Integration.",
+
+		// No updateable fields at this time, all fields require recreation.
+		CreateContext: resourceS3IntegrationCreate,
+		ReadContext:   resourceS3IntegrationRead,
+		DeleteContext: resourceS3IntegrationDelete,
 
 		Schema: map[string]*schema.Schema{
 			"name": &schema.Schema{
@@ -43,101 +40,53 @@ func resourceS3Integration() *schema.Resource {
 	}
 }
 
-func resourceS3IntegrationCreate(d *schema.ResourceData, m interface{}) error {
-	// https://docs.rockset.com/rest-api#createintegration
-	rc := m.(*rockset.RockClient)
+func resourceS3IntegrationCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	rc := meta.(*rockset.RockClient)
+	var diags diag.Diagnostics
 
-	req := models.CreateIntegrationRequest{
-		Name:        d.Get("name").(string),
-		Description: d.Get("description").(string),
-		S3: &models.S3Integration{
-			AwsRole: &models.AwsRole{AwsRoleArn: d.Get("aws_role_arn").(string)},
-		},
-	}
-
-	res, _, err := rc.Integration.Create(req)
+	r, err := rc.CreateS3Integration(ctx, d.Get("name").(string),
+		option.AWSRole(d.Get("aws_role_arn").(string)),
+		option.WithS3IntegrationDescription(d.Get("description").(string)))
 	if err != nil {
-		return asSwaggerMessage(err)
+		return diag.FromErr(err)
 	}
 
-	d.SetId(res.Data.Name)
+	d.SetId(r.Data.GetName())
 
-	return resourceS3IntegrationRead(d, m)
+	return diags
 }
 
-// TODO: this type must be defined in models, find it
-type swaggerErrorMessage struct {
-	Message string `json:"message"`
-	Type    string `json:"type"`
+func resourceS3IntegrationRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	rc := meta.(*rockset.RockClient)
+	var diags diag.Diagnostics
+
+	getReq := rc.IntegrationsApi.GetIntegration(ctx, d.Get("name").(string))
+	response, _, err := getReq.Execute()
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.Set("name", response.Data.Name)
+	d.Set("description", response.Data.Description)
+	d.Set("aws_role_arn", response.Data.S3.AwsRole.AwsRoleArn)
+
+	d.SetId(response.Data.Name)
+
+	return diags
 }
 
-func asSwaggerMessage(err error) error {
-	var e models.GenericSwaggerError
-	if errors.As(err, &e) {
-		var msg swaggerErrorMessage
-		if err = json.Unmarshal(e.Body(), &msg); err != nil {
-			log.Printf("failed to unmarshal error response: %v", err)
-		}
-		return errors.New(msg.Message)
-	}
+func resourceS3IntegrationDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	rc := meta.(*rockset.RockClient)
+	var diags diag.Diagnostics
 
-	return err
-}
-
-func resourceS3IntegrationRead(d *schema.ResourceData, m interface{}) error {
-	// https://docs.rockset.com/rest-api#getintegration
-	rc := m.(*rockset.RockClient)
-
-	id := d.Id()
-
-	log.Printf("getting integration with ID %s", id)
-	res, httpResp, err := rc.Integration.Get(id)
+	err := rc.DeleteIntegration(ctx, d.Get("name").(string))
 	if err != nil {
-		return asSwaggerMessage(err)
+		return diag.FromErr(err)
 	}
 
-	if httpResp.StatusCode == http.StatusNotFound {
-		d.SetId("")
-		return nil
-	}
-	log.Printf("%+v", *res.Data)
-
-	if res.Data.S3 == nil && res.Data.S3.AwsRole == nil {
-		d.SetId("")
-		return nil
-	}
-
-	err = d.Set("aws_role_arn", res.Data.S3.AwsRole.AwsRoleArn)
-	if err != nil {
-		return nil
-	}
-
-	err = d.Set("name", res.Data.Name)
-	if err != nil {
-		return nil
-	}
-
-	err = d.Set("description", res.Data.Description)
-	if err != nil {
-		return nil
-	}
-
-	return nil
-}
-
-func resourceS3IntegrationDelete(d *schema.ResourceData, m interface{}) error {
-	// https://docs.rockset.com/rest-api#deleteintegration
-	name := d.Get("name").(string)
-
-	rc := m.(*rockset.RockClient)
-
-	log.Printf("deleting integration %s", name)
-	_, _, err := rc.Integration.Delete(name)
-	if err != nil {
-		return asSwaggerMessage(err)
-	}
-
+	// d.SetId("") is automatically called assuming delete returns no errors,
+	// but it is added here for explicitness.
 	d.SetId("")
 
-	return nil
+	return diags
 }

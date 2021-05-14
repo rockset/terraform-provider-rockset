@@ -1,12 +1,15 @@
 package rockset
 
 import (
+	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/rockset/rockset-go-client"
 	"log"
 	"regexp"
 	"strings"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/rockset/rockset-go-client"
 )
 
 type Config struct {
@@ -15,13 +18,13 @@ type Config struct {
 }
 
 func Provider() *schema.Provider {
-	provider := &schema.Provider{
+	return &schema.Provider{
 		ResourcesMap: map[string]*schema.Resource{
-			"rockset_workspace": resourceWorkspace(),
+			"rockset_workspace":      resourceWorkspace(),
 			"rockset_s3_integration": resourceS3Integration(),
-			"rockset_s3_collection":  resourceS3Collection(),
-			"rockset_query_lambda": resourceQueryLambda(),
-			"rockset_collection": resourceCollection(),
+			// "rockset_s3_collection":  resourceS3Collection(),
+			// "rockset_query_lambda": resourceQueryLambda(),
+			// "rockset_collection": resourceCollection(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"rockset_account": dataSourceRocksetAccount(),
@@ -41,30 +44,36 @@ func Provider() *schema.Provider {
 				Description: "The API server for accessing Rockset",
 			},
 		},
+		ConfigureContextFunc: providerConfigure,
 	}
-
-	provider.ConfigureFunc = func(d *schema.ResourceData) (interface{}, error) {
-		config := Config{
-			APIKey:    d.Get("api_key").(string),
-			APIServer: d.Get("api_server").(string),
-		}
-
-		return config.Client()
-	}
-
-	return provider
 }
 
-func (c *Config) Client() (interface{}, error) {
+func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
+	config := Config{
+		APIKey:    d.Get("api_key").(string),
+		APIServer: d.Get("api_server").(string),
+	}
+
+	return config.Client()
+}
+
+func (c *Config) Client() (interface{}, diag.Diagnostics) {
+	var diags diag.Diagnostics
 	var opts []rockset.RockOption
 
 	if c.APIKey != "" {
-		opts = append(opts, rockset.WithAPIKey(c.APIKey), rockset.WithAPIServer(c.APIServer))
+		// TODO: WithAPIKey no longer in go client, re-add this once it's added back
+		//opts = append(opts, rockset.WithAPIKey(c.APIKey), rockset.WithAPIServer(c.APIServer))
 	} else {
 		opts = append(opts, rockset.FromEnv())
 	}
 
-	return rockset.NewClient(opts...)
+	rc, err := rockset.NewClient(opts...)
+	if err != nil {
+		return nil, diag.FromErr(err)
+	}
+
+	return rc, diags
 }
 
 var nameRegexp = regexp.MustCompile("^[[:alnum:]][[:alnum:]-_]*$")
@@ -91,4 +100,3 @@ func workspaceAndNameFromID(id string) (string, string) {
 	}
 	return tokens[0], tokens[1]
 }
-
