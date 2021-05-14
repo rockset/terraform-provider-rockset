@@ -7,14 +7,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceCollection() *schema.Resource {
+func resourceScaffold() *schema.Resource {
 	return &schema.Resource{
-		Description: "Sample resource in the Terraform provider Collection.",
+		Description: "Sample resource in the Terraform provider Scaffold.",
 
-		CreateContext: resourceCollectionCreate,
-		ReadContext:   resourceCollectionRead,
-		UpdateContext: resourceCollectionUpdate,
-		DeleteContext: resourceCollectionDelete,
+		CreateContext: resourceScaffoldCreate,
+		ReadContext:   resourceScaffoldRead,
+		UpdateContext: resourceScaffoldUpdate,
+		DeleteContext: resourceScaffoldDelete,
 
 		Schema: map[string]*schema.Schema{
 			"sample_attribute": {
@@ -31,7 +31,7 @@ func resourceCollection() *schema.Resource {
 	}
 }
 
-func resourceCollectionCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceScaffoldCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	//rc := meta.(*rockset.RockClient)
 	//var diags diag.Diagnostics
 
@@ -41,21 +41,21 @@ func resourceCollectionCreate(ctx context.Context, d *schema.ResourceData, meta 
 	return diag.Errorf("not implemented")
 }
 
-func resourceCollectionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceScaffoldRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	//rc := meta.(*rockset.RockClient)
 	//var diags diag.Diagnostics
 
 	return diag.Errorf("not implemented")
 }
 
-func resourceCollectionUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceScaffoldUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	//rc := meta.(*rockset.RockClient)
 	//var diags diag.Diagnostics
 
 	return diag.Errorf("not implemented")
 }
 
-func resourceCollectionDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceScaffoldDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	//rc := meta.(*rockset.RockClient)
 	//var diags diag.Diagnostics
 

@@ -1,18 +1,21 @@
 package rockset
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rockset/rockset-go-client"
 )
 
 func dataSourceRocksetAccount() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceReadRocksetAccount,
+		ReadContext: dataSourceReadRocksetAccount,
 
 		Schema: map[string]*schema.Schema{
 			"external_id": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:      schema.TypeString,
+				Computed:  true,
 				Sensitive: true,
 			},
 			"account_id": &schema.Schema{
@@ -24,25 +27,27 @@ func dataSourceRocksetAccount() *schema.Resource {
 
 const accountID = "318212636800"
 
-func dataSourceReadRocksetAccount(d *schema.ResourceData, m interface{}) error {
-	rc := m.(*rockset.RockClient)
+func dataSourceReadRocksetAccount(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	rc := meta.(*rockset.RockClient)
+	var diags diag.Diagnostics
 
 	err := d.Set("account_id", accountID)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	org, _, err := rc.Organization()
+	getReq := rc.OrganizationsApi.GetOrganization(ctx)
+	org, _, err := getReq.Execute()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	err = d.Set("external_id", org.ExternalId)
+	err = d.Set("external_id", org.Data.ExternalId)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(accountID)
 
-	return nil
+	return diags
 }
