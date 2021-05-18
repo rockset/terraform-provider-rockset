@@ -10,12 +10,9 @@ import (
 	"github.com/rockset/rockset-go-client"
 )
 
-const testUserEmail = "terraform-provider-acceptance-tests@rockset.com" // TODO: CHANGE THIS
+const testUserEmail = "terraform-provider-acceptance-tests@rockset.com"
 const testUserRole1 = "read-only"
 const testUserRole2 = "member"
-
-// TODO: Verify the roles list for each test.
-// Test email changing
 
 func TestAccUser_Basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{

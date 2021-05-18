@@ -11,7 +11,7 @@ import (
 )
 
 const testApiKeyName = "terraform-provider-acceptance-tests"
-const testApiKeyUser = "john@rockset.com" // TODO, replace with user we create!
+const testApiKeyUser = "terraform-provider-tests-apikey-user@rockset.com"
 
 func TestAccApiKey_Basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
@@ -82,11 +82,15 @@ resource rockset_api_key test {
 
 func testAccCheckApiKeyUpdateUser() string {
 	return fmt.Sprintf(`
+resource rockset_user test {
+	email        = "%s"
+	roles				 = ["read-only"]
+}
 resource rockset_api_key test {
 	name        = "%s-updated"
-	user				= "%s" 
+	user				= rockset_user.test.email 
 }
-`, testApiKeyName, testApiKeyUser)
+`, testApiKeyUser, testApiKeyName)
 }
 
 func testAccCheckRocksetApiKeyDestroy(s *terraform.State) error {
