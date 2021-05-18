@@ -13,7 +13,7 @@ import (
 
 func resourceApiKey() *schema.Resource {
 	return &schema.Resource{
-		Description: "Manage an ApiKey.",
+		Description: "Manage a Rockset Api Key.",
 
 		CreateContext: resourceApiKeyCreate,
 		ReadContext:   resourceApiKeyRead,

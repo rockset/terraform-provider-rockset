@@ -51,11 +51,12 @@ func resourceAlias() *schema.Resource {
 					Check in and update this when aliases that point to multiple
 					collections becomes a feature.
 				*/
-				Type:     schema.TypeList,
-				MinItems: 1,
-				MaxItems: 1,
-				ForceNew: false,
-				Required: true,
+				Description: "List of collections for this alis to refer to.",
+				Type:        schema.TypeList,
+				MinItems:    1,
+				MaxItems:    1,
+				ForceNew:    false,
+				Required:    true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},

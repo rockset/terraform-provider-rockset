@@ -22,6 +22,7 @@ func Provider() *schema.Provider {
 		ResourcesMap: map[string]*schema.Resource{
 			"rockset_alias":          resourceAlias(),
 			"rockset_api_key":        resourceApiKey(),
+			"rockset_user":           resourceUser(),
 			"rockset_s3_integration": resourceS3Integration(),
 			// "rockset_workspace":      resourceWorkspace(),
 			// "rockset_s3_collection":  resourceS3Collection(),
