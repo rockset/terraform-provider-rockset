@@ -2,9 +2,7 @@ package rockset
 
 import (
 	"context"
-	"fmt"
 	"reflect"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -65,35 +63,27 @@ func resourceAlias() *schema.Resource {
 	}
 }
 
-func waitForAliasCollections(ctx context.Context, rc *rockset.RockClient, workspace string, name string, collections []string) diag.Diagnostics {
-	// Waits for the collections field to be set on an alias
-	var diags diag.Diagnostics
-
-	// We don't yet know if this create/update was successful.
-	// If we return before collections returns the configured collections,
-	// Then we will leave the provider in a state where tests fail
-	// And there's a pending state change if things go too fast or two applies happen too fast.
-	// Let's check for collections. It has to be len > 0 to be a valid alias.
-	for i := 1; i < 5; i++ {
+func aliasCollectionsSet(ctx context.Context, rc *rockset.RockClient, workspace string, name string, collections []string) rockset.WaitFunc {
+	/*
+		Implements a WaitFunc to wait for the create or update
+		to finalize and show the specified collections.
+		If we don't do this two applies in a row will show pending changes.
+	*/
+	return func() (bool, error) {
 		q := rc.AliasesApi.GetAlias(ctx, workspace, name)
 
 		resp, _, err := q.Execute()
 		if err != nil {
-			return diag.FromErr(err)
+			return false, err
 		}
-		if reflect.DeepEqual(resp.Data.GetCollections(), collections) {
-			return diags
-		} else { // This should be nearly instantaneous so I'm not going so far as to do expoential backoff
-			time.Sleep(time.Duration(i) * time.Second)
-		}
+
+		return reflect.DeepEqual(resp.Data.GetCollections(), collections), nil
 	}
-	// If we got here, we gave it a fair amount of time,
-	// but it doesn't look like this created successfully
-	return diag.FromErr(fmt.Errorf("Alias was created but isn't showing any collections. Something went wrong."))
 }
 
 func resourceAliasCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	rc := meta.(*rockset.RockClient)
+	var diags diag.Diagnostics
 
 	workspace := d.Get("workspace").(string)
 	name := d.Get("name").(string)
@@ -109,9 +99,16 @@ func resourceAliasCreate(ctx context.Context, d *schema.ResourceData, meta inter
 		return diag.FromErr(err)
 	}
 
+	// There's a lag between create and update and the alias
+	// showing those collections in the response.
+	err = rc.WaitUntil(ctx, aliasCollectionsSet(ctx, rc, workspace, name, collections))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	d.SetId(toID(resp.Data.GetWorkspace(), resp.Data.GetName()))
 
-	return waitForAliasCollections(ctx, rc, workspace, name, collections)
+	return diags
 }
 
 func resourceAliasRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -152,6 +149,7 @@ func resourceAliasRead(ctx context.Context, d *schema.ResourceData, meta interfa
 
 func resourceAliasUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	rc := meta.(*rockset.RockClient)
+	var diags diag.Diagnostics
 
 	workspace, name := workspaceAndNameFromID(d.Id())
 
@@ -166,7 +164,14 @@ func resourceAliasUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 		return diag.FromErr(err)
 	}
 
-	return waitForAliasCollections(ctx, rc, workspace, name, collections)
+	// There's a lag between create and update and the alias
+	// showing those collections in the response.
+	err = rc.WaitUntil(ctx, aliasCollectionsSet(ctx, rc, workspace, name, collections))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return diags
 }
 
 func resourceAliasDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

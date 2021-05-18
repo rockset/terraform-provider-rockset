@@ -1,17 +1,5 @@
 package rockset
 
-/*
-	TODO:
-		* Return to these tests when resource_user is finished.
-		We need to test the admin (create as other user) version of this
-		But we should do that after we can create users for the test.
-
-		* Return to these when resource_collection is finished.
-		commons.test is manaully created right now.
-
-		* Do a more complex check on collections returned.
-*/
-
 import (
 	"context"
 	"fmt"
@@ -26,7 +14,7 @@ const testAliasName = "terraform-provider-acceptance-tests"
 const testAliasDescription = "terraform provider acceptance tests"
 const testAliasWorkspace = "commons"
 const testCollection1 = "commons._events"
-const testCollection2 = "commons.test"
+const testCollection2 = "commons.test-alias"
 
 func TestAccAlias_Basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
@@ -106,6 +94,10 @@ resource rockset_alias test {
 
 func testAccCheckAliasUpdateCollections() string {
 	return fmt.Sprintf(`
+resource rockset_collection test {
+	name = "test-alias"
+	workspace = "commons"
+}
 resource rockset_alias test {
 	name        = "%s"
 	description	= "%s-updated"

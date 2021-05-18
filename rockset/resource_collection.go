@@ -276,7 +276,7 @@ func baseCollectionSchema() map[string]*schema.Schema {
 
 func resourceCollection() *schema.Resource {
 	return &schema.Resource{
-		Description: "Manages a basic collection with no resources. Usually used for the write api.",
+		Description: "Manages a basic collection with no sources. Usually used for the write api.",
 
 		CreateContext: resourceCollectionCreate,
 		ReadContext:   resourceCollectionRead,
