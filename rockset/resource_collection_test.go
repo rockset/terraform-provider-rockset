@@ -10,9 +10,10 @@ import (
 	"github.com/rockset/rockset-go-client"
 )
 
-const testCollectionName = "terraform-provider-acceptance-tests-1"
+const testCollectionName = "terraform-provider-acceptance-tests-basic"
 const testCollectionWorkspace = "commons"
 const testCollectionDescription = "Terraform provider acceptance tests."
+const testCollectionNameFieldMappings = "terraform-provider-acceptance-tests-fieldmapping"
 
 func TestAccCollection_Basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
@@ -42,6 +43,51 @@ func TestAccCollection_Basic(t *testing.T) {
 			},
 		},
 	})
+}
+
+func TestAccCollection_FieldMapping(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckRocksetCollectionDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckCollectionFieldMapping(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRocksetCollectionExists("rockset_collection.test"),
+					resource.TestCheckResourceAttr("rockset_collection.test", "name", testCollectionNameFieldMappings),
+					resource.TestCheckResourceAttr("rockset_collection.test", "workspace", testCollectionWorkspace),
+					resource.TestCheckResourceAttr("rockset_collection.test", "description", testCollectionDescription),
+				),
+				ExpectNonEmptyPlan: false,
+			},
+		},
+	})
+}
+
+func testAccCheckCollectionFieldMapping() string {
+	return fmt.Sprintf(`
+resource rockset_collection test {
+	name        = "%s"
+	workspace   = "%s"
+	description = "%s"
+	field_mapping {
+		name = "string to float"
+		input_fields {
+			field_name = "population"
+			if_missing = "SKIP"
+			is_drop    = false
+			param      = "pop"
+		}
+
+		output_field {
+			field_name = "pop"
+			on_error   = "FAIL"
+			sql        = "CAST(:pop as int)"
+		}
+	}
+}
+`, testCollectionNameFieldMappings, testCollectionWorkspace, testCollectionDescription)
 }
 
 func testAccCheckCollectionBasic() string {

@@ -2,6 +2,7 @@ package rockset
 
 import (
 	"context"
+	"log"
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -274,49 +275,6 @@ func baseCollectionSchema() map[string]*schema.Schema {
 	} // End schema return
 } // End func
 
-func resourceCollection() *schema.Resource {
-	return &schema.Resource{
-		Description: "Manages a basic collection with no sources. Usually used for the write api.",
-
-		CreateContext: resourceCollectionCreate,
-		ReadContext:   resourceCollectionRead,
-		DeleteContext: resourceCollectionDelete,
-
-		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
-		},
-
-		Schema: baseCollectionSchema(),
-	}
-}
-
-func resourceCollectionCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	rc := meta.(*rockset.RockClient)
-	var diags diag.Diagnostics
-
-	workspace := d.Get("workspace").(string)
-	name := d.Get("name").(string)
-	description := d.Get("description").(string)
-
-	req := rc.CollectionsApi.CreateCollection(ctx, workspace)
-	params := openapi.NewCreateCollectionRequest(name)
-	params.SetDescription(description)
-
-	_, _, err := req.Body(*params).Execute()
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	err = rc.WaitUntilCollectionReady(ctx, workspace, name)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	d.SetId(toID(workspace, name))
-
-	return diags
-}
-
 func parseBaseCollection(collection *openapi.Collection, d *schema.ResourceData) error {
 	/*
 		Takes in a collection returned from the api.
@@ -340,7 +298,99 @@ func parseBaseCollection(collection *openapi.Collection, d *schema.ResourceData)
 		return err
 	}
 
+	err = d.Set("retention_secs", collection.GetRetentionSecs())
+	if err != nil {
+		return err
+	}
+
+	err = d.Set("field_mapping", flattenFieldMappings(collection.GetFieldMappings()))
+	if err != nil {
+		return err
+	}
+
 	return nil // No errors
+}
+
+func createBaseCollectionRequest(d *schema.ResourceData) *openapi.CreateCollectionRequest {
+	/*
+		Parses resource data and returns a create collection request
+		with all the base fields a basic collection will have.
+		Per-source terraform resources can add to the collection request
+		to implement sources and other fields related to the source.
+	*/
+	name := d.Get("name").(string)
+	description := d.Get("description").(string)
+
+	params := openapi.NewCreateCollectionRequest(name)
+	params.SetDescription(description)
+
+	if v, ok := d.GetOk("field_mapping"); ok && len(v.([]interface{})) > 0 {
+		mappings := make([]openapi.FieldMappingV2, 0)
+		for _, raw := range v.([]interface{}) {
+			fm := openapi.FieldMappingV2{}
+			cfg := raw.(map[string]interface{})
+
+			if v, ok := cfg["name"]; ok {
+				fieldMappingName := v.(string)
+				fm.Name = &fieldMappingName
+			}
+
+			if v, ok := cfg["output_field"]; ok {
+				log.Printf("output_field(%T): %+v", v, v)
+				fm.OutputField = makeOutputField(v)
+			}
+
+			if v, ok := cfg["input_fields"]; ok {
+				fm.InputFields = makeInputFields(v)
+			}
+
+			mappings = append(mappings, fm)
+		}
+		params.SetFieldMappings(mappings)
+	}
+
+	return params
+}
+
+func resourceCollection() *schema.Resource {
+	return &schema.Resource{
+		Description: "Manages a basic collection with no sources. Usually used for the write api.",
+
+		CreateContext: resourceCollectionCreate,
+		ReadContext:   resourceCollectionRead,
+		DeleteContext: resourceCollectionDelete,
+
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
+
+		Schema: baseCollectionSchema(),
+	}
+}
+
+func resourceCollectionCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	rc := meta.(*rockset.RockClient)
+	var diags diag.Diagnostics
+
+	name := d.Get("name").(string)
+	workspace := d.Get("workspace").(string)
+
+	req := rc.CollectionsApi.CreateCollection(ctx, workspace)
+	params := createBaseCollectionRequest(d)
+
+	_, _, err := req.Body(*params).Execute()
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = rc.WaitUntilCollectionReady(ctx, workspace, name)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId(toID(workspace, name))
+
+	return diags
 }
 
 func resourceCollectionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -381,4 +431,108 @@ func resourceCollectionDelete(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	return diags
+}
+
+func makeOutputField(in interface{}) *openapi.OutputField {
+	of := openapi.OutputField{}
+
+	for _, i := range in.(*schema.Set).List() {
+		if val, ok := i.(map[string]interface{}); ok {
+			for k, v := range val {
+				switch k {
+				case "field_name":
+					field := v.(string)
+					of.FieldName = &field
+				case "on_error":
+					field := v.(string)
+					of.OnError = &field
+				case "sql":
+					field := v.(string)
+					of.Value = &openapi.SqlExpression{Sql: &field}
+				}
+			}
+		}
+	}
+
+	return &of
+}
+
+func makeInputFields(in interface{}) *[]openapi.InputField {
+	fields := make([]openapi.InputField, 0)
+	log.Printf("in: %T", in)
+
+	if arr, ok := in.([]interface{}); ok {
+		for _, a := range arr {
+			if cfg, ok := a.(map[string]interface{}); ok {
+				i := openapi.InputField{}
+
+				if v, ok := cfg["field_name"]; ok {
+					field := v.(string)
+					i.FieldName = &field
+				}
+
+				if v, ok := cfg["param"]; ok {
+					field := v.(string)
+					i.Param = &field
+				}
+
+				if v, ok := cfg["if_missing"]; ok {
+					field := v.(string)
+					i.IfMissing = &field
+				}
+
+				if v, ok := cfg["is_drop"]; ok {
+					field := v.(bool)
+					i.IsDrop = &field
+				}
+
+				fields = append(fields, i)
+			} else {
+				log.Printf("failed to cast %+v to map[string]interface{}", a)
+			}
+		}
+	}
+
+	return &fields
+}
+
+func flattenFieldMappings(fieldMappings []openapi.FieldMappingV2) []interface{} {
+	var out = make([]interface{}, 0, 0)
+
+	for _, f := range fieldMappings {
+		m := make(map[string]interface{})
+
+		m["name"] = f.Name
+		m["output_field"] = flattenOutputField(*f.OutputField)
+		m["input_fields"] = flattenInputFields(*f.InputFields)
+
+		out = append(out, m)
+	}
+
+	return out
+}
+
+func flattenOutputField(outputField openapi.OutputField) []interface{} {
+	m := make(map[string]interface{})
+
+	m["field_name"] = outputField.FieldName
+	m["on_error"] = outputField.OnError
+	m["sql"] = outputField.Value.Sql
+
+	return []interface{}{m}
+}
+
+func flattenInputFields(inputFields []openapi.InputField) []interface{} {
+	var out = make([]interface{}, 0, 0)
+
+	for _, i := range inputFields {
+		m := make(map[string]interface{})
+		m["field_name"] = i.FieldName
+		m["if_missing"] = i.IfMissing
+		m["is_drop"] = i.IsDrop
+		m["param"] = i.Param
+		out = append(out, m)
+	}
+
+	return out
 }
