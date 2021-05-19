@@ -3,11 +3,13 @@ package rockset
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/rockset/rockset-go-client"
+	"github.com/rockset/rockset-go-client/openapi"
 )
 
 const testAliasName = "terraform-provider-acceptance-tests"
@@ -17,6 +19,8 @@ const testCollection1 = "commons._events"
 const testCollection2 = "commons.test-alias"
 
 func TestAccAlias_Basic(t *testing.T) {
+	var alias openapi.Alias
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -25,44 +29,44 @@ func TestAccAlias_Basic(t *testing.T) {
 			{
 				Config: testAccCheckAliasBasic(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRocksetAliasExists("rockset_alias.test"),
+					testAccCheckRocksetAliasExists("rockset_alias.test", &alias),
 					resource.TestCheckResourceAttr("rockset_alias.test", "name", testAliasName),
 					resource.TestCheckResourceAttr("rockset_alias.test", "description", testAliasDescription),
 					resource.TestCheckResourceAttr("rockset_alias.test", "workspace", testAliasWorkspace),
-					testAccCheckResourceListMatches("rockset_alias.test", "collections", []string{testCollection1}),
+					testAccAliasCollectionListMatches(&alias, []string{testCollection1}),
 				),
 				ExpectNonEmptyPlan: false,
 			},
 			{
 				Config: testAccCheckAliasUpdateDescription(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRocksetAliasExists("rockset_alias.test"),
+					testAccCheckRocksetAliasExists("rockset_alias.test", &alias),
 					resource.TestCheckResourceAttr("rockset_alias.test", "name", testAliasName),
 					resource.TestCheckResourceAttr("rockset_alias.test", "description", fmt.Sprintf("%s-updated", testAliasDescription)),
 					resource.TestCheckResourceAttr("rockset_alias.test", "workspace", testAliasWorkspace),
-					testAccCheckResourceListMatches("rockset_alias.test", "collections", []string{testCollection1}),
+					testAccAliasCollectionListMatches(&alias, []string{testCollection1}),
 				),
 				ExpectNonEmptyPlan: false,
 			},
 			{
 				Config: testAccCheckAliasUpdateCollections(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRocksetAliasExists("rockset_alias.test"),
+					testAccCheckRocksetAliasExists("rockset_alias.test", &alias),
 					resource.TestCheckResourceAttr("rockset_alias.test", "name", testAliasName),
 					resource.TestCheckResourceAttr("rockset_alias.test", "description", fmt.Sprintf("%s-updated", testAliasDescription)),
 					resource.TestCheckResourceAttr("rockset_alias.test", "workspace", testAliasWorkspace),
-					testAccCheckResourceListMatches("rockset_alias.test", "collections", []string{testCollection2}),
+					testAccAliasCollectionListMatches(&alias, []string{testCollection2}),
 				),
 				ExpectNonEmptyPlan: false,
 			},
 			{
 				Config: testAccCheckAliasUpdateMultipleFields(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRocksetAliasExists("rockset_alias.test"),
+					testAccCheckRocksetAliasExists("rockset_alias.test", &alias),
 					resource.TestCheckResourceAttr("rockset_alias.test", "name", testAliasName),
 					resource.TestCheckResourceAttr("rockset_alias.test", "description", testAliasDescription),
 					resource.TestCheckResourceAttr("rockset_alias.test", "workspace", testAliasWorkspace),
-					testAccCheckResourceListMatches("rockset_alias.test", "collections", []string{testCollection1}),
+					testAccAliasCollectionListMatches(&alias, []string{testCollection1}),
 				),
 				ExpectNonEmptyPlan: false,
 			},
@@ -154,7 +158,7 @@ func testAccCheckRocksetAliasDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckRocksetAliasExists(resource string) resource.TestCheckFunc {
+func testAccCheckRocksetAliasExists(resource string, alias *openapi.Alias) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		rs, err := getResourceFromState(state, resource)
 		if err != nil {
@@ -166,9 +170,21 @@ func testAccCheckRocksetAliasExists(resource string) resource.TestCheckFunc {
 		ctx := context.TODO()
 
 		q := rc.AliasesApi.GetAlias(ctx, workspace, name)
-		_, _, err = q.Execute()
+		resp, _, err := q.Execute()
 		if err != nil {
 			return fmt.Errorf("Failed to get alias %s:%s", workspace, name)
+		}
+
+		*alias = *resp.Data
+
+		return nil
+	}
+}
+
+func testAccAliasCollectionListMatches(alias *openapi.Alias, expectedCollections []string) resource.TestCheckFunc {
+	return func(state *terraform.State) error {
+		if !reflect.DeepEqual(alias.GetCollections(), expectedCollections) {
+			return fmt.Errorf("Expected %s collections, got %s.", expectedCollections, alias.GetCollections())
 		}
 
 		return nil

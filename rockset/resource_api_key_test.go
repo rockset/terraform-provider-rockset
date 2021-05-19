@@ -8,12 +8,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/rockset/rockset-go-client"
+	"github.com/rockset/rockset-go-client/openapi"
 )
 
 const testApiKeyName = "terraform-provider-acceptance-tests"
 const testApiKeyUser = "terraform-provider-tests-apikey-user@rockset.com"
 
 func TestAccApiKey_Basic(t *testing.T) {
+	var apiKey openapi.ApiKey
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -22,7 +25,7 @@ func TestAccApiKey_Basic(t *testing.T) {
 			{
 				Config: testAccCheckApiKeyBasic(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRocksetApiKeyExists("rockset_api_key.test"),
+					testAccCheckRocksetApiKeyExists("rockset_api_key.test", &apiKey),
 					resource.TestCheckResourceAttr("rockset_api_key.test", "name", testApiKeyName),
 					resource.TestCheckNoResourceAttr("rockset_api_key.test", "user"),
 					resource.TestCheckResourceAttrSet("rockset_api_key.test", "key"),
@@ -32,7 +35,7 @@ func TestAccApiKey_Basic(t *testing.T) {
 			{
 				Config: testAccCheckApiKeyUpdateName(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRocksetApiKeyExists("rockset_api_key.test"),
+					testAccCheckRocksetApiKeyExists("rockset_api_key.test", &apiKey),
 					resource.TestCheckResourceAttr("rockset_api_key.test", "name", fmt.Sprintf("%s-updated", testApiKeyName)),
 					resource.TestCheckNoResourceAttr("rockset_api_key.test", "user"),
 					resource.TestCheckResourceAttrSet("rockset_api_key.test", "key"),
@@ -42,7 +45,7 @@ func TestAccApiKey_Basic(t *testing.T) {
 			{
 				Config: testAccCheckApiKeyUpdateUser(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRocksetApiKeyExists("rockset_api_key.test"),
+					testAccCheckRocksetApiKeyExists("rockset_api_key.test", &apiKey),
 					resource.TestCheckResourceAttr("rockset_api_key.test", "name", fmt.Sprintf("%s-updated", testApiKeyName)),
 					resource.TestCheckResourceAttr("rockset_api_key.test", "user", testApiKeyUser),
 					resource.TestCheckResourceAttrSet("rockset_api_key.test", "key"),
@@ -53,7 +56,7 @@ func TestAccApiKey_Basic(t *testing.T) {
 				// Back to basic, will change name AND api key
 				Config: testAccCheckApiKeyBasic(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRocksetApiKeyExists("rockset_api_key.test"),
+					testAccCheckRocksetApiKeyExists("rockset_api_key.test", &apiKey),
 					resource.TestCheckResourceAttr("rockset_api_key.test", "name", testApiKeyName),
 					resource.TestCheckNoResourceAttr("rockset_api_key.test", "user"),
 					resource.TestCheckResourceAttrSet("rockset_api_key.test", "key"),
@@ -118,7 +121,7 @@ func testAccCheckRocksetApiKeyDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckRocksetApiKeyExists(resource string) resource.TestCheckFunc {
+func testAccCheckRocksetApiKeyExists(resource string, apiKey *openapi.ApiKey) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		rc := testAccProvider.Meta().(*rockset.RockClient)
 
@@ -133,10 +136,12 @@ func testAccCheckRocksetApiKeyExists(resource string) resource.TestCheckFunc {
 		}
 
 		ctx := context.TODO()
-		_, err = getApiKey(ctx, rc, name, user)
+		resp, err := getApiKey(ctx, rc, name, user)
 		if err != nil {
 			return err
 		}
+
+		*apiKey = *resp
 
 		return nil
 	}
