@@ -3,11 +3,13 @@ package rockset
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/rockset/rockset-go-client"
+	"github.com/rockset/rockset-go-client/openapi"
 )
 
 const testUserEmail = "terraform-provider-acceptance-tests@rockset.com"
@@ -15,6 +17,8 @@ const testUserRole1 = "read-only"
 const testUserRole2 = "member"
 
 func TestAccUser_Basic(t *testing.T) {
+	var user openapi.User
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -23,18 +27,18 @@ func TestAccUser_Basic(t *testing.T) {
 			{
 				Config: testAccCheckUserBasic(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRocksetUserExists("rockset_user.test"),
+					testAccCheckRocksetUserExists("rockset_user.test", &user),
 					resource.TestCheckResourceAttr("rockset_user.test", "email", testUserEmail),
-					testAccCheckResourceListMatches("rockset_user.test", "roles", []string{testUserRole1}),
+					testAccUserRoleListMatches(&user, []string{testUserRole1}),
 				),
 				ExpectNonEmptyPlan: false,
 			},
 			{
 				Config: testAccCheckUserTwoRoles(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRocksetUserExists("rockset_user.test"),
+					testAccCheckRocksetUserExists("rockset_user.test", &user),
 					resource.TestCheckResourceAttr("rockset_user.test", "email", testUserEmail),
-					testAccCheckResourceListMatches("rockset_user.test", "roles", []string{testUserRole1, testUserRole2}),
+					testAccUserRoleListMatches(&user, []string{testUserRole1, testUserRole2}),
 				),
 				ExpectNonEmptyPlan: false,
 			},
@@ -82,7 +86,7 @@ func testAccCheckRocksetUserDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckRocksetUserExists(resource string) resource.TestCheckFunc {
+func testAccCheckRocksetUserExists(resource string, user *openapi.User) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		rc := testAccProvider.Meta().(*rockset.RockClient)
 		ctx := context.TODO()
@@ -93,9 +97,21 @@ func testAccCheckRocksetUserExists(resource string) resource.TestCheckFunc {
 		}
 
 		email := rs.Primary.ID
-		_, err = getUserByEmail(ctx, rc, email)
+		resp, err := getUserByEmail(ctx, rc, email)
 		if err != nil {
 			return err
+		}
+
+		*user = *resp
+
+		return nil
+	}
+}
+
+func testAccUserRoleListMatches(user *openapi.User, expectedRoles []string) resource.TestCheckFunc {
+	return func(state *terraform.State) error {
+		if !reflect.DeepEqual(user.GetRoles(), expectedRoles) {
+			return fmt.Errorf("Expected %s collections, got %s.", expectedRoles, user.GetRoles())
 		}
 
 		return nil

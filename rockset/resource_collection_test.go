@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/rockset/rockset-go-client"
+	"github.com/rockset/rockset-go-client/openapi"
 )
 
 const testCollectionName = "terraform-provider-acceptance-tests-basic"
@@ -16,6 +17,8 @@ const testCollectionDescription = "Terraform provider acceptance tests."
 const testCollectionNameFieldMappings = "terraform-provider-acceptance-tests-fieldmapping"
 
 func TestAccCollection_Basic(t *testing.T) {
+	var collection openapi.Collection
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -24,7 +27,7 @@ func TestAccCollection_Basic(t *testing.T) {
 			{
 				Config: testAccCheckCollectionBasic(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRocksetCollectionExists("rockset_collection.test"),
+					testAccCheckRocksetCollectionExists("rockset_collection.test", &collection),
 					resource.TestCheckResourceAttr("rockset_collection.test", "name", testCollectionName),
 					resource.TestCheckResourceAttr("rockset_collection.test", "workspace", testCollectionWorkspace),
 					resource.TestCheckResourceAttr("rockset_collection.test", "description", testCollectionDescription),
@@ -34,7 +37,7 @@ func TestAccCollection_Basic(t *testing.T) {
 			{
 				Config: testAccCheckCollectionUpdateForceRecreate(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRocksetCollectionExists("rockset_collection.test"),
+					testAccCheckRocksetCollectionExists("rockset_collection.test", &collection),
 					resource.TestCheckResourceAttr("rockset_collection.test", "name", fmt.Sprintf("%s-updated", testCollectionName)),
 					resource.TestCheckResourceAttr("rockset_collection.test", "workspace", testCollectionWorkspace),
 					resource.TestCheckResourceAttr("rockset_collection.test", "description", testCollectionDescription),
@@ -46,6 +49,8 @@ func TestAccCollection_Basic(t *testing.T) {
 }
 
 func TestAccCollection_FieldMapping(t *testing.T) {
+	var collection openapi.Collection
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -54,10 +59,11 @@ func TestAccCollection_FieldMapping(t *testing.T) {
 			{
 				Config: testAccCheckCollectionFieldMapping(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRocksetCollectionExists("rockset_collection.test"),
+					testAccCheckRocksetCollectionExists("rockset_collection.test", &collection),
 					resource.TestCheckResourceAttr("rockset_collection.test", "name", testCollectionNameFieldMappings),
 					resource.TestCheckResourceAttr("rockset_collection.test", "workspace", testCollectionWorkspace),
 					resource.TestCheckResourceAttr("rockset_collection.test", "description", testCollectionDescription),
+					testAccCheckFieldMappingMatches(&collection),
 				),
 				ExpectNonEmptyPlan: false,
 			},
@@ -132,7 +138,7 @@ func testAccCheckRocksetCollectionDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckRocksetCollectionExists(resource string) resource.TestCheckFunc {
+func testAccCheckRocksetCollectionExists(resource string, collection *openapi.Collection) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		rc := testAccProvider.Meta().(*rockset.RockClient)
 		ctx := context.TODO()
@@ -143,9 +149,66 @@ func testAccCheckRocksetCollectionExists(resource string) resource.TestCheckFunc
 		}
 
 		workspace, name := workspaceAndNameFromID(rs.Primary.ID)
-		_, err = rc.GetCollection(ctx, workspace, name)
+		resp, err := rc.GetCollection(ctx, workspace, name)
 		if err != nil {
 			return err
+		}
+
+		*collection = resp
+
+		return nil
+	}
+}
+
+func testAccCheckFieldMappingMatches(collection *openapi.Collection) resource.TestCheckFunc {
+	return func(state *terraform.State) error {
+		foundFieldMappings := collection.GetFieldMappings()
+		numMappings := len(foundFieldMappings)
+		if numMappings != 1 {
+			return fmt.Errorf("Expected one field mapping, found %d.", numMappings)
+		}
+
+		fieldMapping := foundFieldMappings[0]
+		if fieldMapping.GetName() != "string to float" {
+			return fmt.Errorf("Field mapping name expected 'string to float' got %s", fieldMapping.GetName())
+		}
+
+		inputFields := fieldMapping.GetInputFields()
+		numFields := len(inputFields)
+		if numFields != 1 {
+			return fmt.Errorf("Expected one input field, found %d.", numFields)
+		}
+
+		inputField := inputFields[0]
+		if inputField.GetFieldName() != "population" {
+			return fmt.Errorf("Expected first input FieldName to be 'population', found %s.", inputField.GetFieldName())
+		}
+
+		if inputField.GetIfMissing() != "SKIP" {
+			return fmt.Errorf("Expected first input IfMissing to be 'SKIP', found %s.", inputField.GetIfMissing())
+		}
+
+		if inputField.GetIsDrop() != false {
+			return fmt.Errorf("Expected first input IsDrop to be false, found %t.", inputField.GetIsDrop())
+		}
+
+		if inputField.GetParam() != "pop" {
+			return fmt.Errorf("Expected first input Param to be 'pop', found %s.", inputField.GetParam())
+		}
+
+		outputField := fieldMapping.GetOutputField()
+		if outputField.GetFieldName() != "pop" {
+			return fmt.Errorf("Expected output FieldName to be 'pop', found %s.", outputField.GetFieldName())
+		}
+
+		outputValue := outputField.GetValue()
+		outputSql := outputValue.GetSql()
+		if outputSql != "CAST(:pop as int)" {
+			return fmt.Errorf("Expected output Value.Sql to be 'CAST(:pop as int)', found %s.", outputSql)
+		}
+
+		if outputField.GetOnError() != "FAIL" {
+			return fmt.Errorf("Expected output FieldName to be 'FAIL', found %s.", outputField.GetOnError())
 		}
 
 		return nil

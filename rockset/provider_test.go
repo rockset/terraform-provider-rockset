@@ -3,11 +3,8 @@ package rockset
 import (
 	"fmt"
 	"os"
-	"reflect"
-	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -51,34 +48,4 @@ func getResourceFromState(state *terraform.State, resource string) (*terraform.R
 	}
 
 	return rs, nil
-}
-
-func testAccCheckResourceListMatches(resource string, resourceAttribute string, attributeValueCheck []string) resource.TestCheckFunc {
-	return func(state *terraform.State) error {
-		rs, err := getResourceFromState(state, resource)
-		if err != nil {
-			return err
-		}
-
-		// Lists show up as the attribute name and index in one key.
-		// E.g. roles=["foo", "bar"] will be {"roles.0"="foo", "roles.1"="bar"}
-		// So we build a list of the values.
-		var currentValue []string
-		for k, v := range rs.Primary.Attributes {
-			// Attributes will have a final string with the number in the list
-			// E.g. roles.0=foo, roles.1=bar, roles.#=2
-			// Skip the #
-			if strings.HasPrefix(k, fmt.Sprintf("%s.", resourceAttribute)) &&
-				!strings.HasPrefix(k, fmt.Sprintf("%s.#", resourceAttribute)) {
-				currentValue = append(currentValue, v)
-			}
-		}
-
-		if reflect.DeepEqual(currentValue, attributeValueCheck) {
-			return nil
-		} else {
-			return fmt.Errorf("Resource attribute %s.%s did not match expected value. Found %s expected %s.",
-				resource, resourceAttribute, currentValue, attributeValueCheck)
-		}
-	}
 }

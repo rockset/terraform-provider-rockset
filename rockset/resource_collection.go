@@ -463,33 +463,35 @@ func makeInputFields(in interface{}) *[]openapi.InputField {
 
 	if arr, ok := in.([]interface{}); ok {
 		for _, a := range arr {
-			if cfg, ok := a.(map[string]interface{}); ok {
-				i := openapi.InputField{}
-
-				if v, ok := cfg["field_name"]; ok {
-					field := v.(string)
-					i.FieldName = &field
-				}
-
-				if v, ok := cfg["param"]; ok {
-					field := v.(string)
-					i.Param = &field
-				}
-
-				if v, ok := cfg["if_missing"]; ok {
-					field := v.(string)
-					i.IfMissing = &field
-				}
-
-				if v, ok := cfg["is_drop"]; ok {
-					field := v.(bool)
-					i.IsDrop = &field
-				}
-
-				fields = append(fields, i)
-			} else {
+			cfg, ok := a.(map[string]interface{})
+			if !ok {
 				log.Printf("failed to cast %+v to map[string]interface{}", a)
+				continue
 			}
+
+			i := openapi.InputField{}
+
+			if v, ok := cfg["field_name"]; ok {
+				field := v.(string)
+				i.FieldName = &field
+			}
+
+			if v, ok := cfg["param"]; ok {
+				field := v.(string)
+				i.Param = &field
+			}
+
+			if v, ok := cfg["if_missing"]; ok {
+				field := v.(string)
+				i.IfMissing = &field
+			}
+
+			if v, ok := cfg["is_drop"]; ok {
+				field := v.(bool)
+				i.IsDrop = &field
+			}
+
+			fields = append(fields, i)
 		}
 	}
 
@@ -497,7 +499,7 @@ func makeInputFields(in interface{}) *[]openapi.InputField {
 }
 
 func flattenFieldMappings(fieldMappings []openapi.FieldMappingV2) []interface{} {
-	var out = make([]interface{}, 0, 0)
+	var out = make([]interface{}, 0, len(fieldMappings))
 
 	for _, f := range fieldMappings {
 		m := make(map[string]interface{})
@@ -523,7 +525,7 @@ func flattenOutputField(outputField openapi.OutputField) []interface{} {
 }
 
 func flattenInputFields(inputFields []openapi.InputField) []interface{} {
-	var out = make([]interface{}, 0, 0)
+	var out = make([]interface{}, 0, len(inputFields))
 
 	for _, i := range inputFields {
 		m := make(map[string]interface{})
