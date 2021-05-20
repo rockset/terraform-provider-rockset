@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"regexp"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -45,39 +46,6 @@ func baseCollectionSchema() map[string]*schema.Schema {
 			Optional:     true,
 			ValidateFunc: validation.IntAtLeast(1),
 		},
-		"event_time_info": {
-			Description: "Configuration for event data.",
-			Type:        schema.TypeSet,
-			ForceNew:    true,
-			Optional:    true,
-			MinItems:    0,
-			MaxItems:    1,
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"field": {
-						Description: "name of the field containing event time",
-						Type:        schema.TypeString,
-						ForceNew:    true,
-						Required:    true,
-					},
-					"format": {
-						Description: "format of time field",
-						Type:        schema.TypeString,
-						ForceNew:    true,
-						Required:    true,
-						ValidateFunc: validation.StringInSlice(
-							[]string{"milliseconds_since_epoch", "seconds_since_epoch"},
-							false), // Ignore case false, must do exact match
-					},
-					"time_zone": {
-						Description: "default time zone, in standard IANA format",
-						Type:        schema.TypeString,
-						ForceNew:    true,
-						Required:    true,
-					},
-				},
-			},
-		}, // End event_time_info
 		"field_mapping": {
 			Description: "List of field mappings.",
 			Type:        schema.TypeList,
@@ -169,13 +137,13 @@ func baseCollectionSchema() map[string]*schema.Schema {
 						Description: "The type of partitions on a field.",
 						Type:        schema.TypeString,
 						ForceNew:    true,
-						Required:    true,
+						Optional:    true,
 					},
 					"keys": {
 						Description: "The values for partitioning of a field.",
 						Type:        schema.TypeList,
 						ForceNew:    true,
-						Required:    true,
+						Optional:    true,
 						MinItems:    1,
 						Elem: &schema.Schema{
 							Type: schema.TypeString,
@@ -308,6 +276,11 @@ func parseBaseCollection(collection *openapi.Collection, d *schema.ResourceData)
 		return err
 	}
 
+	err = d.Set("clustering_key", flattenClusteringKeys(collection.GetClusteringKey()))
+	if err != nil {
+		return err
+	}
+
 	return nil // No errors
 }
 
@@ -325,28 +298,21 @@ func createBaseCollectionRequest(d *schema.ResourceData) *openapi.CreateCollecti
 	params.SetDescription(description)
 
 	if v, ok := d.GetOk("field_mapping"); ok && len(v.([]interface{})) > 0 {
-		mappings := make([]openapi.FieldMappingV2, 0)
-		for _, raw := range v.([]interface{}) {
-			fm := openapi.FieldMappingV2{}
-			cfg := raw.(map[string]interface{})
+		mappings := makeFieldMappings(v.([]interface{}))
+		params.SetFieldMappings(*mappings)
+	}
 
-			if v, ok := cfg["name"]; ok {
-				fieldMappingName := v.(string)
-				fm.Name = &fieldMappingName
-			}
+	if v, ok := d.GetOk("retention_secs"); ok {
+		retentionSecondsDuration := time.Duration(v.(int)) * time.Second
+		retentionSeconds := int64(retentionSecondsDuration.Seconds())
+		params.RetentionSecs = &retentionSeconds
+	}
 
-			if v, ok := cfg["output_field"]; ok {
-				log.Printf("output_field(%T): %+v", v, v)
-				fm.OutputField = makeOutputField(v)
-			}
-
-			if v, ok := cfg["input_fields"]; ok {
-				fm.InputFields = makeInputFields(v)
-			}
-
-			mappings = append(mappings, fm)
-		}
-		params.SetFieldMappings(mappings)
+	if v, ok := d.GetOk("clustering_key"); ok && len(v.([]interface{})) > 0 {
+		// The api and the go client use the singular 'ClusteringKey'
+		// But the value is in fact a list.
+		clusteringKeys := makeClusteringKeys(v.([]interface{}))
+		params.ClusteringKey = clusteringKeys
 	}
 
 	return params
@@ -431,6 +397,59 @@ func resourceCollectionDelete(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	return diags
+}
+
+func makeClusteringKeys(v []interface{}) *[]openapi.FieldPartition {
+	clusteringKeys := make([]openapi.FieldPartition, 0, len(v))
+	for _, raw := range v {
+		fp := openapi.FieldPartition{}
+		cfg := raw.(map[string]interface{})
+
+		if v, ok := cfg["field_name"]; ok {
+			fieldName := v.(string)
+			fp.FieldName = &fieldName
+		}
+
+		if v, ok := cfg["type"]; ok {
+			partitionType := v.(string)
+			fp.Type = &partitionType
+		}
+
+		if v, ok := cfg["keys"]; ok {
+			partitionKeys := toStringArray(v.([]interface{}))
+			fp.Keys = &partitionKeys
+		}
+
+		clusteringKeys = append(clusteringKeys, fp)
+	}
+
+	return &clusteringKeys
+}
+
+func makeFieldMappings(v []interface{}) *[]openapi.FieldMappingV2 {
+	mappings := make([]openapi.FieldMappingV2, 0, len(v))
+	for _, raw := range v {
+		fm := openapi.FieldMappingV2{}
+		cfg := raw.(map[string]interface{})
+
+		if v, ok := cfg["name"]; ok {
+			fieldMappingName := v.(string)
+			fm.Name = &fieldMappingName
+		}
+
+		if v, ok := cfg["output_field"]; ok {
+			log.Printf("output_field(%T): %+v", v, v)
+			fm.OutputField = makeOutputField(v)
+		}
+
+		if v, ok := cfg["input_fields"]; ok {
+			fm.InputFields = makeInputFields(v)
+		}
+
+		mappings = append(mappings, fm)
+	}
+
+	return &mappings
 }
 
 func makeOutputField(in interface{}) *openapi.OutputField {
@@ -533,6 +552,22 @@ func flattenInputFields(inputFields []openapi.InputField) []interface{} {
 		m["if_missing"] = i.IfMissing
 		m["is_drop"] = i.IsDrop
 		m["param"] = i.Param
+		out = append(out, m)
+	}
+
+	return out
+}
+
+func flattenClusteringKeys(clusteringKeys []openapi.FieldPartition) []interface{} {
+	var out = make([]interface{}, 0, len(clusteringKeys))
+
+	for _, fieldPartition := range clusteringKeys {
+		m := make(map[string]interface{})
+
+		m["field_name"] = fieldPartition.FieldName
+		m["type"] = fieldPartition.Type
+		m["keys"] = fieldPartition.Keys
+
 		out = append(out, m)
 	}
 

@@ -3,6 +3,7 @@ package rockset
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -15,6 +16,18 @@ const testCollectionName = "terraform-provider-acceptance-tests-basic"
 const testCollectionWorkspace = "commons"
 const testCollectionDescription = "Terraform provider acceptance tests."
 const testCollectionNameFieldMappings = "terraform-provider-acceptance-tests-fieldmapping"
+const testCollectionNameClustering = "terraform-provider-acceptance-tests-clustering"
+
+/*
+	NOTES:
+		clustering_key requires field partioning to be enabled for the org.
+			otherwise, a 400 bad request is returned.
+
+	clustering_key {
+		field_name = "population"
+		type = "AUTO"
+	}
+*/
 
 func TestAccCollection_Basic(t *testing.T) {
 	var collection openapi.Collection
@@ -31,6 +44,7 @@ func TestAccCollection_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr("rockset_collection.test", "name", testCollectionName),
 					resource.TestCheckResourceAttr("rockset_collection.test", "workspace", testCollectionWorkspace),
 					resource.TestCheckResourceAttr("rockset_collection.test", "description", testCollectionDescription),
+					testAccCheckRetentionSecsMatches(&collection, 60),
 				),
 				ExpectNonEmptyPlan: false,
 			},
@@ -41,6 +55,7 @@ func TestAccCollection_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr("rockset_collection.test", "name", fmt.Sprintf("%s-updated", testCollectionName)),
 					resource.TestCheckResourceAttr("rockset_collection.test", "workspace", testCollectionWorkspace),
 					resource.TestCheckResourceAttr("rockset_collection.test", "description", testCollectionDescription),
+					testAccCheckRetentionSecsMatches(&collection, 61),
 				),
 				ExpectNonEmptyPlan: false,
 			},
@@ -64,11 +79,51 @@ func TestAccCollection_FieldMapping(t *testing.T) {
 					resource.TestCheckResourceAttr("rockset_collection.test", "workspace", testCollectionWorkspace),
 					resource.TestCheckResourceAttr("rockset_collection.test", "description", testCollectionDescription),
 					testAccCheckFieldMappingMatches(&collection),
+					testAccCheckRetentionSecsMatches(&collection, 65),
 				),
 				ExpectNonEmptyPlan: false,
 			},
 		},
 	})
+}
+
+func TestAccCollection_ClusteringKey(t *testing.T) {
+	var collection openapi.Collection
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckRocksetCollectionDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckCollectionClusteringKeyAuto(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRocksetCollectionExists("rockset_collection.test", &collection),
+					resource.TestCheckResourceAttr("rockset_collection.test", "name", testCollectionNameClustering),
+					resource.TestCheckResourceAttr("rockset_collection.test", "workspace", testCollectionWorkspace),
+					resource.TestCheckResourceAttr("rockset_collection.test", "description", testCollectionDescription),
+					testAccCheckClusteringKeyMatches(&collection, "population", "AUTO", []string{}),
+					testAccCheckRetentionSecsMatches(&collection, 65),
+				),
+				ExpectNonEmptyPlan: false,
+			},
+		},
+	})
+}
+
+func testAccCheckCollectionClusteringKeyAuto() string {
+	return fmt.Sprintf(`
+resource rockset_collection test {
+	name        		= "%s"
+	workspace   		= "%s"
+	description 		= "%s"
+	retention_secs 	= 60
+	clustering_key {
+		field_name = "population"
+		type = "AUTO"
+	}
+}
+`, testCollectionNameClustering, testCollectionWorkspace, testCollectionDescription)
 }
 
 func testAccCheckCollectionFieldMapping() string {
@@ -77,6 +132,8 @@ resource rockset_collection test {
 	name        = "%s"
 	workspace   = "%s"
 	description = "%s"
+	retention_secs 	= 65
+
 	field_mapping {
 		name = "string to float"
 		input_fields {
@@ -99,9 +156,10 @@ resource rockset_collection test {
 func testAccCheckCollectionBasic() string {
 	return fmt.Sprintf(`
 resource rockset_collection test {
-	name        = "%s"
-	workspace   = "%s"
-	description = "%s"
+	name        		= "%s"
+	workspace   		= "%s"
+	description 		= "%s"
+	retention_secs 	= 60
 }
 `, testCollectionName, testCollectionWorkspace, testCollectionDescription)
 }
@@ -112,6 +170,7 @@ resource rockset_collection test {
 	name        = "%s-updated"
 	workspace   = "%s"
 	description = "%s"
+	retention_secs 	= 61
 }`, testCollectionName, testCollectionWorkspace, testCollectionDescription)
 }
 
@@ -209,6 +268,44 @@ func testAccCheckFieldMappingMatches(collection *openapi.Collection) resource.Te
 
 		if outputField.GetOnError() != "FAIL" {
 			return fmt.Errorf("Expected output FieldName to be 'FAIL', found %s.", outputField.GetOnError())
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckRetentionSecsMatches(collection *openapi.Collection, expectedValue int) resource.TestCheckFunc {
+	return func(state *terraform.State) error {
+		retentionSecs := collection.GetRetentionSecs()
+		if retentionSecs != int64(expectedValue) {
+			return fmt.Errorf("RetentionSeconds was expected to be %d got %d", expectedValue, retentionSecs)
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckClusteringKeyMatches(collection *openapi.Collection,
+	fieldName string, partitionType string, partitionKeys []string) resource.TestCheckFunc {
+
+	return func(state *terraform.State) error {
+		// Check just the first partition key, assume one is set
+		numKeys := len(collection.GetClusteringKey())
+		if numKeys != 1 {
+			return fmt.Errorf("Expected 1 clustering key, got %d", numKeys)
+		}
+		clusteringKey := collection.GetClusteringKey()[0]
+
+		if *clusteringKey.FieldName != fieldName {
+			return fmt.Errorf("Expected field name %s got %s", fieldName, *clusteringKey.FieldName)
+		}
+
+		if *clusteringKey.Type != partitionType {
+			return fmt.Errorf("Expected type %s got %s", partitionType, *clusteringKey.Type)
+		}
+
+		if !reflect.DeepEqual(*clusteringKey.Keys, partitionKeys) {
+			return fmt.Errorf("Expected type %s got %s", partitionKeys, *clusteringKey.Keys)
 		}
 
 		return nil
