@@ -63,9 +63,9 @@ func resourceAlias() *schema.Resource {
 	}
 }
 
-func aliasCollectionsSet(ctx context.Context, rc *rockset.RockClient, workspace string, name string, collections []string) rockset.WaitFunc {
+func aliasCollectionsSet(ctx context.Context, rc *rockset.RockClient, workspace string, name string, collections []string) rockset.RetryFunc {
 	/*
-		Implements a WaitFunc to wait for the create or update
+		Implements a Retry func to wait for the create or update
 		to finalize and show the specified collections.
 		If we don't do this two applies in a row will show pending changes.
 	*/
@@ -77,7 +77,10 @@ func aliasCollectionsSet(ctx context.Context, rc *rockset.RockClient, workspace 
 			return false, err
 		}
 
-		return reflect.DeepEqual(resp.Data.GetCollections(), collections), nil
+		collectionsCorrect := reflect.DeepEqual(resp.Data.GetCollections(), collections)
+
+		// If true, return false so we stop looping
+		return !collectionsCorrect, nil
 	}
 }
 
@@ -101,7 +104,7 @@ func resourceAliasCreate(ctx context.Context, d *schema.ResourceData, meta inter
 
 	// There's a lag between create and update and the alias
 	// showing those collections in the response.
-	err = rc.WaitUntil(ctx, aliasCollectionsSet(ctx, rc, workspace, name, collections))
+	err = rc.Retry(ctx, aliasCollectionsSet(ctx, rc, workspace, name, collections))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -166,7 +169,7 @@ func resourceAliasUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 
 	// There's a lag between create and update and the alias
 	// showing those collections in the response.
-	err = rc.WaitUntil(ctx, aliasCollectionsSet(ctx, rc, workspace, name, collections))
+	err = rc.Retry(ctx, aliasCollectionsSet(ctx, rc, workspace, name, collections))
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -7,7 +7,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/hashicorp/terraform-plugin-sdk v1.17.2
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.6.1
-	github.com/rockset/rockset-go-client v0.11.1-0.20210517224926-ca5ccfdadab5
+	github.com/rockset/rockset-go-client v0.11.1-0.20210524063738-a7a15cd9a840
 	github.com/rockset/rockset-go-client/openapi v0.11.1-0.20210517224926-ca5ccfdadab5 // indirect
 	github.com/stretchr/testify v1.7.0
 )

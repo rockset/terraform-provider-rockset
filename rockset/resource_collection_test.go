@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -22,11 +23,6 @@ const testCollectionNameClustering = "terraform-provider-acceptance-tests-cluste
 	NOTES:
 		clustering_key requires field partioning to be enabled for the org.
 			otherwise, a 400 bad request is returned.
-
-	clustering_key {
-		field_name = "population"
-		type = "AUTO"
-	}
 */
 
 func TestAccCollection_Basic(t *testing.T) {
@@ -103,7 +99,7 @@ func TestAccCollection_ClusteringKey(t *testing.T) {
 					resource.TestCheckResourceAttr("rockset_collection.test", "workspace", testCollectionWorkspace),
 					resource.TestCheckResourceAttr("rockset_collection.test", "description", testCollectionDescription),
 					testAccCheckClusteringKeyMatches(&collection, "population", "AUTO", []string{}),
-					testAccCheckRetentionSecsMatches(&collection, 65),
+					testAccCheckRetentionSecsMatches(&collection, 60),
 				),
 				ExpectNonEmptyPlan: false,
 			},
@@ -114,13 +110,13 @@ func TestAccCollection_ClusteringKey(t *testing.T) {
 func testAccCheckCollectionClusteringKeyAuto() string {
 	return fmt.Sprintf(`
 resource rockset_collection test {
-	name        		= "%s"
-	workspace   		= "%s"
-	description 		= "%s"
-	retention_secs 	= 60
+	name						= "%s"
+	workspace				= "%s"
+	description			= "%s"
+	retention_secs	= 60
 	clustering_key {
-		field_name = "population"
-		type = "AUTO"
+		field_name 	= "population"
+		type 				= "AUTO"
 	}
 }
 `, testCollectionNameClustering, testCollectionWorkspace, testCollectionDescription)
@@ -174,12 +170,15 @@ resource rockset_collection test {
 }`, testCollectionName, testCollectionWorkspace, testCollectionDescription)
 }
 
+/*
+	Check if any type of collection was successfuly destroyed
+*/
 func testAccCheckRocksetCollectionDestroy(s *terraform.State) error {
 	rc := testAccProvider.Meta().(*rockset.RockClient)
 	ctx := context.TODO()
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "rockset_collection" {
+		if !strings.Contains(rs.Type, "_collection") {
 			continue
 		}
 
@@ -305,7 +304,7 @@ func testAccCheckClusteringKeyMatches(collection *openapi.Collection,
 		}
 
 		if !reflect.DeepEqual(*clusteringKey.Keys, partitionKeys) {
-			return fmt.Errorf("Expected type %s got %s", partitionKeys, *clusteringKey.Keys)
+			return fmt.Errorf("Expected keys %s got %s", partitionKeys, *clusteringKey.Keys)
 		}
 
 		return nil

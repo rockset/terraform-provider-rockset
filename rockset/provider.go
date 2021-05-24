@@ -23,10 +23,10 @@ func Provider() *schema.Provider {
 			"rockset_alias":          resourceAlias(),
 			"rockset_api_key":        resourceApiKey(),
 			"rockset_collection":     resourceCollection(),
-			"rockset_user":           resourceUser(),
 			"rockset_s3_integration": resourceS3Integration(),
+			"rockset_s3_collection":  resourceS3Collection(),
+			"rockset_user":           resourceUser(),
 			// "rockset_workspace":      resourceWorkspace(),
-			// "rockset_s3_collection":  resourceS3Collection(),
 			// "rockset_query_lambda": resourceQueryLambda(),
 			// "rockset_collection": resourceCollection(),
 		},
@@ -66,8 +66,7 @@ func (c *Config) Client() (interface{}, diag.Diagnostics) {
 	var opts []rockset.RockOption
 
 	if c.APIKey != "" {
-		// TODO: WithAPIKey no longer in go client, re-add this once it's added back
-		//opts = append(opts, rockset.WithAPIKey(c.APIKey), rockset.WithAPIServer(c.APIServer))
+		opts = append(opts, rockset.WithAPIKey(c.APIKey), rockset.WithAPIServer(c.APIServer))
 	} else {
 		opts = append(opts, rockset.FromEnv())
 	}
@@ -112,4 +111,32 @@ func toStringArray(a []interface{}) []string {
 		r[i] = v.(string)
 	}
 	return r
+}
+
+func toBoolPtr(v bool) *bool {
+	return &v
+}
+
+func toStringPtr(v string) *string {
+	if v == "" {
+		return nil
+	}
+
+	return &v
+}
+
+func toIntPtr(v int) *int {
+	return &v
+}
+
+func toStringArrayPtr(v []string) *[]string {
+	return &v
+}
+
+func mergeSchemas(mergeOnto map[string]*schema.Schema, toMerge map[string]*schema.Schema) map[string]*schema.Schema {
+	for k, v := range toMerge {
+		mergeOnto[k] = v
+	}
+
+	return mergeOnto
 }

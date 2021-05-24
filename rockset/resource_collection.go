@@ -243,12 +243,13 @@ func baseCollectionSchema() map[string]*schema.Schema {
 	} // End schema return
 } // End func
 
+/*
+	Takes in a collection returned from the api.
+	Parses the base fields any collection has and
+	puts them into the schema object.
+*/
 func parseBaseCollection(collection *openapi.Collection, d *schema.ResourceData) error {
-	/*
-		Takes in a collection returned from the api.
-		Parses the base fields any collection has and
-		puts them into the schema object.
-	*/
+
 	var err error
 
 	err = d.Set("name", collection.GetName())
