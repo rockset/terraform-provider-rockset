@@ -11,7 +11,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const testS3CollectionName = "terraform-provider-acceptance-tests-s3-csv"
+const testS3CollectionNameCsv = "terraform-provider-acceptance-tests-s3-csv"
+const testS3CollectionNameXml = "terraform-provider-acceptance-tests-s3-xml"
 const testS3CollectionWorkspace = "commons"
 const testS3CollectionDescription = "Terraform provider acceptance tests."
 const testS3CollectionIntegrationRoleArn = "arn:aws:iam::469279130686:role/terraform-provider-rockset-tests"
@@ -27,14 +28,26 @@ func TestAccS3Collection_Basic(t *testing.T) {
 		CheckDestroy: testAccCheckRocksetCollectionDestroy, // Reused from base collection
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckS3CollectionBasic(),
+				Config: testAccCheckS3CollectionCsv(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetCollectionExists("rockset_s3_collection.test", &collection), // Reused from base collection
-					resource.TestCheckResourceAttr("rockset_s3_collection.test", "name", testS3CollectionName),
+					resource.TestCheckResourceAttr("rockset_s3_collection.test", "name", testS3CollectionNameCsv),
 					resource.TestCheckResourceAttr("rockset_s3_collection.test", "workspace", testS3CollectionWorkspace),
 					resource.TestCheckResourceAttr("rockset_s3_collection.test", "description", testS3CollectionDescription),
 					testAccCheckRetentionSecsMatches(&collection, 3600),
-					testAccCheckS3SourceExpected(t, &collection),
+					testAccCheckS3SourceExpectedCsv(t, &collection),
+				),
+				ExpectNonEmptyPlan: false,
+			},
+			{
+				Config: testAccCheckS3CollectionXml(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRocksetCollectionExists("rockset_s3_collection.test", &collection), // Reused from base collection
+					resource.TestCheckResourceAttr("rockset_s3_collection.test", "name", testS3CollectionNameXml),
+					resource.TestCheckResourceAttr("rockset_s3_collection.test", "workspace", testS3CollectionWorkspace),
+					resource.TestCheckResourceAttr("rockset_s3_collection.test", "description", testS3CollectionDescription),
+					testAccCheckRetentionSecsMatches(&collection, 3600),
+					testAccCheckS3SourceExpectedXml(t, &collection),
 				),
 				ExpectNonEmptyPlan: false,
 			},
@@ -42,7 +55,7 @@ func TestAccS3Collection_Basic(t *testing.T) {
 	})
 }
 
-func testAccCheckS3CollectionBasic() string {
+func testAccCheckS3CollectionCsv() string {
 	hclPath := filepath.Join("..", "testdata", "s3_collection_csv.tf")
 	s3CollectionHCL, err := getFileContents(hclPath)
 	if err != nil {
@@ -52,7 +65,17 @@ func testAccCheckS3CollectionBasic() string {
 	return s3CollectionHCL
 }
 
-func testAccCheckS3SourceExpected(t *testing.T, collection *openapi.Collection) resource.TestCheckFunc {
+func testAccCheckS3CollectionXml() string {
+	hclPath := filepath.Join("..", "testdata", "s3_collection_xml.tf")
+	s3CollectionHCL, err := getFileContents(hclPath)
+	if err != nil {
+		log.Fatalf("Unexpected error loading test data %s", hclPath)
+	}
+
+	return s3CollectionHCL
+}
+
+func testAccCheckS3SourceExpectedCsv(t *testing.T, collection *openapi.Collection) resource.TestCheckFunc {
 	assert := assert.New(t)
 
 	return func(state *terraform.State) error {
@@ -99,6 +122,24 @@ func testAccCheckS3SourceExpected(t *testing.T, collection *openapi.Collection) 
 
 		assert.Equal(outputField1.GetOnError(), "FAIL", "First output OnError didn't match.")
 		assert.Equal(outputField2.GetOnError(), "SKIP", "Second output OnError didn't match.")
+
+		return nil
+	}
+}
+
+func testAccCheckS3SourceExpectedXml(t *testing.T, collection *openapi.Collection) resource.TestCheckFunc {
+	assert := assert.New(t)
+
+	return func(state *terraform.State) error {
+		assert.Equal(len(collection.GetFieldMappings()), 0, "Expected no field mappings.")
+
+		sources := collection.GetSources()
+		assert.Equal(len(sources), 1, "Expected one source.")
+
+		xmlSource := sources[0]
+		assert.Equal(*xmlSource.FormatParams.Xml.RootTag, "note")
+		assert.Equal(*xmlSource.FormatParams.Xml.Encoding, "UTF-8")
+		assert.Equal(*xmlSource.FormatParams.Xml.DocTag, "note")
 
 		return nil
 	}

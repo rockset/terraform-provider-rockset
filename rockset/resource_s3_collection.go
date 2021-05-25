@@ -44,8 +44,8 @@ func s3CollectionSchema() map[string]*schema.Schema {
 			ForceNew: true,
 			Required: true,
 			ValidateFunc: validation.StringMatch(
-				regexp.MustCompile("^(json|csv)$"), "only 'json' or 'csv' is supported"),
-			Description: "Format of the data. One of: json, csv. csv block cannot be set if format is json.",
+				regexp.MustCompile("^(json|csv|xml)$"), "only 'json', 'xml', or 'csv' is supported"),
+			Description: "Format of the data. One of: json, csv, xml. xml and csv blocks can only be set for their respective formats. ",
 		},
 		"csv": {
 			Type:     schema.TypeSet,
@@ -105,7 +105,52 @@ func s3CollectionSchema() map[string]*schema.Schema {
 					},
 				},
 			},
-		},
+		}, // End csv
+		"xml": {
+			Type:     schema.TypeSet,
+			ForceNew: true,
+			Optional: true,
+			MinItems: 0,
+			MaxItems: 1,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"root_tag": {
+						Description: "Tag until which xml is ignored.",
+						Type:        schema.TypeString,
+						ForceNew:    true,
+						Optional:    true,
+					},
+					"encoding": {
+						Description: "Encoding in which data source is encoded.",
+						Type:        schema.TypeString,
+						ForceNew:    true,
+						Optional:    true,
+						Default:     "UTF-8",
+						ValidateFunc: validation.StringMatch(
+							regexp.MustCompile("^(UTF-8|UTF-16|ISO_8859_1)$"), "must be either 'UTF-8', 'UTF-16' or 'ISO_8859_1'"),
+					},
+					"doc_tag": {
+						Description: "Tags with which documents are identified",
+						Type:        schema.TypeString,
+						ForceNew:    true,
+						Optional:    true,
+					},
+					"value_tag": {
+						Description: "Tag used for the value when there are attributes in the element having no child.",
+						Type:        schema.TypeString,
+						ForceNew:    true,
+						Optional:    true,
+						Default:     "value", // API sets this implicitly, if we don't match we get diffs
+					},
+					"attribute_prefix": {
+						Description: "Tag to differentiate between attributes and elements.",
+						Type:        schema.TypeString,
+						ForceNew:    true,
+						Optional:    true,
+					},
+				},
+			},
+		}, // End xml
 	} // End schema return
 } // End func
 
@@ -135,7 +180,6 @@ func resourceS3CollectionCreate(ctx context.Context, d *schema.ResourceData, met
 	name := d.Get("name").(string)
 	workspace := d.Get("workspace").(string)
 
-	
 	// Add all base schema fields
 	params := createBaseCollectionRequest(d)
 	// Add fields for s3
@@ -218,6 +262,16 @@ func parseS3Collection(collection *openapi.Collection, d *schema.ResourceData) e
 		if err != nil {
 			return err
 		}
+	} else if formatParams.Xml != nil {
+		err = d.Set("format", "xml")
+		if err != nil {
+			return err
+		}
+
+		err = d.Set("xml", flattenXmlParams(formatParams.Xml))
+		if err != nil {
+			return err
+		}
 	}
 
 	err = d.Set("prefix", s3Source.S3.GetPrefix())
@@ -248,14 +302,31 @@ func addS3Params(d *schema.ResourceData, params *openapi.CreateCollectionRequest
 		Adds the s3 sources data to the create collection request
 	*/
 	var format = openapi.FormatParams{}
+
+	csvBlock := d.Get("csv")
+	xmlBlock := d.Get("xml")
+	xmlBlockIsSet := xmlBlock != nil && xmlBlock.(*schema.Set).Len() != 0
+	csvBlockIsSet := csvBlock != nil && csvBlock.(*schema.Set).Len() != 0
+
 	switch d.Get("format").(string) {
 	case "json":
 		format.Json = openapi.PtrBool(true)
-		if d.Get("csv") != nil {
+		if csvBlockIsSet {
 			return fmt.Errorf("can't define csv block with json format")
 		}
+		if xmlBlockIsSet {
+			return fmt.Errorf("can't define xml block with json format")
+		}
 	case "csv":
+		if xmlBlockIsSet {
+			return fmt.Errorf("can't define xml block with csv format")
+		}
 		format.Csv = makeCsvParams(d.Get("csv"))
+	case "xml":
+		if csvBlockIsSet {
+			return fmt.Errorf("can't define csv block with xml format")
+		}
+		format.Xml = makeXmlParams(d.Get("xml"))
 	}
 
 	sources := []openapi.Source{
@@ -309,6 +380,42 @@ func makeCsvParams(in interface{}) *openapi.CsvParams {
 					m.ColumnNames = toStringArrayPtr(toStringArray(v.([]interface{})))
 				case "column_types":
 					m.ColumnTypes = toStringArrayPtr(toStringArray(v.([]interface{})))
+				}
+			}
+		}
+	}
+
+	return &m
+}
+
+func flattenXmlParams(params *openapi.XmlParams) []interface{} {
+	m := make(map[string]interface{})
+	m["root_tag"] = *params.RootTag
+	m["encoding"] = *params.Encoding
+	m["doc_tag"] = *params.DocTag
+	m["value_tag"] = *params.ValueTag
+	m["attribute_prefix"] = *params.AttributePrefix
+
+	return []interface{}{m}
+}
+
+func makeXmlParams(in interface{}) *openapi.XmlParams {
+	m := openapi.XmlParams{}
+
+	for _, i := range in.(*schema.Set).List() {
+		if val, ok := i.(map[string]interface{}); ok {
+			for k, v := range val {
+				switch k {
+				case "root_tag":
+					m.RootTag = toStringPtrNilIfEmpty(v.(string))
+				case "encoding":
+					m.Encoding = toStringPtrNilIfEmpty(v.(string))
+				case "doc_tag":
+					m.DocTag = toStringPtrNilIfEmpty(v.(string))
+				case "value_tag":
+					m.ValueTag = toStringPtrNilIfEmpty(v.(string))
+				case "attribute_prefix":
+					m.AttributePrefix = toStringPtrNilIfEmpty(v.(string))
 				}
 			}
 		}

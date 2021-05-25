@@ -36,6 +36,10 @@ func TestProvider(t *testing.T) {
 	}
 }
 
+/*
+	Verifies necessary environment variables are set before running tests.
+	Fails early if they are not set.
+*/
 func testAccPreCheck(t *testing.T) {
 	if v := os.Getenv("ROCKSET_APIKEY"); v == "" {
 		t.Fatal("ROCKSET_APIKEY must be set for acceptance tests")
@@ -45,6 +49,10 @@ func testAccPreCheck(t *testing.T) {
 	}
 }
 
+/*
+	Finds a specific resource by identifier (e.g. rockset_collection.test) from terraform state
+	and returns the resource state.
+*/
 func getResourceFromState(state *terraform.State, resource string) (*terraform.ResourceState, error) {
 	rs, ok := state.RootModule().Resources[resource]
 	if !ok {
