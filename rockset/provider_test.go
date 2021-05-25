@@ -1,23 +1,29 @@
 package rockset
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/rs/zerolog"
 )
 
 var testAccProviders map[string]*schema.Provider
 var testAccProvider *schema.Provider
+var testCtx context.Context
 
 func init() {
 	testAccProvider = Provider()
 	testAccProviders = map[string]*schema.Provider{
 		"rockset": testAccProvider,
 	}
+
+	testCtx = createTestContext()
 }
 
 func TestProvider(t *testing.T) {
@@ -58,4 +64,11 @@ func getFileContents(path string) (string, error) {
 	}
 
 	return string(content), nil
+}
+
+func createTestContext() context.Context {
+	console := zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339}
+	log := zerolog.New(console).Level(zerolog.TraceLevel).With().Timestamp().Logger()
+
+	return log.WithContext(context.Background())
 }

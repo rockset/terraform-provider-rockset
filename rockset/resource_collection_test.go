@@ -1,7 +1,6 @@
 package rockset
 
 import (
-	"context"
 	"fmt"
 	"reflect"
 	"strings"
@@ -175,7 +174,6 @@ resource rockset_collection test {
 */
 func testAccCheckRocksetCollectionDestroy(s *terraform.State) error {
 	rc := testAccProvider.Meta().(*rockset.RockClient)
-	ctx := context.TODO()
 
 	for _, rs := range s.RootModule().Resources {
 		if !strings.Contains(rs.Type, "_collection") {
@@ -184,7 +182,7 @@ func testAccCheckRocksetCollectionDestroy(s *terraform.State) error {
 
 		workspace, name := workspaceAndNameFromID(rs.Primary.ID)
 
-		_, err := rc.GetCollection(ctx, workspace, name)
+		_, err := rc.GetCollection(testCtx, workspace, name)
 
 		// An error would mean we didn't find the key, we expect an error
 		if err == nil {
@@ -199,7 +197,6 @@ func testAccCheckRocksetCollectionDestroy(s *terraform.State) error {
 func testAccCheckRocksetCollectionExists(resource string, collection *openapi.Collection) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		rc := testAccProvider.Meta().(*rockset.RockClient)
-		ctx := context.TODO()
 
 		rs, err := getResourceFromState(state, resource)
 		if err != nil {
@@ -207,7 +204,7 @@ func testAccCheckRocksetCollectionExists(resource string, collection *openapi.Co
 		}
 
 		workspace, name := workspaceAndNameFromID(rs.Primary.ID)
-		resp, err := rc.GetCollection(ctx, workspace, name)
+		resp, err := rc.GetCollection(testCtx, workspace, name)
 		if err != nil {
 			return err
 		}

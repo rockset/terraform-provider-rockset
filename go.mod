@@ -9,5 +9,6 @@ require (
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.6.1
 	github.com/rockset/rockset-go-client v0.11.1-0.20210525083833-30af5281b589
 	github.com/rockset/rockset-go-client/openapi v0.11.1-0.20210517224926-ca5ccfdadab5 // indirect
+	github.com/rs/zerolog v1.22.0 // indirect
 	github.com/stretchr/testify v1.7.0
 )

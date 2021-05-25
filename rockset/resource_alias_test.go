@@ -1,7 +1,6 @@
 package rockset
 
 import (
-	"context"
 	"fmt"
 	"reflect"
 	"testing"
@@ -135,7 +134,6 @@ resource rockset_alias test {
 
 func testAccCheckRocksetAliasDestroy(s *terraform.State) error {
 	rc := testAccProvider.Meta().(*rockset.RockClient)
-	ctx := context.TODO()
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "rockset_alias" {
@@ -144,7 +142,7 @@ func testAccCheckRocksetAliasDestroy(s *terraform.State) error {
 
 		workspace, name := workspaceAndNameFromID(rs.Primary.ID)
 
-		q := rc.AliasesApi.GetAlias(ctx, name, workspace)
+		q := rc.AliasesApi.GetAlias(testCtx, name, workspace)
 		_, _, err := q.Execute()
 
 		// A 404 would return an error. We expect a 404 here.
@@ -167,9 +165,8 @@ func testAccCheckRocksetAliasExists(resource string, alias *openapi.Alias) resou
 		workspace, name := workspaceAndNameFromID(rs.Primary.ID)
 
 		rc := testAccProvider.Meta().(*rockset.RockClient)
-		ctx := context.TODO()
 
-		q := rc.AliasesApi.GetAlias(ctx, workspace, name)
+		q := rc.AliasesApi.GetAlias(testCtx, workspace, name)
 		resp, _, err := q.Execute()
 		if err != nil {
 			return fmt.Errorf("Failed to get alias %s:%s", workspace, name)

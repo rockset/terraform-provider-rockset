@@ -1,7 +1,6 @@
 package rockset
 
 import (
-	"context"
 	"fmt"
 	"testing"
 
@@ -49,7 +48,6 @@ resource rockset_s3_integration test {
 
 func testAccCheckRocksetS3IntegrationDestroy(s *terraform.State) error {
 	rc := testAccProvider.Meta().(*rockset.RockClient)
-	ctx := context.TODO()
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "rockset_s3_integration" {
@@ -58,7 +56,7 @@ func testAccCheckRocksetS3IntegrationDestroy(s *terraform.State) error {
 
 		name := rs.Primary.ID
 		// TODO: Change to convenience method
-		getReq := rc.IntegrationsApi.GetIntegration(ctx, name)
+		getReq := rc.IntegrationsApi.GetIntegration(testCtx, name)
 		_, _, err := getReq.Execute()
 		// An error would mean we didn't find the it, we expect an error
 		if err == nil {
@@ -72,7 +70,6 @@ func testAccCheckRocksetS3IntegrationDestroy(s *terraform.State) error {
 func testAccCheckRocksetS3IntegrationExists(resource string, s3Integration *openapi.S3Integration) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		rc := testAccProvider.Meta().(*rockset.RockClient)
-		ctx := context.TODO()
 
 		rs, err := getResourceFromState(state, resource)
 		if err != nil {
@@ -81,7 +78,7 @@ func testAccCheckRocksetS3IntegrationExists(resource string, s3Integration *open
 
 		name := rs.Primary.ID
 		// TODO: Change to convenience method
-		getReq := rc.IntegrationsApi.GetIntegration(ctx, name)
+		getReq := rc.IntegrationsApi.GetIntegration(testCtx, name)
 		resp, _, err := getReq.Execute()
 		if err != nil {
 			return err

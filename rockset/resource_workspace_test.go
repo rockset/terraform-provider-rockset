@@ -1,7 +1,6 @@
 package rockset
 
 import (
-	"context"
 	"fmt"
 	"testing"
 
@@ -66,7 +65,6 @@ resource rockset_workspace test {
 
 func testAccCheckRocksetWorkspaceDestroy(s *terraform.State) error {
 	rc := testAccProvider.Meta().(*rockset.RockClient)
-	ctx := context.TODO()
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "rockset_api_key" {
@@ -74,7 +72,7 @@ func testAccCheckRocksetWorkspaceDestroy(s *terraform.State) error {
 		}
 
 		name := rs.Primary.ID
-		_, err := rc.GetWorkspace(ctx, name)
+		_, err := rc.GetWorkspace(testCtx, name)
 
 		// An error would mean we didn't find the key, we expect an error
 		if err == nil {
@@ -97,8 +95,7 @@ func testAccCheckRocksetWorkspaceExists(resource string, workspace *openapi.Work
 
 		name := rs.Primary.ID
 
-		ctx := context.TODO()
-		resp, err := rc.GetWorkspace(ctx, name)
+		resp, err := rc.GetWorkspace(testCtx, name)
 		if err != nil {
 			return err
 		}

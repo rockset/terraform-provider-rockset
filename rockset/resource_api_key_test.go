@@ -1,7 +1,6 @@
 package rockset
 
 import (
-	"context"
 	"fmt"
 	"testing"
 
@@ -98,7 +97,6 @@ resource rockset_api_key test {
 
 func testAccCheckRocksetApiKeyDestroy(s *terraform.State) error {
 	rc := testAccProvider.Meta().(*rockset.RockClient)
-	ctx := context.TODO()
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "rockset_api_key" {
@@ -109,7 +107,7 @@ func testAccCheckRocksetApiKeyDestroy(s *terraform.State) error {
 		if err != nil {
 			return err
 		}
-		_, err = getApiKey(ctx, rc, name, user)
+		_, err = getApiKey(testCtx, rc, name, user)
 
 		// An error would mean we didn't find the key, we expect an error
 		if err == nil {
@@ -135,8 +133,7 @@ func testAccCheckRocksetApiKeyExists(resource string, apiKey *openapi.ApiKey) re
 			return err
 		}
 
-		ctx := context.TODO()
-		resp, err := getApiKey(ctx, rc, name, user)
+		resp, err := getApiKey(testCtx, rc, name, user)
 		if err != nil {
 			return err
 		}

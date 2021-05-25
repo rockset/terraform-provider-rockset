@@ -115,7 +115,7 @@ func toStringArray(a []interface{}) []string {
 /*
 
  */
-func toStringPtrNullIfEmpty(v string) *string {
+func toStringPtrNilIfEmpty(v string) *string {
 	if v == "" {
 		return nil
 	}
