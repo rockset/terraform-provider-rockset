@@ -57,6 +57,10 @@ func getResourceFromState(state *terraform.State, resource string) (*terraform.R
 	return rs, nil
 }
 
+/*
+	Gets a file's contents and returns them as a string.
+	Intended to be used for test data.
+*/
 func getFileContents(path string) (string, error) {
 	content, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -66,6 +70,9 @@ func getFileContents(path string) (string, error) {
 	return string(content), nil
 }
 
+/*
+	Creates a context with debug logging for use in tests.
+*/
 func createTestContext() context.Context {
 	console := zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339}
 	log := zerolog.New(console).Level(zerolog.TraceLevel).With().Timestamp().Logger()

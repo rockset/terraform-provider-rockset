@@ -135,7 +135,7 @@ func resourceS3CollectionCreate(ctx context.Context, d *schema.ResourceData, met
 	name := d.Get("name").(string)
 	workspace := d.Get("workspace").(string)
 
-	req := rc.CollectionsApi.CreateCollection(ctx, workspace)
+	
 	// Add all base schema fields
 	params := createBaseCollectionRequest(d)
 	// Add fields for s3
@@ -144,16 +144,9 @@ func resourceS3CollectionCreate(ctx context.Context, d *schema.ResourceData, met
 		return diag.FromErr(err)
 	}
 
-	_, _, err = req.Body(*params).Execute()
+	_, err = rc.CreateCollection(ctx, workspace, name, params)
 	if err != nil {
-		// Get detailed error
-		errorMessage := err.Error()
-
-		re := rockset.NewError(err)
-		if re.ErrorModel != nil {
-			errorMessage = fmt.Sprintf("%s. Detailed Error: %s", errorMessage, re.ErrorModel.GetMessage())
-		}
-		return diag.FromErr(fmt.Errorf(errorMessage))
+		return diag.FromErr(err)
 	}
 
 	err = rc.WaitUntilCollectionReady(ctx, workspace, name)

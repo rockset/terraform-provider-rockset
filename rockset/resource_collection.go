@@ -341,10 +341,8 @@ func resourceCollectionCreate(ctx context.Context, d *schema.ResourceData, meta 
 	name := d.Get("name").(string)
 	workspace := d.Get("workspace").(string)
 
-	req := rc.CollectionsApi.CreateCollection(ctx, workspace)
 	params := createBaseCollectionRequest(d)
-
-	_, _, err := req.Body(*params).Execute()
+	_, err := rc.CreateCollection(ctx, workspace, name, params)
 	if err != nil {
 		return diag.FromErr(err)
 	}
