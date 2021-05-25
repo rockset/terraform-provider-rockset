@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rockset/rockset-go-client"
-	"github.com/rockset/rockset-go-client/openapi"
+	"github.com/rockset/rockset-go-client/option"
 )
 
 func resourceAlias() *schema.Resource {
@@ -63,21 +63,22 @@ func resourceAlias() *schema.Resource {
 	}
 }
 
-func aliasCollectionsSet(ctx context.Context, rc *rockset.RockClient, workspace string, name string, collections []string) rockset.WaitFunc {
+func aliasCollectionsSet(ctx context.Context, rc *rockset.RockClient, workspace string, name string, collections []string) rockset.RetryCheck {
 	/*
-		Implements a WaitFunc to wait for the create or update
+		Implements a Retry func to wait for the create or update
 		to finalize and show the specified collections.
 		If we don't do this two applies in a row will show pending changes.
 	*/
 	return func() (bool, error) {
-		q := rc.AliasesApi.GetAlias(ctx, workspace, name)
-
-		resp, _, err := q.Execute()
+		alias, err := rc.GetAlias(ctx, workspace, name)
 		if err != nil {
 			return false, err
 		}
 
-		return reflect.DeepEqual(resp.Data.GetCollections(), collections), nil
+		collectionsCorrect := reflect.DeepEqual(alias.GetCollections(), collections)
+
+		// If true, return false so we stop looping
+		return !collectionsCorrect, nil
 	}
 }
 
@@ -90,23 +91,19 @@ func resourceAliasCreate(ctx context.Context, d *schema.ResourceData, meta inter
 
 	collections := toStringArray(d.Get("collections").([]interface{}))
 
-	q := rc.AliasesApi.CreateAlias(ctx, workspace)
-	req := openapi.NewCreateAliasRequest(name, collections)
-	req.SetDescription(d.Get("description").(string))
-
-	resp, _, err := q.Body(*req).Execute()
+	_, err := rc.CreateAlias(ctx, workspace, name, collections, option.WithAliasDescription(d.Get("description").(string)))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	// There's a lag between create and update and the alias
 	// showing those collections in the response.
-	err = rc.WaitUntil(ctx, aliasCollectionsSet(ctx, rc, workspace, name, collections))
+	err = rc.RetryWithCheck(ctx, aliasCollectionsSet(ctx, rc, workspace, name, collections))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(toID(resp.Data.GetWorkspace(), resp.Data.GetName()))
+	d.SetId(toID(workspace, name))
 
 	return diags
 }
@@ -117,29 +114,27 @@ func resourceAliasRead(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	workspace, name := workspaceAndNameFromID(d.Id())
 
-	q := rc.AliasesApi.GetAlias(ctx, workspace, name)
-
-	resp, _, err := q.Execute()
+	alias, err := rc.GetAlias(ctx, workspace, name)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	err = d.Set("name", resp.Data.GetName())
+	err = d.Set("name", alias.GetName())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	err = d.Set("workspace", resp.Data.GetWorkspace())
+	err = d.Set("workspace", alias.GetWorkspace())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	err = d.Set("description", resp.Data.GetDescription())
+	err = d.Set("description", alias.GetDescription())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	err = d.Set("collections", resp.Data.GetCollections())
+	err = d.Set("collections", alias.GetCollections())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -155,18 +150,14 @@ func resourceAliasUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 
 	collections := toStringArray(d.Get("collections").([]interface{}))
 
-	q := rc.AliasesApi.UpdateAlias(ctx, workspace, name)
-	req := openapi.NewUpdateAliasRequest(collections)
-	req.SetDescription(d.Get("description").(string))
-
-	_, _, err := q.Body(*req).Execute()
+	err := rc.UpdateAlias(ctx, workspace, name, collections, option.WithAliasDescription(d.Get("description").(string)))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	// There's a lag between create and update and the alias
 	// showing those collections in the response.
-	err = rc.WaitUntil(ctx, aliasCollectionsSet(ctx, rc, workspace, name, collections))
+	err = rc.RetryWithCheck(ctx, aliasCollectionsSet(ctx, rc, workspace, name, collections))
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -1,7 +1,6 @@
 package rockset
 
 import (
-	"context"
 	"fmt"
 	"reflect"
 	"testing"
@@ -66,7 +65,6 @@ resource rockset_user test {
 
 func testAccCheckRocksetUserDestroy(s *terraform.State) error {
 	rc := testAccProvider.Meta().(*rockset.RockClient)
-	ctx := context.TODO()
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "rockset_user" {
@@ -74,7 +72,7 @@ func testAccCheckRocksetUserDestroy(s *terraform.State) error {
 		}
 
 		email := rs.Primary.ID
-		_, err := getUserByEmail(ctx, rc, email)
+		_, err := getUserByEmail(testCtx, rc, email)
 
 		// An error would mean we didn't find the key, we expect an error
 		if err == nil {
@@ -89,7 +87,6 @@ func testAccCheckRocksetUserDestroy(s *terraform.State) error {
 func testAccCheckRocksetUserExists(resource string, user *openapi.User) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		rc := testAccProvider.Meta().(*rockset.RockClient)
-		ctx := context.TODO()
 
 		rs, err := getResourceFromState(state, resource)
 		if err != nil {
@@ -97,7 +94,7 @@ func testAccCheckRocksetUserExists(resource string, user *openapi.User) resource
 		}
 
 		email := rs.Primary.ID
-		resp, err := getUserByEmail(ctx, rc, email)
+		resp, err := getUserByEmail(testCtx, rc, email)
 		if err != nil {
 			return err
 		}

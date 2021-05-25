@@ -1,22 +1,29 @@
 package rockset
 
 import (
+	"context"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/rs/zerolog"
 )
 
 var testAccProviders map[string]*schema.Provider
 var testAccProvider *schema.Provider
+var testCtx context.Context
 
 func init() {
 	testAccProvider = Provider()
 	testAccProviders = map[string]*schema.Provider{
 		"rockset": testAccProvider,
 	}
+
+	testCtx = createTestContext()
 }
 
 func TestProvider(t *testing.T) {
@@ -29,6 +36,10 @@ func TestProvider(t *testing.T) {
 	}
 }
 
+/*
+	Verifies necessary environment variables are set before running tests.
+	Fails early if they are not set.
+*/
 func testAccPreCheck(t *testing.T) {
 	if v := os.Getenv("ROCKSET_APIKEY"); v == "" {
 		t.Fatal("ROCKSET_APIKEY must be set for acceptance tests")
@@ -38,6 +49,10 @@ func testAccPreCheck(t *testing.T) {
 	}
 }
 
+/*
+	Finds a specific resource by identifier (e.g. rockset_collection.test) from terraform state
+	and returns the resource state.
+*/
 func getResourceFromState(state *terraform.State, resource string) (*terraform.ResourceState, error) {
 	rs, ok := state.RootModule().Resources[resource]
 	if !ok {
@@ -48,4 +63,27 @@ func getResourceFromState(state *terraform.State, resource string) (*terraform.R
 	}
 
 	return rs, nil
+}
+
+/*
+	Gets a file's contents and returns them as a string.
+	Intended to be used for test data.
+*/
+func getFileContents(path string) (string, error) {
+	content, err := ioutil.ReadFile(path)
+	if err != nil {
+		return "", err
+	}
+
+	return string(content), nil
+}
+
+/*
+	Creates a context with debug logging for use in tests.
+*/
+func createTestContext() context.Context {
+	console := zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339}
+	log := zerolog.New(console).Level(zerolog.TraceLevel).With().Timestamp().Logger()
+
+	return log.WithContext(context.Background())
 }
