@@ -2,7 +2,6 @@ package rockset
 
 import (
 	"context"
-	"log"
 	"regexp"
 	"time"
 
@@ -439,7 +438,6 @@ func makeFieldMappings(v []interface{}) *[]openapi.FieldMappingV2 {
 		}
 
 		if v, ok := cfg["output_field"]; ok {
-			log.Printf("output_field(%T): %+v", v, v)
 			fm.OutputField = makeOutputField(v)
 		}
 
@@ -479,13 +477,14 @@ func makeOutputField(in interface{}) *openapi.OutputField {
 
 func makeInputFields(in interface{}) *[]openapi.InputField {
 	fields := make([]openapi.InputField, 0)
-	log.Printf("in: %T", in)
 
 	if arr, ok := in.([]interface{}); ok {
 		for _, a := range arr {
 			cfg, ok := a.(map[string]interface{})
 			if !ok {
-				log.Printf("failed to cast %+v to map[string]interface{}", a)
+				// TODO: should handle the error if this happens,
+				// But we generally are dealing with an interface defined by two rigid systems
+				// Terraform schema and the openapi go client.
 				continue
 			}
 

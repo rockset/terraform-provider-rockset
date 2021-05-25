@@ -353,6 +353,8 @@ github.com/rockset/rockset-go-client v0.11.1-0.20210517224926-ca5ccfdadab5 h1:B4
 github.com/rockset/rockset-go-client v0.11.1-0.20210517224926-ca5ccfdadab5/go.mod h1:fUNKvQg5Atmg8F4Eg3I/WP/wfyM2ozmpv6bziOZMBJ4=
 github.com/rockset/rockset-go-client v0.11.1-0.20210524063738-a7a15cd9a840 h1:55gyD1jx7rAZqGtrURjTenoOUPSptYrjrojNQ9bK3a8=
 github.com/rockset/rockset-go-client v0.11.1-0.20210524063738-a7a15cd9a840/go.mod h1:ehvaA5W2iu+EIe4/FchvJXFnmDdd3OaexCkfntzJJPQ=
+github.com/rockset/rockset-go-client v0.11.1-0.20210525083833-30af5281b589 h1:HAe+IiJXNW3lziuVRo+o/cQlTAhdTj6tNu01kwe8HQY=
+github.com/rockset/rockset-go-client v0.11.1-0.20210525083833-30af5281b589/go.mod h1:ehvaA5W2iu+EIe4/FchvJXFnmDdd3OaexCkfntzJJPQ=
 github.com/rockset/rockset-go-client/openapi v0.0.0-20210510221013-50c02aebd1ad h1:BZ+BoAlDvAfLDuXCNT/48D1+vcn+uDvnvjLYoaBCg5s=
 github.com/rockset/rockset-go-client/openapi v0.0.0-20210510221013-50c02aebd1ad/go.mod h1:erRwm5FBeSt/QUb6DbqWUOn5TXYPZK9qzdfVqi9WWTM=
 github.com/rockset/rockset-go-client/openapi v0.11.0/go.mod h1:erRwm5FBeSt/QUb6DbqWUOn5TXYPZK9qzdfVqi9WWTM=
@@ -384,6 +386,7 @@ github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UV
 github.com/stretchr/testify v1.4.0 h1:2E4SXV/wtOkTonXsotYi4li6zVWxYlZuYNCXe9XRJyk=
 github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81PSLYec5m4=
 github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
+github.com/stretchr/testify v1.7.0 h1:nwc3DEeHmmLAfoZucVR881uASk0Mfjw8xYJ99tb5CcY=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/ulikunitz/xz v0.5.5 h1:pFrO0lVpTBXLpYw+pnLj6TbvHuyjXMfjGeCwSqCVwok=
 github.com/ulikunitz/xz v0.5.5/go.mod h1:2bypXElzHzzJZwzH67Y6wb67pO62Rzfn7BSiF4ABRW8=
@@ -736,6 +739,7 @@ gopkg.in/yaml.v2 v2.2.2/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
 gopkg.in/yaml.v2 v2.2.4/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
 gopkg.in/yaml.v2 v2.2.8/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
 gopkg.in/yaml.v2 v2.3.0/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
+gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c h1:dUUwHk2QECo/6vqA44rthZ8ie2QXMNeKRTHCNY2nXvo=
 gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
 honnef.co/go/tools v0.0.0-20190102054323-c2f93a96b099/go.mod h1:rf3lG4BRIbNafJWhAfAdb/ePZxsR/4RtNHQocxwk9r4=
 honnef.co/go/tools v0.0.0-20190106161140-3f1c8253044a/go.mod h1:rf3lG4BRIbNafJWhAfAdb/ePZxsR/4RtNHQocxwk9r4=

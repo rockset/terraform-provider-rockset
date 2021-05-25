@@ -2,7 +2,6 @@ package rockset
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -54,8 +53,6 @@ func resourceWorkspaceCreate(ctx context.Context, d *schema.ResourceData, meta i
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
-	fmt.Printf("Got description: %s", workspace.GetDescription())
 
 	err = d.Set("created_by", workspace.GetCreatedBy())
 	if err != nil {

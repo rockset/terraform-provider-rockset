@@ -257,7 +257,7 @@ func addS3Params(d *schema.ResourceData, params *openapi.CreateCollectionRequest
 	var format = openapi.FormatParams{}
 	switch d.Get("format").(string) {
 	case "json":
-		format.Json = toBoolPtr(true)
+		format.Json = openapi.PtrBool(true)
 		if d.Get("csv") != nil {
 			return fmt.Errorf("can't define csv block with json format")
 		}
@@ -270,8 +270,8 @@ func addS3Params(d *schema.ResourceData, params *openapi.CreateCollectionRequest
 			FormatParams:    &format,
 			IntegrationName: d.Get("integration_name").(string),
 			S3: &openapi.SourceS3{
-				Prefix:  toStringPtr(d.Get("prefix").(string)),
-				Pattern: toStringPtr(d.Get("pattern").(string)),
+				Prefix:  toStringPtrNullIfEmpty(d.Get("prefix").(string)),
+				Pattern: toStringPtrNullIfEmpty(d.Get("pattern").(string)),
 				Bucket:  d.Get("bucket").(string),
 			},
 		},
@@ -303,15 +303,15 @@ func makeCsvParams(in interface{}) *openapi.CsvParams {
 			for k, v := range val {
 				switch k {
 				case "first_line_as_column_names":
-					m.FirstLineAsColumnNames = toBoolPtr(v.(bool))
+					m.FirstLineAsColumnNames = openapi.PtrBool(v.(bool))
 				case "separator":
-					m.Separator = toStringPtr(v.(string))
+					m.Separator = toStringPtrNullIfEmpty(v.(string))
 				case "encoding":
-					m.Encoding = toStringPtr(v.(string))
+					m.Encoding = toStringPtrNullIfEmpty(v.(string))
 				case "quote_char":
-					m.QuoteChar = toStringPtr(v.(string))
+					m.QuoteChar = toStringPtrNullIfEmpty(v.(string))
 				case "escape_char":
-					m.EscapeChar = toStringPtr(v.(string))
+					m.EscapeChar = toStringPtrNullIfEmpty(v.(string))
 				case "column_names":
 					m.ColumnNames = toStringArrayPtr(toStringArray(v.([]interface{})))
 				case "column_types":

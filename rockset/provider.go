@@ -112,19 +112,14 @@ func toStringArray(a []interface{}) []string {
 	return r
 }
 
-func toBoolPtr(v bool) *bool {
-	return &v
-}
+/*
 
-func toStringPtr(v string) *string {
+ */
+func toStringPtrNullIfEmpty(v string) *string {
 	if v == "" {
 		return nil
 	}
 
-	return &v
-}
-
-func toIntPtr(v int) *int {
 	return &v
 }
 
