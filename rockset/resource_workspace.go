@@ -2,9 +2,12 @@ package rockset
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/rockset/rockset-go-client"
+	"github.com/rockset/rockset-go-client/option"
 )
 
 func resourceWorkspace() *schema.Resource {
@@ -13,7 +16,6 @@ func resourceWorkspace() *schema.Resource {
 
 		CreateContext: resourceWorkspaceCreate,
 		ReadContext:   resourceWorkspaceRead,
-		UpdateContext: resourceWorkspaceUpdate,
 		DeleteContext: resourceWorkspaceDelete,
 
 		Importer: &schema.ResourceImporter{
@@ -37,43 +39,73 @@ func resourceWorkspace() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"last_updated": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
 		},
 	}
 }
 
 func resourceWorkspaceCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	//rc := meta.(*rockset.RockClient)
-	//var diags diag.Diagnostics
+	rc := meta.(*rockset.RockClient)
+	var diags diag.Diagnostics
 
-	//name := d.Get("name").(string)
+	name := d.Get("name").(string)
+	description := d.Get("description").(string)
 
-	//d.SetId(name)
+	workspace, err := rc.CreateWorkspace(ctx, name, option.WithWorkspaceDescription(description))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	return diag.Errorf("not implemented")
+	fmt.Printf("Got description: %s", workspace.GetDescription())
+
+	err = d.Set("created_by", workspace.GetCreatedBy())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId(name)
+
+	return diags
 }
 
 func resourceWorkspaceRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	//rc := meta.(*rockset.RockClient)
-	//var diags diag.Diagnostics
+	rc := meta.(*rockset.RockClient)
+	var diags diag.Diagnostics
 
-	return diag.Errorf("not implemented")
-}
+	name := d.Id()
 
-func resourceWorkspaceUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	//rc := meta.(*rockset.RockClient)
-	//var diags diag.Diagnostics
+	workspace, err := rc.GetWorkspace(ctx, name)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	return diag.Errorf("not implemented")
+	err = d.Set("name", workspace.GetName())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("description", workspace.GetDescription())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("created_by", workspace.GetCreatedBy())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return diags
 }
 
 func resourceWorkspaceDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	//rc := meta.(*rockset.RockClient)
-	//var diags diag.Diagnostics
+	rc := meta.(*rockset.RockClient)
+	var diags diag.Diagnostics
 
-	return diag.Errorf("not implemented")
+	name := d.Id()
+
+	err := rc.DeleteWorkspace(ctx, name)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return diags
 }
