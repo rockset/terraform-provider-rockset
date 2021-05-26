@@ -1,28 +1,31 @@
 // this file contains the required configuration to create an S3 bucket and role
 // configured to allow a Rockset integration to be created
 // https://docs.rockset.com/amazon-s3
-provider aws {
-  region  = var.region
-  version = "~> 3.0"
+
+locals {
+  csv_path = "${path.module}/files/cities.csv"
+  bucket_string = replace(var.bucket, ".", "-") // Dns compatible to AWS name compatible
 }
 
 resource aws_s3_bucket rockset {
   bucket = var.bucket
 }
 
+// This uploads the file we've specified to the bucket
 resource aws_s3_bucket_object cities {
   bucket = aws_s3_bucket.rockset.bucket
-  key = var.csv
-  source = var.csv
-  etag = filemd5(var.csv)
+  key = "cities.csv"
+  source = local.csv_path
+  etag = filemd5(local.csv_path)
 }
 
-resource aws_iam_policy rockset-s3-integration {
-  name   = "terraform-provider-rockset"
-  policy = data.aws_iam_policy_document.s3-bucket-policy.json
+resource aws_iam_policy rockset_s3_integration {
+  // Bucket is univerally unique, policy name will be too
+  name   = "${local.bucket_string}-access" 
+  policy = data.aws_iam_policy_document.s3_bucket_policy.json
 }
 
-data aws_iam_policy_document s3-bucket-policy {
+data aws_iam_policy_document s3_bucket_policy {
   statement {
     sid       = "RocksetS3IntegrationPolicy"
     actions   = [
@@ -37,7 +40,8 @@ data aws_iam_policy_document s3-bucket-policy {
 }
 
 resource aws_iam_role rockset {
-  name               = var.role-name
+  // Bucket is univerally unique, role name will be too
+  name               = "${local.bucket_string}-role" 
   assume_role_policy = data.aws_iam_policy_document.rockset-trust-policy.json
 }
 
@@ -55,13 +59,14 @@ data aws_iam_policy_document rockset-trust-policy {
     condition {
       test     = "StringEquals"
       values   = [
-        data.rockset_account.example.external_id]
+        data.rockset_account.example.external_id // From rockset data source
+      ] 
       variable = "sts:ExternalId"
     }
   }
 }
 
-resource aws_iam_role_policy_attachment rockset-s3-integration {
+resource aws_iam_role_policy_attachment rockset_s3_integration {
   role       = aws_iam_role.rockset.name
-  policy_arn = aws_iam_policy.rockset-s3-integration.arn
+  policy_arn = aws_iam_policy.rockset_s3_integration.arn
 }

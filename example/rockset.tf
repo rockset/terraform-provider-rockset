@@ -1,23 +1,24 @@
-provider rockset {}
-
+// This gets information about the rockset account
+// The account id will vary by region 
+// External id will be used to grant an IAM role s3 permissions
 data rockset_account example {}
 
 resource rockset_workspace example {
-  name = "example"
+  name = local.bucket_string
 }
 
 resource rockset_s3_integration example {
-  name         = "s3-integration"
+  name         = "${local.bucket_string}-s3-integration"
   aws_role_arn = aws_iam_role.rockset.arn
 }
 
-resource rockset_s3_collection demo {
+resource rockset_s3_collection example {
   workspace        = rockset_workspace.example.name
   name             = "cities"
   integration_name = rockset_s3_integration.example.name
   bucket           = aws_s3_bucket.rockset.bucket
-  pattern          = var.csv
-  retention        = 3600
+  pattern          = "cities.csv"
+  retention_secs   = 3600
 
   format = "csv"
   csv {
@@ -26,7 +27,14 @@ resource rockset_s3_collection demo {
       "country",
       "city",
       "population",
-      "visited"]
+      "visited"
+    ]
+    column_types = [ 
+      "STRING",
+      "STRING",
+      "STRING",
+      "STRING",
+    ]
   }
 
   field_mapping {
@@ -62,15 +70,15 @@ resource rockset_s3_collection demo {
   }
 }
 
-resource rockset_query_lambda test {
-  workspace = rockset_workspace.example.name
-  name      = "test"
-  sql {
-    query = file("${path.module}/query.sql")
-    default_parameter {
-      name  = "country"
-      type  = "string"
-      value = "Sweden"
-    }
-  }
-}
+# resource rockset_query_lambda example {
+#   workspace = rockset_workspace.example.name
+#   name      = "test"
+#   sql {
+#     query = file("${path.module}/files/query.sql")
+#     default_parameter {
+#       name  = "country"
+#       type  = "string"
+#       value = "Sweden"
+#     }
+#   }
+# }
