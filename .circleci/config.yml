@@ -22,4 +22,8 @@ jobs:
       - image: circleci/golang:1.14
     steps:
       - checkout
-      - run: go test -v ./...
+      - run: 
+          name: Terraform Acceptance Tests
+          command: go test -timeout 1200s -v ./rockset/*
+          environment:
+            TF_ACC: true
