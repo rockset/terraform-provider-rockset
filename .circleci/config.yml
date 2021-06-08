@@ -24,6 +24,6 @@ jobs:
       - checkout
       - run: 
           name: Terraform Acceptance Tests
-          command: go test -timeout 1200s -v ./rockset/*
+          command: go test -timeout 2400s -v ./rockset/*
           environment:
             TF_ACC: true
