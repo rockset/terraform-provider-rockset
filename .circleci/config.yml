@@ -16,7 +16,19 @@ jobs:
       - image: circleci/golang:1.14
     steps:
       - checkout
-      - run: curl -sL https://git.io/goreleaser | bash
+      - run:
+          name: "Import GPG Key and Test Signing"
+          command: |
+            echo "$GPG_PRIVATE_KEY" | base64 -d > key.pem
+            echo "$PASSPHRASE" | gpg --batch --import ./key.pem
+            rm key.pem
+            echo "hello world" > temp.txt
+            gpg --detach-sig --yes -v --output=/dev/null --pinentry-mode loopback --passphrase "$PASSPHRASE" temp.txt
+            rm temp.txt
+      - run:
+          name: "Publish Release on GitHub"
+          command: |
+            curl -sL https://git.io/goreleaser | bash
   test:
     docker:
       - image: circleci/golang:1.14
