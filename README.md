@@ -4,59 +4,9 @@
 
 This terraform provider implements the Rockset API. See the docs folder for what has been implemented so far.
 
-## Installation
-
-As it hasn't been published yet, it needs to be manually installed as follows:
-
-#### 1. Build or Download
-Either download the provider from a release or build the provider.
-
-#### 2. Put the provider in the expected path
-Untar/zip the provider. The executable should be named `terraform-provider-rockset`
-
-Create the folder structure and move the provider to it.
-
-The path will include the platform (e.g. `linux_amd64`, `windows_amd64`) and the version (e.g. `0.1.0`)
-```
-mkdir -p ~/.terraform.d/plugins/terraform.rockset.com/rockset/rockset/0.1.0/linux_amd64/
-mv terraform-provider-rockset ~/.terraform.d/plugins/terraform.rockset.com/rockset/rockset/0.1.0/linux_amd64/
-```
-
-#### 3. Configure Terraform
-Because this is not a provider coming from a Terraform repository 
-Terraform will always assume it's from the default hashicorp repository.
-
-Every place the provider is used (Both on the consuming end of a module, and within the module itself) 
-the requirements must explicitly reference the above path.
-
-E.g.
-```
-terraform {
-  required_providers {
-    rockset = {
-      source  = "terraform.rockset.com/rockset/rockset"
-    }
-  }
-}
-```
-
-The source string is structured:
-<Repository URL>/<Org name>/<Provider name>
-
-This is a stub for a future private repository `terraform.rockset.com`
-
-With an org of `rockset`
-
-Since this is the rockset provider, the provider is also named `rockset`.
-
-#### 4. Terraform init
-If the above is all done correctly you are now able to run `terraform init`.
-
-It will see the provider in the folder and treat it as if it's already downloaded.
-
 ## Setting and securing your Rockset api key
 
-We encourage you to keep your rockset api key secure and never put it in plain text in terraform provider config or commit it to repositories. 
+We encourage you to keep your rockset api key secure and *never put it in plain text in terraform provider config or commit it to repositories*. 
 Using environment variables is the recommended way to configure the provider or run the acceptance tests.
 
 ### Securing your key
@@ -67,7 +17,7 @@ E.g.
 ```bash
 #!/bin/bash
 
-export ROCKSET_APIKEY=$(aws ssm get-parameter --name '/john/rockset_api_key' --with-decryption --output text | awk '{print $7}')
+export ROCKSET_APIKEY=$(aws ssm get-parameter --name '/terraform/rockset_api_key' --with-decryption --output text | awk '{print $7}')
 export ROCKSET_APISERVER="api.rs2.usw2.rockset.com"
 ```
 
@@ -120,3 +70,53 @@ To run a specific test:
 ```
 TF_ACC=true go test -v ./rockset/* -run TestAccS3Collection_Basic
 ```
+
+## Manual Installation
+
+To manually install this provider from a build or release 
+follow these steps to place the executable in the folder Terraform expects.
+
+This should not be necessary for general use of the provider as you can fetch it from the repository.
+But this can be useful for local testing as you're building new features of the provider.
+
+### Move the provider
+
+Untar/zip the provider. The executable should be named `terraform-provider-rockset`. Rename it to match if necessary.
+
+Create the folder structure and move the provider to it.
+
+The path will include the platform (e.g. `linux_amd64`, `windows_amd64`) and the version (e.g. `0.1.0`)
+```
+mkdir -p ~/.terraform.d/plugins/terraform.rockset.com/rockset/rockset/0.1.0/linux_amd64/
+mv terraform-provider-rockset ~/.terraform.d/plugins/terraform.rockset.com/rockset/rockset/0.1.0/linux_amd64/
+```
+
+### Configure Terraform
+Terraform will always assume unknown providers are from the default hashicorp repository.
+
+Every place the provider is used (Both on the consuming end of a module, and within the module itself) 
+the requirements must explicitly reference the path.
+
+E.g.
+```
+terraform {
+  required_providers {
+    rockset = {
+      source  = "terraform.rockset.com/rockset/rockset"
+    }
+  }
+}
+```
+
+The source string is structured:
+<Repository URL>/<Org name>/<Provider name>
+
+This is a stub for a hypothetical repository `terraform.rockset.com`
+
+With an org of `rockset`
+
+Since this is the rockset provider, the provider is also named `rockset`.
+
+If the above is all done correctly you are now able to run `terraform init`.
+
+It will see the provider in the folder and treat it as if it's already downloaded.
