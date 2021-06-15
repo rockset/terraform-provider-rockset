@@ -1,4 +1,6 @@
-# Terraform Provider for Rockset
+# [BETA] Terraform Provider for Rockset
+
+**This is a work in progress and is considered a beta at this point in time. No official support provided until GA.**
 
 This terraform provider implements the Rockset API. See the docs folder for what has been implemented so far.
 
@@ -87,6 +89,14 @@ provider rockset {
   api_key = "var.ROCKSET_APIKEY"
   api_server = "api.rs2.usw2.rockset.com"
 }
+```
+
+## Example Module
+A module is included which has an example s3 integration.
+
+You can get the curl command for the created query lambda without string escaping using jq:
+```
+terraform output -json | jq -r .rockset.value[0].curl_command
 ```
 
 ## Testing

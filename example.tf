@@ -27,3 +27,7 @@ module rockset {
   source = "./example"
   bucket = "rockset-${random_uuid.random_bucket_name.result}"
 }
+
+output rockset {
+  value = module.rockset.*
+}
