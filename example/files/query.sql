@@ -1,3 +1,3 @@
 SELECT *
-FROM example.cities
-WHERE cities.country = :country
+FROM "${workspace}"."${alias}" c
+WHERE c.country = :country

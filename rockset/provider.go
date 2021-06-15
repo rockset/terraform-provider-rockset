@@ -89,14 +89,18 @@ func rocksetNameValidator(val interface{}, key string) ([]string, []error) {
 	return nil, []error{fmt.Errorf("%s must start with alphanumeric, the rest can be alphanumeric, -, or _", key)}
 }
 
+/*
+	Returns an id of format <workspace>.<collection>.
+	This is how collections are referenced in Rockset.
+*/
 func toID(workspace, name string) string {
-	// TODO if there are multiple accounts which all have the same workspace and name
-	// this ID wont't work, so perhaps the account name should be included in the id?
-	return fmt.Sprintf("%s:%s", workspace, name)
+	// The provider will be configured for 1 account.
+	// This should be univerally unique within the account.
+	return fmt.Sprintf("%s.%s", workspace, name)
 }
 
 func workspaceAndNameFromID(id string) (string, string) {
-	tokens := strings.SplitN(id, ":", 2)
+	tokens := strings.SplitN(id, ".", 2)
 	if len(tokens) != 2 {
 		log.Printf("unparsable id: %s", id)
 		return "", ""

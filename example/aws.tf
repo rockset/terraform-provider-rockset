@@ -4,7 +4,7 @@
 
 locals {
   csv_path = "${path.module}/files/cities.csv"
-  bucket_string = replace(var.bucket, ".", "-") // Dns compatible to AWS name compatible
+  bucket_string = replace(var.bucket, ".", "-") // DNS compatible to AWS name compatible
 }
 
 resource aws_s3_bucket rockset {
@@ -50,7 +50,8 @@ data aws_iam_policy_document rockset-trust-policy {
     sid     = ""
     effect  = "Allow"
     actions = [
-      "sts:AssumeRole"]
+      "sts:AssumeRole"
+    ]
     principals {
       identifiers = [
         "arn:aws:iam::${data.rockset_account.example.account_id}:root"]
@@ -69,4 +70,14 @@ data aws_iam_policy_document rockset-trust-policy {
 resource aws_iam_role_policy_attachment rockset_s3_integration {
   role       = aws_iam_role.rockset.name
   policy_arn = aws_iam_policy.rockset_s3_integration.arn
+}
+
+// We must give AWS a little time before we try to actually use
+// the role that was created.
+resource time_sleep wait_for_role {
+  depends_on = [
+    aws_iam_role_policy_attachment.rockset_s3_integration
+  ]
+
+  create_duration = "30s"
 }

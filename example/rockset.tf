@@ -10,17 +10,33 @@ resource rockset_workspace example {
 resource rockset_s3_integration example {
   name         = "${local.bucket_string}-s3-integration"
   aws_role_arn = aws_iam_role.rockset.arn
+  depends_on = [
+    // Let's give AWS time for the role to be usable.
+    // If we try too quickly, we get an IAM error.
+    time_sleep.wait_for_role
+  ]
+}
+
+resource rockset_alias example {
+  name = "cities"
+  workspace = rockset_workspace.example.name
+  collections = [
+    "${rockset_s3_collection.example.workspace}.${rockset_s3_collection.example.name}"
+  ]
 }
 
 resource rockset_s3_collection example {
   workspace        = rockset_workspace.example.name
-  name             = "cities"
+  // If we need to update the fields of this collection
+  // we will bump the v# to a new number to force a new name
+  // Collections cannot be updated, only replaced.
+  name             = "cities-v1" 
   integration_name = rockset_s3_integration.example.name
   bucket           = aws_s3_bucket.rockset.bucket
   pattern          = "cities.csv"
-  retention_secs   = 3600
-
+  retention_secs   = 10000
   format = "csv"
+
   csv {
     first_line_as_column_names = false
     column_names               = [
@@ -68,17 +84,33 @@ resource rockset_s3_collection example {
       sql        = "CAST(:visited as bool)"
     }
   }
+
+  // If we need to update the collection config,
+  // we will create the new collection before destroying
+  // The alias will only update upon successful creation
+  // and only when the new collection is ready.
+  lifecycle {
+    create_before_destroy = true
+  }  
 }
 
-# resource rockset_query_lambda example {
-#   workspace = rockset_workspace.example.name
-#   name      = "test"
-#   sql {
-#     query = file("${path.module}/files/query.sql")
-#     default_parameter {
-#       name  = "country"
-#       type  = "string"
-#       value = "Sweden"
-#     }
-#   }
-# }
+data template_file sql {
+  template = file("${path.module}/files/query.sql")
+  vars = {
+    workspace = rockset_s3_collection.example.workspace
+    alias = rockset_alias.example.name
+  }
+}
+
+resource rockset_query_lambda example {
+  workspace = rockset_workspace.example.name
+  name      = "cities"
+  sql {
+    query = data.template_file.sql.rendered
+    default_parameter {
+      name  = "country"
+      type  = "string"
+      value = "Sweden"
+    }
+  }
+}
