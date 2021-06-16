@@ -3,12 +3,12 @@
 page_title: "rockset_workspace Resource - terraform-provider-rockset"
 subcategory: ""
 description: |-
-  Sample resource in the Terraform provider Workspace.
+  Manages a Rockset workspace.
 ---
 
 # rockset_workspace (Resource)
 
-Sample resource in the Terraform provider Workspace.
+Manages a Rockset workspace.
 
 
 
@@ -17,15 +17,15 @@ Sample resource in the Terraform provider Workspace.
 
 ### Required
 
-- **name** (String)
+- **name** (String) Unique identifier for workspace. Can contain alphanumeric or dash characters.
 
 ### Optional
 
-- **description** (String)
+- **description** (String) Text describing the collection.
 - **id** (String) The ID of this resource.
 
 ### Read-Only
 
-- **created_by** (String)
+- **created_by** (String) The user who created the workspace.
 
 

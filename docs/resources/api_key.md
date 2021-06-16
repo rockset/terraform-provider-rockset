@@ -26,6 +26,6 @@ Manage a Rockset Api Key.
 
 ### Read-Only
 
-- **key** (String, Sensitive)
+- **key** (String, Sensitive) The resulting Rockset api key.
 
 

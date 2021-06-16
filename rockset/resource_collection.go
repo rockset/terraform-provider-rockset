@@ -20,7 +20,7 @@ import (
 func baseCollectionSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"name": {
-			Description:  "Unique identifier for collection. Can contain alphanumeric or dash characters.",
+			Description:  "Unique identifier for the collection. Can contain alphanumeric or dash characters.",
 			Type:         schema.TypeString,
 			ForceNew:     true,
 			Required:     true,
@@ -34,9 +34,10 @@ func baseCollectionSchema() map[string]*schema.Schema {
 			Optional:    true,
 		},
 		"workspace": {
-			Type:     schema.TypeString,
-			ForceNew: true,
-			Required: true,
+			Description: "The name of the workspace.",
+			Type:        schema.TypeString,
+			ForceNew:    true,
+			Required:    true,
 		},
 		"retention_secs": {
 			Description:  "Number of seconds after which data is purged. Based on event time.",

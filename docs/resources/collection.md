@@ -17,8 +17,8 @@ Manages a basic collection with no sources. Usually used for the write api.
 
 ### Required
 
-- **name** (String) Unique identifier for collection. Can contain alphanumeric or dash characters.
-- **workspace** (String)
+- **name** (String) Unique identifier for the collection. Can contain alphanumeric or dash characters.
+- **workspace** (String) The name of the workspace.
 
 ### Optional
 

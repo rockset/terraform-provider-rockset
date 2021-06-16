@@ -24,7 +24,7 @@ resource random_uuid random_bucket_name {}
 // and Rockset side (collections, lambdas, etc)
 // Peruse the `example` folder to see the resources used.
 module rockset {
-  source = "./example"
+  source = "./s3-example"
   bucket = "rockset-${random_uuid.random_bucket_name.result}"
 }
 

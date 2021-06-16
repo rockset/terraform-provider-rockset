@@ -19,9 +19,9 @@ Manages a collection with an s3 source attached.
 
 - **bucket** (String) S3 bucket containing the target data.
 - **format** (String) Format of the data. One of: json, csv, xml. xml and csv blocks can only be set for their respective formats.
-- **integration_name** (String)
-- **name** (String) Unique identifier for collection. Can contain alphanumeric or dash characters.
-- **workspace** (String)
+- **integration_name** (String) The name of the Rockset S3 integration.
+- **name** (String) Unique identifier for the collection. Can contain alphanumeric or dash characters.
+- **workspace** (String) The name of the workspace.
 
 ### Optional
 

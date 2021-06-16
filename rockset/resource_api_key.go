@@ -37,9 +37,10 @@ func resourceApiKey() *schema.Resource {
 				ForceNew:    true,
 			},
 			"key": {
-				Type:      schema.TypeString,
-				Computed:  true,
-				Sensitive: true,
+				Description: "The resulting Rockset api key.",
+				Type:        schema.TypeString,
+				Computed:    true,
+				Sensitive:   true,
 			},
 		},
 	}
