@@ -24,21 +24,24 @@ func resourceS3Integration() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"name": &schema.Schema{
+				Description:  "Unique identifier for the integration. Can contain alphanumeric or dash characters.",
 				Type:         schema.TypeString,
 				ForceNew:     true,
 				Required:     true,
 				ValidateFunc: rocksetNameValidator,
 			},
 			"description": &schema.Schema{
-				Type:     schema.TypeString,
-				Default:  "created by Rockset terraform provider",
-				ForceNew: true,
-				Optional: true,
+				Description: "Text describing the integration.",
+				Type:        schema.TypeString,
+				Default:     "created by Rockset terraform provider",
+				ForceNew:    true,
+				Optional:    true,
 			},
 			"aws_role_arn": &schema.Schema{
-				Type:     schema.TypeString,
-				ForceNew: true,
-				Required: true,
+				Description: "The AWS Role Arn to use for this integration.",
+				Type:        schema.TypeString,
+				ForceNew:    true,
+				Required:    true,
 			},
 		},
 	}

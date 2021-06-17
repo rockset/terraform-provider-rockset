@@ -49,6 +49,17 @@ You can get the curl command for the created query lambda without string escapin
 terraform output -json | jq -r .rockset.value[0].curl_command
 ```
 
+## Doc generation
+
+We use [terraform-docs](https://github.com/terraform-docs/terraform-docs) for generating docs in the format the
+provider repository expects.
+
+The `examples` folder will render examples into resource doc pages.
+
+The `templates` folder can be used to dictate how a page should render. Primarily used for the root page.
+
+`terraform-docs` will render documentation based on what's in all the implemented resources.
+
 ## Testing
 Acceptance tests are written for all implemented resources and data sources. They can be run using `go test`. To run acceptance tests the environment variable `TF_ACC` must be set.
 

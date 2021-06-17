@@ -10,17 +10,20 @@ import (
 
 func dataSourceRocksetAccount() *schema.Resource {
 	return &schema.Resource{
+		Description: "Gets information about the Rockset deployment for the specified api server.",
 		ReadContext: dataSourceReadRocksetAccount,
 
 		Schema: map[string]*schema.Schema{
 			"external_id": &schema.Schema{
-				Type:      schema.TypeString,
-				Computed:  true,
-				Sensitive: true,
+				Description: "The external ID to use in AWS trust policies.",
+				Type:        schema.TypeString,
+				Computed:    true,
+				Sensitive:   true,
 			},
 			"account_id": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The AWS account ID to reference in AWS policies.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 		}}
 }

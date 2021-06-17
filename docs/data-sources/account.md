@@ -3,12 +3,12 @@
 page_title: "rockset_account Data Source - terraform-provider-rockset"
 subcategory: ""
 description: |-
-  
+  Gets information about the Rockset deployment for the specified api server.
 ---
 
 # rockset_account (Data Source)
 
-
+Gets information about the Rockset deployment for the specified api server.
 
 
 
@@ -21,7 +21,7 @@ description: |-
 
 ### Read-Only
 
-- **account_id** (String)
-- **external_id** (String, Sensitive)
+- **account_id** (String) The AWS account ID to reference in AWS policies.
+- **external_id** (String, Sensitive) The external ID to use in AWS trust policies.
 
 

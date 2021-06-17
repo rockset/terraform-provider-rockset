@@ -25,28 +25,33 @@ func resourceQueryLambda() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"workspace": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Description: "The name of the workspace.",
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
 			},
 			"name": {
+				Description:  "Unique identifier for the query lambda. Can contain alphanumeric or dash characters.",
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
 				ValidateFunc: rocksetNameValidator,
 			},
 			"description": {
-				Type:     schema.TypeString,
-				Default:  "created by Rockset terraform provider",
-				Optional: true,
+				Description: "Text describing the query lambda.",
+				Type:        schema.TypeString,
+				Default:     "created by Rockset terraform provider",
+				Optional:    true,
 			},
 			"version": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The latest version string of this query lambda.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"state": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The latest state of this query lambda.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"sql": {
 				Type:     schema.TypeSet,

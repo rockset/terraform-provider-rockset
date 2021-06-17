@@ -11,7 +11,7 @@ import (
 
 func resourceWorkspace() *schema.Resource {
 	return &schema.Resource{
-		Description: "Sample resource in the Terraform provider Workspace.",
+		Description: "Manages a Rockset workspace.",
 
 		CreateContext: resourceWorkspaceCreate,
 		ReadContext:   resourceWorkspaceRead,
@@ -23,20 +23,23 @@ func resourceWorkspace() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"name": {
+				Description:  "Unique identifier for workspace. Can contain alphanumeric or dash characters.",
 				Type:         schema.TypeString,
 				ForceNew:     true,
 				Required:     true,
 				ValidateFunc: rocksetNameValidator,
 			},
 			"description": {
-				Type:     schema.TypeString,
-				Default:  "created by Rockset terraform provider",
-				ForceNew: true,
-				Optional: true,
+				Description: "Text describing the collection.",
+				Type:        schema.TypeString,
+				Default:     "created by Rockset terraform provider",
+				ForceNew:    true,
+				Optional:    true,
 			},
 			"created_by": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The user who created the workspace.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 		},
 	}

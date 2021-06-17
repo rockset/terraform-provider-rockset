@@ -25,22 +25,25 @@ func resourceAlias() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"name": &schema.Schema{
+				Description:  "Unique identifier for the alias. Can contain alphanumeric or dash characters.",
 				Type:         schema.TypeString,
 				ForceNew:     true,
 				Required:     true,
 				ValidateFunc: rocksetNameValidator,
 			},
 			"workspace": &schema.Schema{
+				Description:  "Name of the workspace the alias will be in.",
 				Type:         schema.TypeString,
 				ForceNew:     true,
 				Required:     true,
 				ValidateFunc: rocksetNameValidator,
 			},
 			"description": &schema.Schema{
-				Type:     schema.TypeString,
-				Default:  "created by Rockset terraform provider",
-				ForceNew: false,
-				Optional: true,
+				Description: "Text describing the alias.",
+				Type:        schema.TypeString,
+				Default:     "created by Rockset terraform provider",
+				ForceNew:    false,
+				Optional:    true,
 			},
 			"collections": {
 				/*
@@ -49,7 +52,7 @@ func resourceAlias() *schema.Resource {
 					Check in and update this when aliases that point to multiple
 					collections becomes a feature.
 				*/
-				Description: "List of collections for this alis to refer to.",
+				Description: "List of collections for this alias to refer to.",
 				Type:        schema.TypeList,
 				MinItems:    1,
 				MaxItems:    1,

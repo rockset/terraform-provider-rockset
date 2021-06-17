@@ -15,9 +15,10 @@ import (
 func s3CollectionSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"integration_name": {
-			Type:     schema.TypeString,
-			ForceNew: true,
-			Required: true,
+			Description: "The name of the Rockset S3 integration.",
+			Type:        schema.TypeString,
+			ForceNew:    true,
+			Required:    true,
 		},
 		"prefix": {
 			Type:        schema.TypeString,

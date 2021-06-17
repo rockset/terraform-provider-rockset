@@ -17,19 +17,19 @@ Manages a Rockset Query Lambda.
 
 ### Required
 
-- **name** (String)
+- **name** (String) Unique identifier for the query lambda. Can contain alphanumeric or dash characters.
 - **sql** (Block Set, Min: 1) (see [below for nested schema](#nestedblock--sql))
-- **workspace** (String)
+- **workspace** (String) The name of the workspace.
 
 ### Optional
 
-- **description** (String)
+- **description** (String) Text describing the query lambda.
 - **id** (String) The ID of this resource.
 
 ### Read-Only
 
-- **state** (String)
-- **version** (String)
+- **state** (String) The latest state of this query lambda.
+- **version** (String) The latest version string of this query lambda.
 
 <a id="nestedblock--sql"></a>
 ### Nested Schema for `sql`
