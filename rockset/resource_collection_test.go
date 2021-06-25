@@ -29,7 +29,7 @@ func TestAccCollection_Basic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProviderFactories: testAccProviderFactories,
 		CheckDestroy: testAccCheckRocksetCollectionDestroy,
 		Steps: []resource.TestStep{
 			{
@@ -63,7 +63,7 @@ func TestAccCollection_FieldMapping(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProviderFactories: testAccProviderFactories,
 		CheckDestroy: testAccCheckRocksetCollectionDestroy,
 		Steps: []resource.TestStep{
 			{
@@ -87,7 +87,7 @@ func TestAccCollection_ClusteringKey(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProviderFactories: testAccProviderFactories,
 		CheckDestroy: testAccCheckRocksetCollectionDestroy,
 		Steps: []resource.TestStep{
 			{

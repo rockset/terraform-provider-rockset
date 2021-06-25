@@ -93,7 +93,7 @@ func rocksetNameValidator(val interface{}, key string) ([]string, []error) {
 */
 func toID(workspace, name string) string {
 	// The provider will be configured for 1 account.
-	// This should be univerally unique within the account.
+	// This should be universally unique within the account.
 	return fmt.Sprintf("%s.%s", workspace, name)
 }
 

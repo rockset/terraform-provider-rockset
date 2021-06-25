@@ -18,7 +18,7 @@ func TestAccApiKey_Basic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProviderFactories: testAccProviderFactories,
 		CheckDestroy: testAccCheckRocksetApiKeyDestroy,
 		Steps: []resource.TestStep{
 			{
