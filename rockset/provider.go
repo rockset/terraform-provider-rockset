@@ -67,8 +67,6 @@ func (c *Config) Client() (interface{}, diag.Diagnostics) {
 
 	if c.APIKey != "" {
 		opts = append(opts, rockset.WithAPIKey(c.APIKey), rockset.WithAPIServer(c.APIServer))
-	} else {
-		opts = append(opts, rockset.FromEnv())
 	}
 
 	rc, err := rockset.NewClient(opts...)

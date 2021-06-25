@@ -44,9 +44,6 @@ func testAccPreCheck(t *testing.T) {
 	if v := os.Getenv("ROCKSET_APIKEY"); v == "" {
 		t.Fatal("ROCKSET_APIKEY must be set for acceptance tests")
 	}
-	if v := os.Getenv("ROCKSET_APISERVER"); v == "" {
-		t.Fatal("ROCKSET_APISERVER must be set for acceptance tests")
-	}
 }
 
 /*
