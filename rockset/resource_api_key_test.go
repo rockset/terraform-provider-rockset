@@ -42,15 +42,6 @@ func TestAccApiKey_Basic(t *testing.T) {
 				ExpectNonEmptyPlan: false,
 			},
 			{
-				Config: testAccCheckApiKeyUpdateUser(),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRocksetApiKeyExists("rockset_api_key.test", &apiKey),
-					resource.TestCheckResourceAttr("rockset_api_key.test", "name", fmt.Sprintf("%s-updated", testApiKeyName)),
-					resource.TestCheckResourceAttrSet("rockset_api_key.test", "key"),
-				),
-				ExpectNonEmptyPlan: false,
-			},
-			{
 				// Back to basic, will change name AND api key
 				Config: testAccCheckApiKeyBasic(),
 				Check: resource.ComposeTestCheckFunc(
