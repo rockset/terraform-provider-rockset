@@ -33,8 +33,7 @@ func resourceApiKey() *schema.Resource {
 			"user": {
 				Description: "User to create the key for. If not set, defaults to authenticated user.",
 				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
+				Computed:    true,
 			},
 			"key": {
 				Description: "The resulting Rockset api key.",
@@ -78,23 +77,16 @@ func resourceApiKeyCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	name := d.Get("name").(string)
 	user := d.Get("user").(string)
 	id := nameAndUserToId(name, user)
-	req := openapi.NewCreateApiKeyRequest(name)
 
-	var resp openapi.CreateApiKeyResponse
 	var err error
-	if user != "" {
-		// Then we need to use CreateApiKeyAdmin create as the specified user
-		resp, _, err = rc.APIKeysApi.CreateApiKeyAdmin(ctx, d.Get("user").(string)).Body(*req).Execute()
-	} else {
-		// Use CreateApiKey to create as current authenticated user
-		resp, _, err = rc.APIKeysApi.CreateApiKey(ctx).Body(*req).Execute()
-	}
+	// Use CreateApiKey to create as current authenticated user
+	key, err := rc.CreateAPIKey(ctx, name)
 
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	err = d.Set("key", resp.Data.GetKey())
+	err = d.Set("key", key.GetKey())
 	if err != nil {
 		return diag.FromErr(err)
 	}

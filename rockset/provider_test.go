@@ -13,14 +13,17 @@ import (
 	"github.com/rs/zerolog"
 )
 
-var testAccProviders map[string]*schema.Provider
+var testAccProviderFactories map[string]func() (*schema.Provider, error)
+
 var testAccProvider *schema.Provider
 var testCtx context.Context
 
 func init() {
 	testAccProvider = Provider()
-	testAccProviders = map[string]*schema.Provider{
-		"rockset": testAccProvider,
+	testAccProviderFactories = map[string]func() (*schema.Provider, error) {
+		"rockset": func()(*schema.Provider, error) {
+			return testAccProvider, nil
+		},
 	}
 
 	testCtx = createTestContext()
@@ -43,9 +46,6 @@ func TestProvider(t *testing.T) {
 func testAccPreCheck(t *testing.T) {
 	if v := os.Getenv("ROCKSET_APIKEY"); v == "" {
 		t.Fatal("ROCKSET_APIKEY must be set for acceptance tests")
-	}
-	if v := os.Getenv("ROCKSET_APISERVER"); v == "" {
-		t.Fatal("ROCKSET_APISERVER must be set for acceptance tests")
 	}
 }
 

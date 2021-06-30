@@ -18,7 +18,7 @@ func TestAccApiKey_Basic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		ProviderFactories: testAccProviderFactories,
 		CheckDestroy: testAccCheckRocksetApiKeyDestroy,
 		Steps: []resource.TestStep{
 			{
@@ -37,16 +37,6 @@ func TestAccApiKey_Basic(t *testing.T) {
 					testAccCheckRocksetApiKeyExists("rockset_api_key.test", &apiKey),
 					resource.TestCheckResourceAttr("rockset_api_key.test", "name", fmt.Sprintf("%s-updated", testApiKeyName)),
 					resource.TestCheckNoResourceAttr("rockset_api_key.test", "user"),
-					resource.TestCheckResourceAttrSet("rockset_api_key.test", "key"),
-				),
-				ExpectNonEmptyPlan: false,
-			},
-			{
-				Config: testAccCheckApiKeyUpdateUser(),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRocksetApiKeyExists("rockset_api_key.test", &apiKey),
-					resource.TestCheckResourceAttr("rockset_api_key.test", "name", fmt.Sprintf("%s-updated", testApiKeyName)),
-					resource.TestCheckResourceAttr("rockset_api_key.test", "user", testApiKeyUser),
 					resource.TestCheckResourceAttrSet("rockset_api_key.test", "key"),
 				),
 				ExpectNonEmptyPlan: false,
@@ -90,7 +80,6 @@ resource rockset_user test {
 }
 resource rockset_api_key test {
 	name        = "%s-updated"
-	user				= rockset_user.test.email 
 }
 `, testApiKeyUser, testApiKeyName)
 }

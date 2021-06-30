@@ -67,8 +67,6 @@ func (c *Config) Client() (interface{}, diag.Diagnostics) {
 
 	if c.APIKey != "" {
 		opts = append(opts, rockset.WithAPIKey(c.APIKey), rockset.WithAPIServer(c.APIServer))
-	} else {
-		opts = append(opts, rockset.FromEnv())
 	}
 
 	rc, err := rockset.NewClient(opts...)
@@ -95,7 +93,7 @@ func rocksetNameValidator(val interface{}, key string) ([]string, []error) {
 */
 func toID(workspace, name string) string {
 	// The provider will be configured for 1 account.
-	// This should be univerally unique within the account.
+	// This should be universally unique within the account.
 	return fmt.Sprintf("%s.%s", workspace, name)
 }
 
