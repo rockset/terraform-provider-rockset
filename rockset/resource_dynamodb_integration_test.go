@@ -11,25 +11,25 @@ import (
 	"github.com/rockset/rockset-go-client/openapi"
 )
 
-const testS3IntegrationName = "terraform-provider-acceptance-test-s3-integration"
-const testS3IntegrationDescription = "Terraform provider acceptance tests."
-const testS3IntegrationRoleArn = "arn:aws:iam::469279130686:role/terraform-provider-rockset-tests"
+const testDynamoDBIntegrationName = "terraform-provider-acceptance-test-dynamodb-integration"
+const testDynamoDBIntegrationDescription = "Terraform provider acceptance tests."
+const testDynamoDBIntegrationRoleArn = "arn:aws:iam::469279130686:role/terraform-provider-rockset-tests-dynamo"
 
-func TestAccS3Integration_Basic(t *testing.T) {
-	var s3Integration openapi.S3Integration
+func TestAccDynamoDBIntegration_Basic(t *testing.T) {
+	var dynamoDBIntegration openapi.DynamodbIntegration
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckRocksetS3IntegrationDestroy,
+		CheckDestroy:      testAccCheckRocksetDynamoDBIntegrationDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckS3IntegrationBasic(),
+				Config: testAccCheckDynamoDBIntegrationBasic(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRocksetS3IntegrationExists("rockset_s3_integration.test", &s3Integration),
-					resource.TestCheckResourceAttr("rockset_s3_integration.test", "name", testS3IntegrationName),
-					resource.TestCheckResourceAttr("rockset_s3_integration.test", "description", testS3IntegrationDescription),
-					resource.TestCheckResourceAttr("rockset_s3_integration.test", "aws_role_arn", testS3IntegrationRoleArn),
+					testAccCheckRocksetDynamoDBIntegrationExists("rockset_dynamodb_integration.test", &dynamoDBIntegration),
+					resource.TestCheckResourceAttr("rockset_dynamodb_integration.test", "name", testDynamoDBIntegrationName),
+					resource.TestCheckResourceAttr("rockset_dynamodb_integration.test", "description", testDynamoDBIntegrationDescription),
+					resource.TestCheckResourceAttr("rockset_dynamodb_integration.test", "aws_role_arn", testDynamoDBIntegrationRoleArn),
 				),
 				ExpectNonEmptyPlan: false,
 			},
@@ -37,8 +37,8 @@ func TestAccS3Integration_Basic(t *testing.T) {
 	})
 }
 
-func testAccCheckS3IntegrationBasic() string {
-	hclPath := filepath.Join("..", "testdata", "s3_integration.tf")
+func testAccCheckDynamoDBIntegrationBasic() string {
+	hclPath := filepath.Join("..", "testdata", "dynamodb_integration.tf")
 	hcl, err := getFileContents(hclPath)
 	if err != nil {
 		log.Fatalf("Unexpected error loading test data %s", hclPath)
@@ -47,11 +47,11 @@ func testAccCheckS3IntegrationBasic() string {
 	return hcl
 }
 
-func testAccCheckRocksetS3IntegrationDestroy(s *terraform.State) error {
+func testAccCheckRocksetDynamoDBIntegrationDestroy(s *terraform.State) error {
 	rc := testAccProvider.Meta().(*rockset.RockClient)
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "rockset_s3_integration" {
+		if rs.Type != "rockset_dynamodb_integration" {
 			continue
 		}
 
@@ -68,7 +68,7 @@ func testAccCheckRocksetS3IntegrationDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckRocksetS3IntegrationExists(resource string, s3Integration *openapi.S3Integration) resource.TestCheckFunc {
+func testAccCheckRocksetDynamoDBIntegrationExists(resource string, dynamoDBIntegration *openapi.DynamodbIntegration) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		rc := testAccProvider.Meta().(*rockset.RockClient)
 
@@ -85,7 +85,7 @@ func testAccCheckRocksetS3IntegrationExists(resource string, s3Integration *open
 			return err
 		}
 
-		*s3Integration = *resp.Data.S3
+		*dynamoDBIntegration = *resp.Data.Dynamodb
 
 		return nil
 	}

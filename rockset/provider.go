@@ -20,15 +20,16 @@ type Config struct {
 func Provider() *schema.Provider {
 	return &schema.Provider{
 		ResourcesMap: map[string]*schema.Resource{
-			"rockset_alias":          resourceAlias(),
-			"rockset_api_key":        resourceApiKey(),
-			"rockset_collection":     resourceCollection(),
-			"rockset_query_lambda":   resourceQueryLambda(),
-			"rockset_s3_collection":  resourceS3Collection(),
-			"rockset_s3_integration": resourceS3Integration(),
-			"rockset_user":           resourceUser(),
-			"rockset_workspace":      resourceWorkspace(),
-			// "rockset_query_lambda": resourceQueryLambda(),
+			"rockset_alias":                resourceAlias(),
+			"rockset_api_key":              resourceApiKey(),
+			"rockset_collection":           resourceCollection(),
+			"rockset_dynamodb_collection":  resourceDynamoDBCollection(),
+			"rockset_dynamodb_integration": resourceDynamoDBIntegration(),
+			"rockset_query_lambda":         resourceQueryLambda(),
+			"rockset_s3_collection":        resourceS3Collection(),
+			"rockset_s3_integration":       resourceS3Integration(),
+			"rockset_user":                 resourceUser(),
+			"rockset_workspace":            resourceWorkspace(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"rockset_account": dataSourceRocksetAccount(),
