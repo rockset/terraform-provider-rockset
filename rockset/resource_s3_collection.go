@@ -14,145 +14,156 @@ import (
 
 func s3CollectionSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"integration_name": {
-			Description:  "The name of the Rockset S3 integration.",
-			Type:         schema.TypeString,
-			ForceNew:     true,
-			Required:     true,
-			ValidateFunc: rocksetNameValidator,
-		},
-		"prefix": {
-			Type:        schema.TypeString,
+		"source": {
+			Description: "Defines a source for this collection.",
+			Type:        schema.TypeSet,
 			ForceNew:    true,
 			Optional:    true,
-			Default:     nil,
-			Description: "Simple path prefix to s3 key.",
-		},
-		"pattern": {
-			Type:        schema.TypeString,
-			ForceNew:    true,
-			Optional:    true,
-			Default:     nil,
-			Description: "Regex path prefix to s3 key.",
-		},
-		"bucket": {
-			Type:        schema.TypeString,
-			ForceNew:    true,
-			Required:    true,
-			Description: "S3 bucket containing the target data.",
-		},
-		"format": {
-			Type:     schema.TypeString,
-			ForceNew: true,
-			Required: true,
-			ValidateFunc: validation.StringMatch(
-				regexp.MustCompile("^(json|csv|xml)$"), "only 'json', 'xml', or 'csv' is supported"),
-			Description: "Format of the data. One of: json, csv, xml. xml and csv blocks can only be set for their respective formats. ",
-		},
-		"csv": {
-			Type:     schema.TypeSet,
-			ForceNew: true,
-			Optional: true,
-			MinItems: 0,
-			MaxItems: 1,
+			MinItems:    1,
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
-					"first_line_as_column_names": {
-						Type:     schema.TypeBool,
-						ForceNew: true,
-						Optional: true,
-						Default:  true,
+					"integration_name": {
+						Description:  "The name of the Rockset S3 integration.",
+						Type:         schema.TypeString,
+						ForceNew:     true,
+						Required:     true,
+						ValidateFunc: rocksetNameValidator,
 					},
-					"separator": {
+					"prefix": {
+						Type:        schema.TypeString,
+						ForceNew:    true,
+						Optional:    true,
+						Default:     nil,
+						Description: "Simple path prefix to s3 key.",
+					},
+					"pattern": {
+						Type:        schema.TypeString,
+						ForceNew:    true,
+						Optional:    true,
+						Default:     nil,
+						Description: "Regex path prefix to s3 key.",
+					},
+					"bucket": {
+						Type:        schema.TypeString,
+						ForceNew:    true,
+						Required:    true,
+						Description: "S3 bucket containing the target data.",
+					},
+					"format": {
 						Type:     schema.TypeString,
 						ForceNew: true,
-						Optional: true,
-						Default:  ",",
-					},
-					"encoding": {
-						Type:     schema.TypeString,
-						ForceNew: true,
-						Optional: true,
-						Default:  "UTF-8",
+						Required: true,
 						ValidateFunc: validation.StringMatch(
-							regexp.MustCompile("^(UTF-8|UTF-16|ISO_8859_1)$"), "must be either 'UTF-8', 'UTF-16' or 'ISO_8859_1'"),
+							regexp.MustCompile("^(json|csv|xml)$"), "only 'json', 'xml', or 'csv' is supported"),
+						Description: "Format of the data. One of: json, csv, xml. xml and csv blocks can only be set for their respective formats. ",
 					},
-					"column_names": {
-						Type:     schema.TypeList,
+					"csv": {
+						Type:     schema.TypeSet,
 						ForceNew: true,
 						Optional: true,
-						Elem: &schema.Schema{
-							Type: schema.TypeString,
+						MinItems: 0,
+						MaxItems: 1,
+						Elem: &schema.Resource{
+							Schema: map[string]*schema.Schema{
+								"first_line_as_column_names": {
+									Type:     schema.TypeBool,
+									ForceNew: true,
+									Optional: true,
+									Default:  true,
+								},
+								"separator": {
+									Type:     schema.TypeString,
+									ForceNew: true,
+									Optional: true,
+									Default:  ",",
+								},
+								"encoding": {
+									Type:     schema.TypeString,
+									ForceNew: true,
+									Optional: true,
+									Default:  "UTF-8",
+									ValidateFunc: validation.StringMatch(
+										regexp.MustCompile("^(UTF-8|UTF-16|ISO_8859_1)$"), "must be either 'UTF-8', 'UTF-16' or 'ISO_8859_1'"),
+								},
+								"column_names": {
+									Type:     schema.TypeList,
+									ForceNew: true,
+									Optional: true,
+									Elem: &schema.Schema{
+										Type: schema.TypeString,
+									},
+								},
+								"column_types": {
+									Type:     schema.TypeList,
+									ForceNew: true,
+									Optional: true,
+									Elem: &schema.Schema{
+										Type: schema.TypeString,
+									},
+								},
+								"quote_char": {
+									Type:     schema.TypeString,
+									ForceNew: true,
+									Optional: true,
+									Default:  `"`,
+								},
+								"escape_char": {
+									Type:     schema.TypeString,
+									ForceNew: true,
+									Optional: true,
+									Default:  `\`,
+								},
+							},
 						},
-					},
-					"column_types": {
-						Type:     schema.TypeList,
+					}, // End csv
+					"xml": {
+						Type:     schema.TypeSet,
 						ForceNew: true,
 						Optional: true,
-						Elem: &schema.Schema{
-							Type: schema.TypeString,
+						MinItems: 0,
+						MaxItems: 1,
+						Elem: &schema.Resource{
+							Schema: map[string]*schema.Schema{
+								"root_tag": {
+									Description: "Tag until which xml is ignored.",
+									Type:        schema.TypeString,
+									ForceNew:    true,
+									Optional:    true,
+								},
+								"encoding": {
+									Description: "Encoding in which data source is encoded.",
+									Type:        schema.TypeString,
+									ForceNew:    true,
+									Optional:    true,
+									Default:     "UTF-8",
+									ValidateFunc: validation.StringMatch(
+										regexp.MustCompile("^(UTF-8|UTF-16|ISO_8859_1)$"), "must be either 'UTF-8', 'UTF-16' or 'ISO_8859_1'"),
+								},
+								"doc_tag": {
+									Description: "Tags with which documents are identified",
+									Type:        schema.TypeString,
+									ForceNew:    true,
+									Optional:    true,
+								},
+								"value_tag": {
+									Description: "Tag used for the value when there are attributes in the element having no child.",
+									Type:        schema.TypeString,
+									ForceNew:    true,
+									Optional:    true,
+									Default:     "value", // API sets this implicitly, if we don't match we get diffs
+								},
+								"attribute_prefix": {
+									Description: "Tag to differentiate between attributes and elements.",
+									Type:        schema.TypeString,
+									ForceNew:    true,
+									Optional:    true,
+								},
+							},
 						},
-					},
-					"quote_char": {
-						Type:     schema.TypeString,
-						ForceNew: true,
-						Optional: true,
-						Default:  `"`,
-					},
-					"escape_char": {
-						Type:     schema.TypeString,
-						ForceNew: true,
-						Optional: true,
-						Default:  `\`,
-					},
+					}, // End xml
 				},
 			},
-		}, // End csv
-		"xml": {
-			Type:     schema.TypeSet,
-			ForceNew: true,
-			Optional: true,
-			MinItems: 0,
-			MaxItems: 1,
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"root_tag": {
-						Description: "Tag until which xml is ignored.",
-						Type:        schema.TypeString,
-						ForceNew:    true,
-						Optional:    true,
-					},
-					"encoding": {
-						Description: "Encoding in which data source is encoded.",
-						Type:        schema.TypeString,
-						ForceNew:    true,
-						Optional:    true,
-						Default:     "UTF-8",
-						ValidateFunc: validation.StringMatch(
-							regexp.MustCompile("^(UTF-8|UTF-16|ISO_8859_1)$"), "must be either 'UTF-8', 'UTF-16' or 'ISO_8859_1'"),
-					},
-					"doc_tag": {
-						Description: "Tags with which documents are identified",
-						Type:        schema.TypeString,
-						ForceNew:    true,
-						Optional:    true,
-					},
-					"value_tag": {
-						Description: "Tag used for the value when there are attributes in the element having no child.",
-						Type:        schema.TypeString,
-						ForceNew:    true,
-						Optional:    true,
-						Default:     "value", // API sets this implicitly, if we don't match we get diffs
-					},
-					"attribute_prefix": {
-						Description: "Tag to differentiate between attributes and elements.",
-						Type:        schema.TypeString,
-						ForceNew:    true,
-						Optional:    true,
-					},
-				},
-			},
-		}, // End xml
+		},
 	} // End schema return
 } // End func
 
@@ -185,10 +196,11 @@ func resourceS3CollectionCreate(ctx context.Context, d *schema.ResourceData, met
 	// Add all base schema fields
 	params := createBaseCollectionRequest(d)
 	// Add fields for s3
-	err = addS3Params(d, params)
+	sources, err := makeS3SourceParams(d.Get("source"))
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	params.Sources = sources
 
 	_, err = rc.CreateCollection(ctx, workspace, name, params)
 	if err != nil {
@@ -243,55 +255,11 @@ func parseS3Collection(collection *openapi.Collection, d *schema.ResourceData) e
 
 	sourcesList := *collection.Sources
 	sourcesCount := len(sourcesList)
-	if sourcesCount != 1 {
-		return fmt.Errorf("expected %s to have exactly one source, got %d", collection.GetName(), sourcesCount)
+	if sourcesCount < 1 {
+		return fmt.Errorf("expected %s to have at least 1 source", collection.GetName())
 	}
 
-	s3Source := sourcesList[0]
-	formatParams := s3Source.FormatParams
-	if *formatParams.Json {
-		err = d.Set("format", "json")
-		if err != nil {
-			return err
-		}
-	} else if formatParams.Csv != nil {
-		err = d.Set("format", "csv")
-		if err != nil {
-			return err
-		}
-
-		err = d.Set("csv", flattenCsvParams(formatParams.Csv))
-		if err != nil {
-			return err
-		}
-	} else if formatParams.Xml != nil {
-		err = d.Set("format", "xml")
-		if err != nil {
-			return err
-		}
-
-		err = d.Set("xml", flattenXmlParams(formatParams.Xml))
-		if err != nil {
-			return err
-		}
-	}
-
-	err = d.Set("prefix", s3Source.S3.GetPrefix())
-	if err != nil {
-		return err
-	}
-
-	err = d.Set("pattern", s3Source.S3.GetPattern())
-	if err != nil {
-		return err
-	}
-
-	err = d.Set("bucket", s3Source.S3.GetBucket())
-	if err != nil {
-		return err
-	}
-
-	err = d.Set("integration_name", s3Source.GetIntegrationName())
+	err = d.Set("source", flattenS3SourceParams(&sourcesList))
 	if err != nil {
 		return err
 	}
@@ -299,52 +267,79 @@ func parseS3Collection(collection *openapi.Collection, d *schema.ResourceData) e
 	return nil // No errors
 }
 
-func addS3Params(d *schema.ResourceData, params *openapi.CreateCollectionRequest) error {
-	/*
-		Adds the s3 sources data to the create collection request
-	*/
-	var format = openapi.FormatParams{}
+func flattenS3SourceParams(sources *[]openapi.Source) []interface{} {
+	convertedList := make([]interface{}, 0, len(*sources))
+	for _, source := range *sources {
+		m := make(map[string]interface{})
+		formatParams := source.FormatParams
 
-	csvBlock := d.Get("csv")
-	xmlBlock := d.Get("xml")
-	xmlBlockIsSet := xmlBlock != nil && xmlBlock.(*schema.Set).Len() != 0
-	csvBlockIsSet := csvBlock != nil && csvBlock.(*schema.Set).Len() != 0
+		if *formatParams.Json {
+			m["format"] = "json"
+		} else if formatParams.Csv != nil {
+			m["format"] = "csv"
+			m["csv"] = flattenCsvParams(formatParams.Csv)
+		} else if formatParams.Xml != nil {
+			m["format"] = "xml"
+			m["xml"] = flattenXmlParams(formatParams.Xml)
+		}
 
-	switch d.Get("format").(string) {
-	case "json":
-		format.Json = openapi.PtrBool(true)
-		if csvBlockIsSet {
-			return fmt.Errorf("can't define csv block with json format")
-		}
-		if xmlBlockIsSet {
-			return fmt.Errorf("can't define xml block with json format")
-		}
-	case "csv":
-		if xmlBlockIsSet {
-			return fmt.Errorf("can't define xml block with csv format")
-		}
-		format.Csv = makeCsvParams(d.Get("csv"))
-	case "xml":
-		if csvBlockIsSet {
-			return fmt.Errorf("can't define csv block with xml format")
-		}
-		format.Xml = makeXmlParams(d.Get("xml"))
+		m["integration_name"] = source.IntegrationName
+		m["prefix"] = source.S3.Prefix
+		m["pattern"] = source.S3.Pattern
+		m["bucket"] = source.S3.Bucket
+
+		convertedList = append(convertedList, m)
 	}
 
-	sources := []openapi.Source{
-		{
-			FormatParams:    &format,
-			IntegrationName: d.Get("integration_name").(string),
-			S3: &openapi.SourceS3{
-				Prefix:  toStringPtrNilIfEmpty(d.Get("prefix").(string)),
-				Pattern: toStringPtrNilIfEmpty(d.Get("pattern").(string)),
-				Bucket:  d.Get("bucket").(string),
-			},
-		},
-	}
-	params.Sources = &sources
+	return convertedList
+}
 
-	return nil
+func makeS3SourceParams(in interface{}) (*[]openapi.Source, error) {
+	sources := make([]openapi.Source, 0, in.(*schema.Set).Len())
+
+	for _, i := range in.(*schema.Set).List() {
+		if val, ok := i.(map[string]interface{}); ok {
+			source := openapi.Source{}
+			source.S3 = openapi.NewSourceS3WithDefaults()
+			format := openapi.FormatParams{}
+
+			csvBlock, csvBlockOK := val["csv"] // optional fields
+			xmlBlock, xmlBlockOK := val["xml"] // optional fields
+
+			xmlBlockIsSet := xmlBlockOK && xmlBlock.(*schema.Set).Len() != 0
+			csvBlockIsSet := csvBlockOK && csvBlock.(*schema.Set).Len() != 0
+
+			switch val["format"].(string) {
+			case "json":
+				if csvBlockIsSet {
+					return nil, fmt.Errorf("can't define csv block with json format")
+				}
+				if xmlBlockIsSet {
+					return nil, fmt.Errorf("can't define xml block with json format")
+				}
+			case "csv":
+				if xmlBlockIsSet {
+					return nil, fmt.Errorf("can't define xml block with csv format")
+				}
+				format.Csv = makeCsvParams(csvBlock)
+			case "xml":
+				if csvBlockIsSet {
+					return nil, fmt.Errorf("can't define csv block with xml format")
+				}
+				format.Xml = makeXmlParams(xmlBlock)
+			}
+
+			source.FormatParams = &format
+			source.IntegrationName = val["integration_name"].(string)
+			source.S3.Prefix = toStringPtrNilIfEmpty(val["prefix"].(string))
+			source.S3.Pattern = toStringPtrNilIfEmpty(val["pattern"].(string))
+			source.S3.Bucket = val["bucket"].(string)
+
+			sources = append(sources, source)
+		}
+	}
+
+	return &sources, nil
 }
 
 func flattenCsvParams(params *openapi.CsvParams) []interface{} {

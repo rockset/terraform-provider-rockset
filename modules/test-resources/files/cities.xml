@@ -1,0 +1,14 @@
+<cities>
+  <city>
+    <country>USA</country>
+    <city>Albany</city>
+    <population>100000</population>
+    <visited>true</visited>
+  </city>
+  <city>
+    <country>USA</country>
+    <city>New York</city>
+    <population>8500000</population>
+    <visited>true</visited>
+  </city>
+</cities>

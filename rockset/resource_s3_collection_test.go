@@ -1,8 +1,7 @@
 package rockset
 
 import (
-	"log"
-	"path/filepath"
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -11,43 +10,27 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const testS3CollectionNameCsv = "terraform-provider-acceptance-tests-s3-csv"
-const testS3CollectionNameXml = "terraform-provider-acceptance-tests-s3-xml"
+const testS3CollectionName = "terraform-provider-acceptance-tests-s3"
 const testS3CollectionWorkspace = "commons"
 const testS3CollectionDescription = "Terraform provider acceptance tests."
-const testS3CollectionIntegrationRoleArn = "arn:aws:iam::469279130686:role/terraform-provider-rockset-tests"
-const testS3CollectionBucket = "terraform-provider-rockset-tests"
-const testS3ColletionPatternCsv = "cities.csv"
 
 func TestAccS3Collection_Basic(t *testing.T) {
 	var collection openapi.Collection
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
-		CheckDestroy: testAccCheckRocksetCollectionDestroy, // Reused from base collection
+		CheckDestroy:      testAccCheckRocksetCollectionDestroy, // Reused from base collection
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckS3CollectionCsv(),
+				Config: getHCL("s3_collection.tf"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetCollectionExists("rockset_s3_collection.test", &collection), // Reused from base collection
-					resource.TestCheckResourceAttr("rockset_s3_collection.test", "name", testS3CollectionNameCsv),
+					resource.TestCheckResourceAttr("rockset_s3_collection.test", "name", testS3CollectionName),
 					resource.TestCheckResourceAttr("rockset_s3_collection.test", "workspace", testS3CollectionWorkspace),
 					resource.TestCheckResourceAttr("rockset_s3_collection.test", "description", testS3CollectionDescription),
 					testAccCheckRetentionSecsMatches(&collection, 3600),
-					testAccCheckS3SourceExpectedCsv(t, &collection),
-				),
-				ExpectNonEmptyPlan: false,
-			},
-			{
-				Config: testAccCheckS3CollectionXml(),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRocksetCollectionExists("rockset_s3_collection.test", &collection), // Reused from base collection
-					resource.TestCheckResourceAttr("rockset_s3_collection.test", "name", testS3CollectionNameXml),
-					resource.TestCheckResourceAttr("rockset_s3_collection.test", "workspace", testS3CollectionWorkspace),
-					resource.TestCheckResourceAttr("rockset_s3_collection.test", "description", testS3CollectionDescription),
-					testAccCheckRetentionSecsMatches(&collection, 3600),
-					testAccCheckS3SourceExpectedXml(t, &collection),
+					testAccCheckS3SourceExpected(t, &collection),
 				),
 				ExpectNonEmptyPlan: false,
 			},
@@ -55,27 +38,7 @@ func TestAccS3Collection_Basic(t *testing.T) {
 	})
 }
 
-func testAccCheckS3CollectionCsv() string {
-	hclPath := filepath.Join("..", "testdata", "s3_collection_csv.tf")
-	s3CollectionHCL, err := getFileContents(hclPath)
-	if err != nil {
-		log.Fatalf("Unexpected error loading test data %s", hclPath)
-	}
-
-	return s3CollectionHCL
-}
-
-func testAccCheckS3CollectionXml() string {
-	hclPath := filepath.Join("..", "testdata", "s3_collection_xml.tf")
-	s3CollectionHCL, err := getFileContents(hclPath)
-	if err != nil {
-		log.Fatalf("Unexpected error loading test data %s", hclPath)
-	}
-
-	return s3CollectionHCL
-}
-
-func testAccCheckS3SourceExpectedCsv(t *testing.T, collection *openapi.Collection) resource.TestCheckFunc {
+func testAccCheckS3SourceExpected(t *testing.T, collection *openapi.Collection) resource.TestCheckFunc {
 	assert := assert.New(t)
 
 	return func(state *terraform.State) error {
@@ -123,23 +86,49 @@ func testAccCheckS3SourceExpectedCsv(t *testing.T, collection *openapi.Collectio
 		assert.Equal(outputField1.GetOnError(), "FAIL", "First output OnError didn't match.")
 		assert.Equal(outputField2.GetOnError(), "SKIP", "Second output OnError didn't match.")
 
-		return nil
-	}
-}
-
-func testAccCheckS3SourceExpectedXml(t *testing.T, collection *openapi.Collection) resource.TestCheckFunc {
-	assert := assert.New(t)
-
-	return func(state *terraform.State) error {
-		assert.Equal(len(collection.GetFieldMappings()), 0, "Expected no field mappings.")
-
 		sources := collection.GetSources()
-		assert.Equal(len(sources), 1, "Expected one source.")
+		assert.Equal(2, len(sources))
 
-		xmlSource := sources[0]
-		assert.Equal(*xmlSource.FormatParams.Xml.RootTag, "note")
-		assert.Equal(*xmlSource.FormatParams.Xml.Encoding, "UTF-8")
-		assert.Equal(*xmlSource.FormatParams.Xml.DocTag, "note")
+		assert.NotNil(sources[0].S3)
+		assert.NotNil(sources[1].S3)
+
+		var xmlIndex, csvIndex int
+		if sources[0].FormatParams.Csv == nil && sources[1].FormatParams.Xml == nil {
+			xmlIndex = 0
+			csvIndex = 1
+		} else if sources[1].FormatParams.Csv == nil && sources[0].FormatParams.Xml == nil {
+			xmlIndex = 1
+			csvIndex = 0
+		} else {
+			return fmt.Errorf("Expected one CSV source and one XML source.")
+		}
+
+		// Confirm our two sources are what we think.
+		assert.NotNil(sources[xmlIndex].FormatParams.Xml)
+		assert.NotNil(sources[csvIndex].FormatParams.Csv)
+
+		// CSV fields
+		assert.False(sources[csvIndex].FormatParams.Csv.GetFirstLineAsColumnNames())
+
+		assert.Equal("cities.csv", sources[csvIndex].S3.GetPattern())
+
+		assert.Equal(4, len(sources[csvIndex].FormatParams.Csv.GetColumnNames()))
+		assert.Equal("country", sources[csvIndex].FormatParams.Csv.GetColumnNames()[0])
+		assert.Equal("city", sources[csvIndex].FormatParams.Csv.GetColumnNames()[1])
+		assert.Equal("population", sources[csvIndex].FormatParams.Csv.GetColumnNames()[2])
+		assert.Equal("visited", sources[csvIndex].FormatParams.Csv.GetColumnNames()[3])
+
+		assert.Equal(4, len(sources[csvIndex].FormatParams.Csv.GetColumnTypes()))
+		assert.Equal("STRING", sources[csvIndex].FormatParams.Csv.GetColumnTypes()[0])
+		assert.Equal("STRING", sources[csvIndex].FormatParams.Csv.GetColumnTypes()[1])
+		assert.Equal("STRING", sources[csvIndex].FormatParams.Csv.GetColumnTypes()[2])
+		assert.Equal("STRING", sources[csvIndex].FormatParams.Csv.GetColumnTypes()[3])
+
+		// XML fields
+		assert.Equal("cities.xml", sources[xmlIndex].S3.GetPattern())
+		assert.Equal("cities", sources[xmlIndex].FormatParams.Xml.GetRootTag())
+		assert.Equal("city", sources[xmlIndex].FormatParams.Xml.GetDocTag())
+		assert.Equal("UTF-8", sources[xmlIndex].FormatParams.Xml.GetEncoding())
 
 		return nil
 	}

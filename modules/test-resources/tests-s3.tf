@@ -1,6 +1,6 @@
 locals {
   csv_path = "${path.module}/files/cities.csv"
-  xml_path = "${path.module}/files/note.xml"
+  xml_path = "${path.module}/files/cities.xml"
 }
 
 resource "aws_s3_bucket" "provider_tests" {
@@ -23,7 +23,7 @@ resource "aws_s3_bucket_object" "csv" {
 
 resource "aws_s3_bucket_object" "xml" {
   bucket = aws_s3_bucket.provider_tests.bucket
-  key    = "note.xml"
+  key    = "cities.xml"
   source = local.xml_path
   etag   = filemd5(local.xml_path)
 }
