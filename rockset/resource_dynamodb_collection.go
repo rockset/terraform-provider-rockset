@@ -13,10 +13,11 @@ import (
 func dynamoDBCollectionSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"source": {
-			Type:     schema.TypeSet,
-			ForceNew: true,
-			Optional: true,
-			MinItems: 1,
+			Description: "Defines a source for this collection.",
+			Type:        schema.TypeSet,
+			ForceNew:    true,
+			Optional:    true,
+			MinItems:    1,
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
 					"integration_name": {
