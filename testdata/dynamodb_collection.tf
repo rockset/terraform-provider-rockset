@@ -1,7 +1,7 @@
 resource rockset_dynamodb_integration test {
-	name = "terraform-provider-acceptance-test-dynamodb-collection-1"
-	description = "Terraform provider acceptance tests."
-	aws_role_arn = "arn:aws:iam::469279130686:role/terraform-provider-rockset-tests-dynamo"
+  name = "terraform-provider-acceptance-test-dynamodb-collection-1"
+  description = "Terraform provider acceptance tests."
+  aws_role_arn = "arn:aws:iam::469279130686:role/terraform-provider-rockset-tests-dynamo"
 }
 
 resource rockset_dynamodb_collection test {

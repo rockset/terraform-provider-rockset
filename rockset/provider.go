@@ -25,6 +25,8 @@ func Provider() *schema.Provider {
 			"rockset_collection":           resourceCollection(),
 			"rockset_dynamodb_collection":  resourceDynamoDBCollection(),
 			"rockset_dynamodb_integration": resourceDynamoDBIntegration(),
+			"rockset_mongodb_collection":   resourceMongoDBCollection(),
+			"rockset_mongodb_integration":  resourceMongoDBIntegration(),
 			"rockset_query_lambda":         resourceQueryLambda(),
 			"rockset_s3_collection":        resourceS3Collection(),
 			"rockset_s3_integration":       resourceS3Integration(),

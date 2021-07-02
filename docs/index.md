@@ -12,7 +12,7 @@ description: |-
 
 Visit https://rockset.com/ for more information on Rockset.
 
-Visit https://github.com/rockset/terraform-provider-rockset to file an issues for bugs or feedback related to the provider.
+Visit https://github.com/rockset/terraform-provider-rockset to file any issues for bugs or feedback related to the provider.
 
 ```
 // Use env vars ROCKSET_APIKEY and ROCKSET_APISERVER to configure provider.

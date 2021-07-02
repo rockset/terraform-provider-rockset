@@ -22,10 +22,10 @@ Manage a Rockset Api Key.
 ### Optional
 
 - **id** (String) The ID of this resource.
-- **user** (String) User to create the key for. If not set, defaults to authenticated user.
 
 ### Read-Only
 
 - **key** (String, Sensitive) The resulting Rockset api key.
+- **user** (String) The user the key is created for.
 
 
