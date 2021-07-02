@@ -17,25 +17,19 @@ Manages a collection with an s3 source attached.
 
 ### Required
 
-- **bucket** (String) S3 bucket containing the target data.
-- **format** (String) Format of the data. One of: json, csv, xml. xml and csv blocks can only be set for their respective formats.
-- **integration_name** (String) The name of the Rockset S3 integration.
 - **name** (String) Unique identifier for the collection. Can contain alphanumeric or dash characters.
 - **workspace** (String) The name of the workspace.
 
 ### Optional
 
 - **clustering_key** (Block List) List of clustering fields. (see [below for nested schema](#nestedblock--clustering_key))
-- **csv** (Block Set, Max: 1) (see [below for nested schema](#nestedblock--csv))
 - **description** (String) Text describing the collection.
 - **field_mapping** (Block List) List of field mappings. (see [below for nested schema](#nestedblock--field_mapping))
 - **field_schemas** (Block List) List of field schemas. (see [below for nested schema](#nestedblock--field_schemas))
 - **id** (String) The ID of this resource.
 - **inverted_index_group_encoding_options** (Block Set, Max: 1) Inverted index group encoding options. (see [below for nested schema](#nestedblock--inverted_index_group_encoding_options))
-- **pattern** (String) Regex path prefix to s3 key.
-- **prefix** (String) Simple path prefix to s3 key.
 - **retention_secs** (Number) Number of seconds after which data is purged. Based on event time.
-- **xml** (Block Set, Max: 1) (see [below for nested schema](#nestedblock--xml))
+- **source** (Block Set) Defines a source for this collection. (see [below for nested schema](#nestedblock--source))
 
 <a id="nestedblock--clustering_key"></a>
 ### Nested Schema for `clustering_key`
@@ -48,20 +42,6 @@ Optional:
 
 - **keys** (List of String) The values for partitioning of a field.
 - **type** (String) The type of partitions on a field.
-
-
-<a id="nestedblock--csv"></a>
-### Nested Schema for `csv`
-
-Optional:
-
-- **column_names** (List of String)
-- **column_types** (List of String)
-- **encoding** (String)
-- **escape_char** (String)
-- **first_line_as_column_names** (Boolean)
-- **quote_char** (String)
-- **separator** (String)
 
 
 <a id="nestedblock--field_mapping"></a>
@@ -121,8 +101,38 @@ Required:
 - **restart_length** (Number) Restart length.
 
 
-<a id="nestedblock--xml"></a>
-### Nested Schema for `xml`
+<a id="nestedblock--source"></a>
+### Nested Schema for `source`
+
+Required:
+
+- **bucket** (String) S3 bucket containing the target data.
+- **format** (String) Format of the data. One of: json, csv, xml. xml and csv blocks can only be set for their respective formats.
+- **integration_name** (String) The name of the Rockset S3 integration.
+
+Optional:
+
+- **csv** (Block Set, Max: 1) (see [below for nested schema](#nestedblock--source--csv))
+- **pattern** (String) Regex path prefix to s3 key.
+- **prefix** (String) Simple path prefix to s3 key.
+- **xml** (Block Set, Max: 1) (see [below for nested schema](#nestedblock--source--xml))
+
+<a id="nestedblock--source--csv"></a>
+### Nested Schema for `source.csv`
+
+Optional:
+
+- **column_names** (List of String)
+- **column_types** (List of String)
+- **encoding** (String)
+- **escape_char** (String)
+- **first_line_as_column_names** (Boolean)
+- **quote_char** (String)
+- **separator** (String)
+
+
+<a id="nestedblock--source--xml"></a>
+### Nested Schema for `source.xml`
 
 Optional:
 
