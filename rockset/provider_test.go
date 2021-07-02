@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -20,8 +22,8 @@ var testCtx context.Context
 
 func init() {
 	testAccProvider = Provider()
-	testAccProviderFactories = map[string]func() (*schema.Provider, error) {
-		"rockset": func()(*schema.Provider, error) {
+	testAccProviderFactories = map[string]func() (*schema.Provider, error){
+		"rockset": func() (*schema.Provider, error) {
 			return testAccProvider, nil
 		},
 	}
@@ -76,6 +78,16 @@ func getFileContents(path string) (string, error) {
 	}
 
 	return string(content), nil
+}
+
+func getHCL(filename string) string {
+	hclPath := filepath.Join("..", "testdata", filename)
+	hcl, err := getFileContents(hclPath)
+	if err != nil {
+		log.Fatalf("Unexpected error loading test data %s", hclPath)
+	}
+
+	return hcl
 }
 
 /*

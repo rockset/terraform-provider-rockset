@@ -69,17 +69,17 @@ Running acceptance tests creates real resources. Some acceptance tests may use f
 
 To run all tests:
 ```
-TF_ACC=true go test ./rockset/*
+TF_ACC=true go test -timeout 40m ./rockset/*
 ```
 
 To run all tests with debug output:
 ```
-TF_ACC=true go test -v ./rockset/*
+TF_ACC=true go test -timeout 40m -v ./rockset/*
 ```
 
 To run a specific test:
 ```
-TF_ACC=true go test -v ./rockset/* -run TestAccS3Collection_Basic
+TF_ACC=true go test -timeout 40m -v ./rockset/* -run TestAccS3Collection_Basic
 ```
 
 ## Manual Installation

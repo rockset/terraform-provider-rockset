@@ -1,5 +1,5 @@
-resource "aws_dynamodb_table" "rockset_dynamo_integration" {
-  name           = "terraform-provider-rockset-tests"
+resource "aws_dynamodb_table" "rockset_dynamo_integration_1" {
+  name           = "terraform-provider-rockset-tests-1"
   read_capacity  = 10
   write_capacity = 10
   hash_key       = "exampleHashKey"
@@ -10,9 +10,21 @@ resource "aws_dynamodb_table" "rockset_dynamo_integration" {
   }
 }
 
-resource "aws_dynamodb_table_item" "rockset_dynamo_integration" {
-  table_name = aws_dynamodb_table.rockset_dynamo_integration.name
-  hash_key   = aws_dynamodb_table.rockset_dynamo_integration.hash_key
+resource "aws_dynamodb_table" "rockset_dynamo_integration_2" {
+  name           = "terraform-provider-rockset-tests-2"
+  read_capacity  = 10
+  write_capacity = 10
+  hash_key       = "exampleHashKey"
+
+  attribute {
+    name = "exampleHashKey"
+    type = "S"
+  }
+}
+
+resource "aws_dynamodb_table_item" "rockset_dynamo_integration_1" {
+  table_name = aws_dynamodb_table.rockset_dynamo_integration_1.name
+  hash_key   = aws_dynamodb_table.rockset_dynamo_integration_1.hash_key
 
   item = <<ITEM
 {
@@ -21,6 +33,21 @@ resource "aws_dynamodb_table_item" "rockset_dynamo_integration" {
   "two": {"N": "22222"},
   "three": {"N": "33333"},
   "four": {"N": "44444"}
+}
+ITEM
+}
+
+resource "aws_dynamodb_table_item" "rockset_dynamo_integration_2" {
+  table_name = aws_dynamodb_table.rockset_dynamo_integration_2.name
+  hash_key   = aws_dynamodb_table.rockset_dynamo_integration_2.hash_key
+
+  item = <<ITEM
+{
+  "exampleHashKey": {"S": "else"},
+  "five": {"N": "55555"},
+  "six": {"N": "66666"},
+  "seven": {"N": "77777"},
+  "eight": {"N": "88888"}
 }
 ITEM
 }
@@ -47,8 +74,10 @@ data "aws_iam_policy_document" "rockset_dynamo_integration" {
       "dynamodb:UpdateTable"
     ]
     resources = [
-      "arn:aws:dynamodb:*:*:table/${aws_dynamodb_table.rockset_dynamo_integration.name}",
-      "arn:aws:dynamodb:*:*:table/${aws_dynamodb_table.rockset_dynamo_integration.name}/stream/*"
+      "arn:aws:dynamodb:*:*:table/${aws_dynamodb_table.rockset_dynamo_integration_1.name}",
+      "arn:aws:dynamodb:*:*:table/${aws_dynamodb_table.rockset_dynamo_integration_1.name}/stream/*",
+      "arn:aws:dynamodb:*:*:table/${aws_dynamodb_table.rockset_dynamo_integration_2.name}",
+      "arn:aws:dynamodb:*:*:table/${aws_dynamodb_table.rockset_dynamo_integration_2.name}/stream/*"
     ]
   }
 }

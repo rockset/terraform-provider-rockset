@@ -9,14 +9,14 @@ import (
 	"github.com/rockset/rockset-go-client/option"
 )
 
-func resourceS3Integration() *schema.Resource {
+func resourceDynamoDBIntegration() *schema.Resource {
 	return &schema.Resource{
-		Description: "Manages a Rockset S3 Integration.",
+		Description: "Manages a Rockset DynamoDB Integration.",
 
 		// No updateable fields at this time, all fields require recreation.
-		CreateContext: resourceS3IntegrationCreate,
-		ReadContext:   resourceS3IntegrationRead,
-		DeleteContext: resourceIntegrationDelete,
+		CreateContext: resourceDynamoDBIntegrationCreate,
+		ReadContext:   resourceDynamoDBIntegrationRead,
+		DeleteContext: resourceIntegrationDelete, // common among <type>integrations
 
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
@@ -47,13 +47,13 @@ func resourceS3Integration() *schema.Resource {
 	}
 }
 
-func resourceS3IntegrationCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDynamoDBIntegrationCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	rc := meta.(*rockset.RockClient)
 	var diags diag.Diagnostics
 
-	r, err := rc.CreateS3Integration(ctx, d.Get("name").(string),
+	r, err := rc.CreateDynamoDBIntegration(ctx, d.Get("name").(string),
 		option.AWSRole(d.Get("aws_role_arn").(string)),
-		option.WithS3IntegrationDescription(d.Get("description").(string)))
+		option.WithDynamoDBIntegrationDescription(d.Get("description").(string)))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -63,7 +63,7 @@ func resourceS3IntegrationCreate(ctx context.Context, d *schema.ResourceData, me
 	return diags
 }
 
-func resourceS3IntegrationRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDynamoDBIntegrationRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	rc := meta.(*rockset.RockClient)
 	var diags diag.Diagnostics
 
@@ -77,25 +77,7 @@ func resourceS3IntegrationRead(ctx context.Context, d *schema.ResourceData, meta
 
 	d.Set("name", response.Data.Name)
 	d.Set("description", response.Data.Description)
-	d.Set("aws_role_arn", response.Data.S3.AwsRole.AwsRoleArn)
-
-	return diags
-}
-
-func resourceIntegrationDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	rc := meta.(*rockset.RockClient)
-	var diags diag.Diagnostics
-
-	name := d.Id()
-
-	err := rc.DeleteIntegration(ctx, name)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	// d.SetId("") is automatically called assuming delete returns no errors,
-	// but it is added here for explicitness.
-	d.SetId("")
+	d.Set("aws_role_arn", response.Data.Dynamodb.AwsRole.AwsRoleArn)
 
 	return diags
 }
