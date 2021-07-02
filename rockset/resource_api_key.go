@@ -31,7 +31,7 @@ func resourceApiKey() *schema.Resource {
 				ForceNew:    true,
 			},
 			"user": {
-				Description: "User to create the key for. If not set, defaults to authenticated user.",
+				Description: "The user the key is created for.",
 				Type:        schema.TypeString,
 				Computed:    true,
 			},
