@@ -2,10 +2,11 @@ package rockset
 
 import (
 	"fmt"
+	"regexp"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/rockset/rockset-go-client/openapi"
-	"regexp"
 )
 
 /*
@@ -224,22 +225,25 @@ func csvSchema() *schema.Schema {
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"first_line_as_column_names": {
-					Type:     schema.TypeBool,
-					ForceNew: true,
-					Optional: true,
-					Default:  true,
+					Type:        schema.TypeBool,
+					ForceNew:    true,
+					Optional:    true,
+					Default:     true,
+					Description: "If the first line in every object specifies the column names.",
 				},
 				"separator": {
-					Type:     schema.TypeString,
-					ForceNew: true,
-					Optional: true,
-					Default:  ",",
+					Type:        schema.TypeString,
+					ForceNew:    true,
+					Optional:    true,
+					Default:     ",",
+					Description: "A single character that is the column separator.",
 				},
 				"encoding": {
-					Type:     schema.TypeString,
-					ForceNew: true,
-					Optional: true,
-					Default:  "UTF-8",
+					Type:        schema.TypeString,
+					ForceNew:    true,
+					Optional:    true,
+					Default:     "UTF-8",
+					Description: "Can be one of: UTF-8, ISO_8859_1, UTF-16.",
 					ValidateFunc: validation.StringMatch(
 						regexp.MustCompile("^(UTF-8|UTF-16|ISO_8859_1)$"), "must be either 'UTF-8', 'UTF-16' or 'ISO_8859_1'"),
 				},
@@ -250,6 +254,7 @@ func csvSchema() *schema.Schema {
 					Elem: &schema.Schema{
 						Type: schema.TypeString,
 					},
+					Description: "The names of the columns.",
 				},
 				"column_types": {
 					Type:     schema.TypeList,
@@ -258,18 +263,21 @@ func csvSchema() *schema.Schema {
 					Elem: &schema.Schema{
 						Type: schema.TypeString,
 					},
+					Description: "The types of the columns.",
 				},
 				"quote_char": {
-					Type:     schema.TypeString,
-					ForceNew: true,
-					Optional: true,
-					Default:  `"`,
+					Type:        schema.TypeString,
+					ForceNew:    true,
+					Optional:    true,
+					Default:     `"`,
+					Description: "Character within which a cell value is enclosed. Defaults to double quote.",
 				},
 				"escape_char": {
-					Type:     schema.TypeString,
-					ForceNew: true,
-					Optional: true,
-					Default:  `\`,
+					Type:        schema.TypeString,
+					ForceNew:    true,
+					Optional:    true,
+					Default:     `\`,
+					Description: "Escape character removes any special meaning from the character that follows it . Defaults to backslash.",
 				},
 			},
 		},
