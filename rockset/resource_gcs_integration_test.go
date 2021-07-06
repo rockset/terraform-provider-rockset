@@ -44,7 +44,6 @@ func testAccPreCheckGCS(t *testing.T) {
 	if v := os.Getenv("TF_VAR_GCS_SERVICE_ACCOUNT_KEY"); v == "" {
 		t.Fatal("TF_VAR_GCS_SERVICE_ACCOUNT_KEY must be set for GCS acceptance tests")
 	}
-
 }
 
 func testAccCheckRocksetGCSIntegrationDestroy(s *terraform.State) error {

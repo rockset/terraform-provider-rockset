@@ -5,7 +5,7 @@ variable GCS_SERVICE_ACCOUNT_KEY {
 resource rockset_gcs_integration test {
   name = "terraform-provider-acceptance-tests-gcs-collection"
   description = "Terraform provider acceptance tests."
-  service_account_key = var.GCS_SERVICE_ACCOUNT_KEY
+  service_account_key = base64decode(var.GCS_SERVICE_ACCOUNT_KEY)
 }
 
 resource rockset_gcs_collection test {
