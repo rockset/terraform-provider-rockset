@@ -2,8 +2,6 @@ module github.com/rockset/terraform-provider-rockset
 
 go 1.16
 
-replace github.com/rockset/rockset-go-client => ../rockset-go-client
-
 require (
 	github.com/aws/aws-sdk-go v1.37.0 // indirect
 	github.com/hashicorp/hcl/v2 v2.8.2 // indirect
