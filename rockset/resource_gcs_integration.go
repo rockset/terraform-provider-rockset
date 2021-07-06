@@ -9,13 +9,13 @@ import (
 	"github.com/rockset/rockset-go-client/option"
 )
 
-func resourceMongoDBIntegration() *schema.Resource {
+func resourceGCSIntegration() *schema.Resource {
 	return &schema.Resource{
-		Description: "Manages a Rockset MongoDB Integration.",
+		Description: "Manages a Rockset GCS Integration.",
 
 		// No updateable fields at this time, all fields require recreation.
-		CreateContext: resourceMongoDBIntegrationCreate,
-		ReadContext:   resourceMongoDBIntegrationRead,
+		CreateContext: resourceGCSIntegrationCreate,
+		ReadContext:   resourceGCSIntegrationRead,
 		DeleteContext: resourceIntegrationDelete, // common among <type>integrations
 
 		Importer: &schema.ResourceImporter{
@@ -23,37 +23,37 @@ func resourceMongoDBIntegration() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
 				Description:  "Unique identifier for the integration. Can contain alphanumeric or dash characters.",
 				Type:         schema.TypeString,
 				ForceNew:     true,
 				Required:     true,
 				ValidateFunc: rocksetNameValidator,
 			},
-			"description": &schema.Schema{
+			"description": {
 				Description: "Text describing the integration.",
 				Type:        schema.TypeString,
 				Default:     "created by Rockset terraform provider",
 				ForceNew:    true,
 				Optional:    true,
 			},
-			"connection_uri": &schema.Schema{
-				Description: "MongoDB connection URI string. The password is scrubbed from the URI when fetched by the API so this field is NOT set on imports and reads.",
+			"service_account_key": {
+				Description: "The GCP service account key JSON.",
 				Type:        schema.TypeString,
 				ForceNew:    true,
 				Required:    true,
-				Sensitive:   true,
 			},
 		},
 	}
 }
 
-func resourceMongoDBIntegrationCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceGCSIntegrationCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	rc := meta.(*rockset.RockClient)
 	var diags diag.Diagnostics
 
-	r, err := rc.CreateMongoDBIntegration(ctx, d.Get("name").(string), d.Get("connection_uri").(string),
-		option.WithMongoDBIntegrationDescription(d.Get("description").(string)))
+	r, err := rc.CreateGCSIntegration(ctx, d.Get("name").(string),
+		d.Get("service_account_key").(string),
+		option.WithGCSIntegrationDescription(d.Get("description").(string)))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -63,7 +63,7 @@ func resourceMongoDBIntegrationCreate(ctx context.Context, d *schema.ResourceDat
 	return diags
 }
 
-func resourceMongoDBIntegrationRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceGCSIntegrationRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	rc := meta.(*rockset.RockClient)
 	var diags diag.Diagnostics
 
@@ -77,7 +77,7 @@ func resourceMongoDBIntegrationRead(ctx context.Context, d *schema.ResourceData,
 
 	_ = d.Set("name", response.Data.Name)
 	_ = d.Set("description", response.Data.Description)
-	// We cannot read the connection URI here. The API sanitizes it and removes secrets.
+	// We cannot read the connection service_account_key here. The API sanitizes it and removes secrets.
 
 	return diags
 }

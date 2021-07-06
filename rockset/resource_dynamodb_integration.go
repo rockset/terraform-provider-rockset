@@ -58,7 +58,7 @@ func resourceDynamoDBIntegrationCreate(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 
-	d.SetId(r.Data.GetName())
+	d.SetId(r.GetName())
 
 	return diags
 }
@@ -75,9 +75,9 @@ func resourceDynamoDBIntegrationRead(ctx context.Context, d *schema.ResourceData
 		return diag.FromErr(err)
 	}
 
-	d.Set("name", response.Data.Name)
-	d.Set("description", response.Data.Description)
-	d.Set("aws_role_arn", response.Data.Dynamodb.AwsRole.AwsRoleArn)
+	_ = d.Set("name", response.Data.Name)
+	_ = d.Set("description", response.Data.Description)
+	_ = d.Set("aws_role_arn", response.Data.Dynamodb.AwsRole.AwsRoleArn)
 
 	return diags
 }

@@ -25,6 +25,8 @@ func Provider() *schema.Provider {
 			"rockset_collection":           resourceCollection(),
 			"rockset_dynamodb_collection":  resourceDynamoDBCollection(),
 			"rockset_dynamodb_integration": resourceDynamoDBIntegration(),
+			"rockset_gcs_collection":       resourceGCSCollection(),
+			"rockset_gcs_integration":      resourceGCSIntegration(),
 			"rockset_mongodb_collection":   resourceMongoDBCollection(),
 			"rockset_mongodb_integration":  resourceMongoDBIntegration(),
 			"rockset_query_lambda":         resourceQueryLambda(),
@@ -55,7 +57,7 @@ func Provider() *schema.Provider {
 	}
 }
 
-func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
+func providerConfigure(_ context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	config := Config{
 		APIKey:    d.Get("api_key").(string),
 		APIServer: d.Get("api_server").(string),

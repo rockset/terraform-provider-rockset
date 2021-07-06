@@ -8,7 +8,25 @@ import (
 	"github.com/rockset/rockset-go-client"
 )
 
-func s3CollectionSchema() map[string]*schema.Schema {
+func resourceGCSCollection() *schema.Resource {
+	return &schema.Resource{
+		Description: "Manages a collection with an GCS source attached.",
+
+		CreateContext: resourceGCSCollectionCreate,
+		ReadContext:   resourceGCSCollectionRead,
+		DeleteContext: resourceCollectionDelete, // No change from base collection delete
+
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
+
+		// This schema will use the base collection schema as a foundation
+		// And layer on just the necessary fields for an gcs collection
+		Schema: mergeSchemas(baseCollectionSchema(), gcsCollectionSchema()),
+	}
+}
+
+func gcsCollectionSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"source": {
 			Description: "Defines a source for this collection.",
@@ -19,7 +37,7 @@ func s3CollectionSchema() map[string]*schema.Schema {
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
 					"integration_name": {
-						Description:  "The name of the Rockset S3 integration.",
+						Description:  "The name of the Rockset GCS integration.",
 						Type:         schema.TypeString,
 						ForceNew:     true,
 						Required:     true,
@@ -30,49 +48,24 @@ func s3CollectionSchema() map[string]*schema.Schema {
 						ForceNew:    true,
 						Optional:    true,
 						Default:     nil,
-						Description: "Simple path prefix to s3 key.",
-					},
-					"pattern": {
-						Type:        schema.TypeString,
-						ForceNew:    true,
-						Optional:    true,
-						Default:     nil,
-						Description: "Regex path prefix to s3 key.",
+						Description: "Simple path prefix to GCS key.",
 					},
 					"bucket": {
 						Type:        schema.TypeString,
 						ForceNew:    true,
 						Required:    true,
-						Description: "S3 bucket containing the target data.",
+						Description: "GCS bucket containing the target data.",
 					},
 					"format": formatSchema(),
-					"csv": csvSchema(),
-					"xml": xmlSchema(),
+					"csv":    csvSchema(),
+					"xml":    xmlSchema(),
 				},
 			},
 		},
-	} // End schema return
-} // End func
-
-func resourceS3Collection() *schema.Resource {
-	return &schema.Resource{
-		Description: "Manages a collection with an s3 source attached.",
-
-		CreateContext: resourceS3CollectionCreate,
-		ReadContext:   resourceS3CollectionRead,
-		DeleteContext: resourceCollectionDelete, // No change from base collection delete
-
-		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
-		},
-
-		// This schema will use the base collection schema as a foundation
-		// And layer on just the necessary fields for an s3 collection
-		Schema: mergeSchemas(baseCollectionSchema(), s3CollectionSchema()),
 	}
 }
 
-func resourceS3CollectionCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceGCSCollectionCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	rc := meta.(*rockset.RockClient)
 	var diags diag.Diagnostics
 	var err error
@@ -82,8 +75,8 @@ func resourceS3CollectionCreate(ctx context.Context, d *schema.ResourceData, met
 
 	// Add all base schema fields
 	params := createBaseCollectionRequest(d)
-	// Add fields for s3
-	sources, err := makeBucketSourceParams("s3", d.Get("source"))
+	// Add fields for gcs
+	sources, err := makeBucketSourceParams("gcs", d.Get("source"))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -104,7 +97,7 @@ func resourceS3CollectionCreate(ctx context.Context, d *schema.ResourceData, met
 	return diags
 }
 
-func resourceS3CollectionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceGCSCollectionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	rc := meta.(*rockset.RockClient)
 	var diags diag.Diagnostics
 	var err error
@@ -123,7 +116,7 @@ func resourceS3CollectionRead(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	// Gets all the fields relevant to an s3 collection
-	err = parseBucketCollection("s3", &collection, d)
+	err = parseBucketCollection("gcs", &collection, d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
