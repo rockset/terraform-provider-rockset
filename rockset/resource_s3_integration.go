@@ -23,21 +23,21 @@ func resourceS3Integration() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
 				Description:  "Unique identifier for the integration. Can contain alphanumeric or dash characters.",
 				Type:         schema.TypeString,
 				ForceNew:     true,
 				Required:     true,
 				ValidateFunc: rocksetNameValidator,
 			},
-			"description": &schema.Schema{
+			"description": {
 				Description: "Text describing the integration.",
 				Type:        schema.TypeString,
 				Default:     "created by Rockset terraform provider",
 				ForceNew:    true,
 				Optional:    true,
 			},
-			"aws_role_arn": &schema.Schema{
+			"aws_role_arn": {
 				Description: "The AWS Role Arn to use for this integration.",
 				Type:        schema.TypeString,
 				ForceNew:    true,
@@ -58,7 +58,7 @@ func resourceS3IntegrationCreate(ctx context.Context, d *schema.ResourceData, me
 		return diag.FromErr(err)
 	}
 
-	d.SetId(r.Data.GetName())
+	d.SetId(r.GetName())
 
 	return diags
 }
@@ -75,9 +75,9 @@ func resourceS3IntegrationRead(ctx context.Context, d *schema.ResourceData, meta
 		return diag.FromErr(err)
 	}
 
-	d.Set("name", response.Data.Name)
-	d.Set("description", response.Data.Description)
-	d.Set("aws_role_arn", response.Data.S3.AwsRole.AwsRoleArn)
+	_ = d.Set("name", response.Data.Name)
+	_ = d.Set("description", response.Data.Description)
+	_ = d.Set("aws_role_arn", response.Data.S3.AwsRole.AwsRoleArn)
 
 	return diags
 }
