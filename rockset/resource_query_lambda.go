@@ -3,6 +3,7 @@ package rockset
 import (
 	"context"
 	"fmt"
+	"github.com/rockset/rockset-go-client/option"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -251,13 +252,12 @@ func makeQueryLambdaSQL(in interface{}) *openapi.QueryLambdaSql {
 }
 
 func getQueryLambda(ctx context.Context, rc *rockset.RockClient, workspace string, name string) (*openapi.QueryLambda, error) {
-
-	resp, _, err := rc.QueryLambdasApi.ListQueryLambdasInWorkspace(ctx, workspace).Execute()
+	lambdas, err := rc.ListQueryLambdas(ctx, option.WithQueryLambdaWorkspace(workspace))
 	if err != nil {
 		return nil, err
 	}
 
-	for _, ql := range *resp.Data {
+	for _, ql := range lambdas {
 		if *ql.Name == name {
 			return &ql, nil
 		}

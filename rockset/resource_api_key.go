@@ -3,12 +3,12 @@ package rockset
 import (
 	"context"
 	"fmt"
+	"github.com/rockset/rockset-go-client/option"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rockset/rockset-go-client"
-	"github.com/rockset/rockset-go-client/openapi"
 )
 
 func resourceApiKey() *schema.Resource {
@@ -96,38 +96,6 @@ func resourceApiKeyCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	return diags
 }
 
-func getApiKey(ctx context.Context, rc *rockset.RockClient, name string, user string) (*openapi.ApiKey, error) {
-	// There's no get endpoint in this api
-	// We must list and find the api key
-	var resp openapi.ListApiKeysResponse
-	var err error
-	if user != "" {
-		// Then we need to use ListApiKeysAdmin to list the specified user's keys
-		resp, _, err = rc.APIKeysApi.ListApiKeysAdmin(ctx, user).Execute()
-	} else {
-		// Use ListApiKeys to list the current authentciated user's keys.
-		resp, _, err = rc.APIKeysApi.ListApiKeys(ctx).Execute()
-	}
-
-	if err != nil {
-		return nil, err
-	}
-
-	var foundApiKey openapi.ApiKey
-	for _, apiKey := range *resp.Data {
-		if apiKey.Name == name {
-			foundApiKey = apiKey
-			break
-		}
-	}
-
-	if foundApiKey.GetName() == "" { // Failed to find
-		return nil, fmt.Errorf("API key not found in list.")
-	}
-
-	return &foundApiKey, nil
-}
-
 func resourceApiKeyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	rc := meta.(*rockset.RockClient)
 	var diags diag.Diagnostics
@@ -137,7 +105,11 @@ func resourceApiKeyRead(ctx context.Context, d *schema.ResourceData, meta interf
 		return diag.FromErr(err)
 	}
 
-	foundApiKey, err := getApiKey(ctx, rc, name, user)
+	var options  []option.APIKeyOption
+	if user != "" {
+		options = append(options, option.ForUser(user))
+	}
+	foundApiKey, err := rc.GetAPIKey(ctx, name, options...)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -175,13 +147,12 @@ func resourceApiKeyDelete(ctx context.Context, d *schema.ResourceData, meta inte
 		return diag.FromErr(err)
 	}
 
+	var options []option.APIKeyOption
 	if user != "" {
-		// Then we need to use DeleteApiKeyAdmin delete as the specified user
-		_, _, err = rc.APIKeysApi.DeleteApiKeyAdmin(ctx, name, user).Execute()
-	} else {
-		// Use DeleteApiKey to delete as current authenticated user
-		_, _, err = rc.APIKeysApi.DeleteApiKey(ctx, name).Execute()
+		// Delete as the specified user
+		options = append(options, option.ForUser(user))
 	}
+	err = rc.DeleteAPIKey(ctx, name, options...)
 
 	if err != nil {
 		return diag.FromErr(err)

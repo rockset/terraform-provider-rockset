@@ -68,9 +68,7 @@ func testAccCheckRocksetMongoDBIntegrationDestroy(s *terraform.State) error {
 		}
 
 		name := rs.Primary.ID
-		// TODO: Change to convenience method
-		getReq := rc.IntegrationsApi.GetIntegration(testCtx, name)
-		_, _, err := getReq.Execute()
+		_, err := rc.GetIntegration(testCtx, name)
 		// An error would mean we didn't find the it, we expect an error
 		if err == nil {
 			return err
@@ -90,14 +88,12 @@ func testAccCheckRocksetMongoDBIntegrationExists(resource string, mongoDBIntegra
 		}
 
 		name := rs.Primary.ID
-		// TODO: Change to convenience method
-		getReq := rc.IntegrationsApi.GetIntegration(testCtx, name)
-		resp, _, err := getReq.Execute()
+		resp, err := rc.GetIntegration(testCtx, name)
 		if err != nil {
 			return err
 		}
 
-		*mongoDBIntegration = *resp.Data.Mongodb
+		*mongoDBIntegration = *resp.Mongodb
 
 		return nil
 	}

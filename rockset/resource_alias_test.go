@@ -1,6 +1,7 @@
 package rockset
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"testing"
@@ -21,9 +22,9 @@ func TestAccAlias_Basic(t *testing.T) {
 	var alias openapi.Alias
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
-		CheckDestroy: testAccCheckRocksetAliasDestroy,
+		CheckDestroy:      testAccCheckRocksetAliasDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckAliasBasic(),
@@ -142,15 +143,22 @@ func testAccCheckRocksetAliasDestroy(s *terraform.State) error {
 
 		workspace, name := workspaceAndNameFromID(rs.Primary.ID)
 
-		q := rc.AliasesApi.GetAlias(testCtx, name, workspace)
-		_, _, err := q.Execute()
-
+		_, err := rc.GetAlias(testCtx, name, workspace)
 		// A 404 would return an error. We expect a 404 here.
 		// Getting a 200 means we failed to delete, so terraform destroy failed.
 		if err == nil {
 			// We did not get a 404, delete must have failed.
 			return fmt.Errorf("Alias %s:%s still exists.", name, workspace)
 		}
+
+		var re rockset.Error
+		if errors.As(err, &re) {
+			if re.IsNotFoundError() {
+				// this is what we expect
+				continue
+			}
+		}
+		return err
 	}
 
 	return nil
@@ -166,13 +174,12 @@ func testAccCheckRocksetAliasExists(resource string, alias *openapi.Alias) resou
 
 		rc := testAccProvider.Meta().(*rockset.RockClient)
 
-		q := rc.AliasesApi.GetAlias(testCtx, workspace, name)
-		resp, _, err := q.Execute()
+		resp, err := rc.GetAlias(testCtx, workspace, name)
 		if err != nil {
 			return fmt.Errorf("Failed to get alias %s:%s", workspace, name)
 		}
 
-		*alias = *resp.Data
+		*alias = resp
 
 		return nil
 	}

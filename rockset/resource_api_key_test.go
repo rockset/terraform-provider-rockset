@@ -1,7 +1,9 @@
 package rockset
 
 import (
+	"errors"
 	"fmt"
+	"github.com/rockset/rockset-go-client/option"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -96,13 +98,26 @@ func testAccCheckRocksetApiKeyDestroy(s *terraform.State) error {
 		if err != nil {
 			return err
 		}
-		_, err = getApiKey(testCtx, rc, name, user)
+
+		var options  []option.APIKeyOption
+		if user != "" {
+			options = append(options, option.ForUser(user))
+		}
+		_, err = rc.GetAPIKey(testCtx, name, options...)
 
 		// An error would mean we didn't find the key, we expect an error
 		if err == nil {
 			// We did not get an error, so we failed to delete the key.
-			return fmt.Errorf("Api Key %s still exists.", rs.Primary.ID)
+			return fmt.Errorf("api Key %s still exists", rs.Primary.ID)
 		}
+
+		var re rockset.Error
+		if errors.As(err, &re) {
+			if re.IsNotFoundError() {
+				continue
+			}
+		}
+		return err
 	}
 
 	return nil
@@ -122,12 +137,16 @@ func testAccCheckRocksetApiKeyExists(resource string, apiKey *openapi.ApiKey) re
 			return err
 		}
 
-		resp, err := getApiKey(testCtx, rc, name, user)
+		var options  []option.APIKeyOption
+		if user != "" {
+			options = append(options, option.ForUser(user))
+		}
+		resp, err := rc.GetAPIKey(testCtx, name, options...)
 		if err != nil {
 			return err
 		}
 
-		*apiKey = *resp
+		*apiKey = resp
 
 		return nil
 	}

@@ -50,14 +50,12 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 	email := d.Get("email").(string)
 	roles := toStringArray(d.Get("roles").([]interface{}))
 
-	q := rc.UsersApi.CreateUser(ctx)
-	req := openapi.NewCreateUserRequest(email, roles)
-	resp, _, err := q.Body(*req).Execute()
+	resp, err := rc.CreateUser(ctx, email, roles)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(resp.Data.GetEmail())
+	d.SetId(resp.GetEmail())
 
 	return diags
 }
@@ -91,7 +89,7 @@ func resourceUserDelete(ctx context.Context, d *schema.ResourceData, meta interf
 	var diags diag.Diagnostics
 
 	email := d.Id()
-	err := deleteUserByEmail(ctx, rc, email)
+	err := rc.DeleteUser(ctx, email)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -100,24 +98,15 @@ func resourceUserDelete(ctx context.Context, d *schema.ResourceData, meta interf
 	return diags
 }
 
-func listUsers(ctx context.Context, rc *rockset.RockClient) (*[]openapi.User, error) {
-	resp, _, err := rc.UsersApi.ListUsers(ctx).Execute()
-	if err != nil {
-		return nil, err
-	}
-
-	return resp.Data, err
-}
-
 func getUserByEmail(ctx context.Context, rc *rockset.RockClient, email string) (*openapi.User, error) {
 	// The api currently has no get user method
-	usersList, err := listUsers(ctx, rc)
+	users, err := rc.ListUsers(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	var foundUser openapi.User
-	for _, currentUser := range *usersList {
+	for _, currentUser := range users {
 		if currentUser.Email == email {
 			foundUser = currentUser
 			break
@@ -129,12 +118,4 @@ func getUserByEmail(ctx context.Context, rc *rockset.RockClient, email string) (
 	}
 
 	return &foundUser, nil
-}
-
-func deleteUserByEmail(ctx context.Context, rc *rockset.RockClient, email string) error {
-	q := rc.UsersApi.DeleteUser(ctx, email)
-
-	_, _, err := q.Execute()
-
-	return err
 }
