@@ -49,21 +49,21 @@ Optional:
 
 Required:
 
-- **name** (String)
-- **output_field** (Block Set, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--field_mapping--output_field))
+- **name** (String) Name of the field mapping.
+- **output_field** (Block Set, Min: 1, Max: 1) List of output fields. (see [below for nested schema](#nestedblock--field_mapping--output_field))
 
 Optional:
 
-- **input_fields** (Block List) (see [below for nested schema](#nestedblock--field_mapping--input_fields))
+- **input_fields** (Block List) List of input fields. (see [below for nested schema](#nestedblock--field_mapping--input_fields))
 
 <a id="nestedblock--field_mapping--output_field"></a>
 ### Nested Schema for `field_mapping.output_field`
 
 Required:
 
-- **field_name** (String)
-- **on_error** (String)
-- **sql** (String)
+- **field_name** (String) Name of the new field created by your SQL expression.
+- **on_error** (String) Specifies the behavior for when there is an error while evaluating the SQL expression defined in the sql parameter. It accepts two valid strings as input: SKIP, which skips only this output field but continues the update, or FAIL, which causes this update to fail entirely.
+- **sql** (String) A string SQL expression used to define the new field being created. It may optionally take another field name as a parameter, or a param name alias specified in an input_fields field mapping.
 
 
 <a id="nestedblock--field_mapping--input_fields"></a>
@@ -71,10 +71,10 @@ Required:
 
 Required:
 
-- **field_name** (String)
-- **if_missing** (String)
-- **is_drop** (Boolean)
-- **param** (String)
+- **field_name** (String) Name of the field in your input data to apply this field mapping to.
+- **if_missing** (String) Specifies the behavior for when the field evaluates to either NULL or UNDEFINED. It accepts two valid strings as input: SKIP, which skips the update for this document entirely, or PASS, which will simply set this field to NULL.
+- **is_drop** (Boolean) Specifies whether or not to drop this field completely from the document as it is being inserted.
+- **param** (String) Name alias for this field which can be referred to in a SQL expression in the output_field attribute.
 
 
 

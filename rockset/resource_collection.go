@@ -54,27 +54,33 @@ func baseCollectionSchema() map[string]*schema.Schema {
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
 					"name": {
-						Type:     schema.TypeString,
-						ForceNew: true,
-						Required: true,
+						Description: "Name of the field mapping.",
+						Type:        schema.TypeString,
+						ForceNew:    true,
+						Required:    true,
 					},
 					"input_fields": {
-						Type:     schema.TypeList,
-						ForceNew: true,
-						Optional: true,
+						Description: "List of input fields.",
+						Type:        schema.TypeList,
+						ForceNew:    true,
+						Optional:    true,
 						Elem: &schema.Resource{
 							Schema: map[string]*schema.Schema{
 								"field_name": {
-									Type:     schema.TypeString,
-									ForceNew: true,
-									Required: true,
+									Description: "Name of the field in your input data to apply this field mapping to.",
+									Type:        schema.TypeString,
+									ForceNew:    true,
+									Required:    true,
 								},
 								"param": {
-									Type:     schema.TypeString,
-									ForceNew: true,
-									Required: true,
+									Description: "Name alias for this field which can be referred to in a SQL expression in the output_field attribute.",
+									Type:        schema.TypeString,
+									ForceNew:    true,
+									Required:    true,
 								},
 								"if_missing": {
+									Description: "Specifies the behavior for when the field evaluates to either NULL or UNDEFINED. " +
+										"It accepts two valid strings as input: SKIP, which skips the update for this document entirely, or PASS, which will simply set this field to NULL.",
 									Type:     schema.TypeString,
 									ForceNew: true,
 									Required: true,
@@ -82,32 +88,39 @@ func baseCollectionSchema() map[string]*schema.Schema {
 										regexp.MustCompile("^(PASS|SKIP)$"), "must be either 'PASS' or 'SKIP'"),
 								},
 								"is_drop": {
-									Type:     schema.TypeBool,
-									ForceNew: true,
-									Required: true,
+									Description: "Specifies whether or not to drop this field completely from the document as it is being inserted.",
+									Type:        schema.TypeBool,
+									ForceNew:    true,
+									Required:    true,
 								},
 							},
 						},
 					},
 					"output_field": {
-						Type:     schema.TypeSet,
-						ForceNew: true,
-						Required: true,
-						MinItems: 1,
-						MaxItems: 1,
+						Description: "List of output fields.",
+						Type:        schema.TypeSet,
+						ForceNew:    true,
+						Required:    true,
+						MinItems:    1,
+						MaxItems:    1,
 						Elem: &schema.Resource{
 							Schema: map[string]*schema.Schema{
 								"field_name": {
-									Type:     schema.TypeString,
-									ForceNew: true,
-									Required: true,
+									Description: "Name of the new field created by your SQL expression.",
+									Type:        schema.TypeString,
+									ForceNew:    true,
+									Required:    true,
 								},
 								"sql": {
+									Description: "A string SQL expression used to define the new field being created. " +
+										"It may optionally take another field name as a parameter, or a param name alias specified in an input_fields field mapping.",
 									Type:     schema.TypeString,
 									ForceNew: true,
 									Required: true,
 								},
 								"on_error": {
+									Description: "Specifies the behavior for when there is an error while evaluating the SQL expression defined in the sql parameter. " +
+										"It accepts two valid strings as input: SKIP, which skips only this output field but continues the update, or FAIL, which causes this update to fail entirely.",
 									Type:     schema.TypeString,
 									ForceNew: true,
 									Required: true,
