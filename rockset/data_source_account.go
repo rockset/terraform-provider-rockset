@@ -39,13 +39,12 @@ func dataSourceReadRocksetAccount(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	getReq := rc.OrganizationsApi.GetOrganization(ctx)
-	org, _, err := getReq.Execute()
+	org, err := rc.GetOrganization(ctx)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	err = d.Set("external_id", org.Data.ExternalId)
+	err = d.Set("external_id", org.ExternalId)
 	if err != nil {
 		return diag.FromErr(err)
 	}

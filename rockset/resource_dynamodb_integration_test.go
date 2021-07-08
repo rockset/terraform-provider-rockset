@@ -1,8 +1,8 @@
 package rockset
 
 import (
-	"log"
-	"path/filepath"
+	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -24,7 +24,7 @@ func TestAccDynamoDBIntegration_Basic(t *testing.T) {
 		CheckDestroy:      testAccCheckRocksetDynamoDBIntegrationDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckDynamoDBIntegrationBasic(),
+				Config: getHCL("dynamodb_integration.tf"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetDynamoDBIntegrationExists("rockset_dynamodb_integration.test", &dynamoDBIntegration),
 					resource.TestCheckResourceAttr("rockset_dynamodb_integration.test", "name", testDynamoDBIntegrationName),
@@ -37,16 +37,6 @@ func TestAccDynamoDBIntegration_Basic(t *testing.T) {
 	})
 }
 
-func testAccCheckDynamoDBIntegrationBasic() string {
-	hclPath := filepath.Join("..", "testdata", "dynamodb_integration.tf")
-	hcl, err := getFileContents(hclPath)
-	if err != nil {
-		log.Fatalf("Unexpected error loading test data %s", hclPath)
-	}
-
-	return hcl
-}
-
 func testAccCheckRocksetDynamoDBIntegrationDestroy(s *terraform.State) error {
 	rc := testAccProvider.Meta().(*rockset.RockClient)
 
@@ -56,13 +46,20 @@ func testAccCheckRocksetDynamoDBIntegrationDestroy(s *terraform.State) error {
 		}
 
 		name := rs.Primary.ID
-		// TODO: Change to convenience method
-		getReq := rc.IntegrationsApi.GetIntegration(testCtx, name)
-		_, _, err := getReq.Execute()
+		_, err := rc.GetIntegration(testCtx, name)
 		// An error would mean we didn't find the it, we expect an error
 		if err == nil {
-			return err
+			return fmt.Errorf("integration found")
 		}
+
+		var re rockset.Error
+		if errors.As(err, &re) {
+			if re.IsNotFoundError() {
+				continue
+			}
+		}
+
+		return err
 	}
 
 	return nil
@@ -78,14 +75,12 @@ func testAccCheckRocksetDynamoDBIntegrationExists(resource string, dynamoDBInteg
 		}
 
 		name := rs.Primary.ID
-		// TODO: Change to convenience method
-		getReq := rc.IntegrationsApi.GetIntegration(testCtx, name)
-		resp, _, err := getReq.Execute()
+		resp, err := rc.GetIntegration(testCtx, name)
 		if err != nil {
 			return err
 		}
 
-		*dynamoDBIntegration = *resp.Data.Dynamodb
+		*dynamoDBIntegration = *resp.Dynamodb
 
 		return nil
 	}

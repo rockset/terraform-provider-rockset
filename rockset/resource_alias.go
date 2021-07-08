@@ -174,9 +174,7 @@ func resourceAliasDelete(ctx context.Context, d *schema.ResourceData, meta inter
 
 	workspace, name := workspaceAndNameFromID(d.Id())
 
-	q := rc.AliasesApi.DeleteAlias(ctx, workspace, name)
-
-	_, _, err := q.Execute()
+	err := rc.DeleteAlias(ctx, workspace, name)
 	if err != nil {
 		return diag.FromErr(err)
 	}

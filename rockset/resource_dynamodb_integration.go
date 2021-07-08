@@ -69,15 +69,14 @@ func resourceDynamoDBIntegrationRead(ctx context.Context, d *schema.ResourceData
 
 	name := d.Id()
 
-	getReq := rc.IntegrationsApi.GetIntegration(ctx, name)
-	response, _, err := getReq.Execute()
+	integration, err := rc.GetIntegration(ctx, name)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	_ = d.Set("name", response.Data.Name)
-	_ = d.Set("description", response.Data.Description)
-	_ = d.Set("aws_role_arn", response.Data.Dynamodb.AwsRole.AwsRoleArn)
+	_ = d.Set("name", integration.Name)
+	_ = d.Set("description", integration.Description)
+	_ = d.Set("aws_role_arn", integration.Dynamodb.AwsRole.AwsRoleArn)
 
 	return diags
 }

@@ -56,9 +56,7 @@ func testAccCheckRocksetS3IntegrationDestroy(s *terraform.State) error {
 		}
 
 		name := rs.Primary.ID
-		// TODO: Change to convenience method
-		getReq := rc.IntegrationsApi.GetIntegration(testCtx, name)
-		_, _, err := getReq.Execute()
+		_, err := rc.GetIntegration(testCtx, name)
 		// An error would mean we didn't find the it, we expect an error
 		if err == nil {
 			return err
@@ -78,14 +76,12 @@ func testAccCheckRocksetS3IntegrationExists(resource string, s3Integration *open
 		}
 
 		name := rs.Primary.ID
-		// TODO: Change to convenience method
-		getReq := rc.IntegrationsApi.GetIntegration(testCtx, name)
-		resp, _, err := getReq.Execute()
+		resp, err := rc.GetIntegration(testCtx, name)
 		if err != nil {
 			return err
 		}
 
-		*s3Integration = *resp.Data.S3
+		*s3Integration = *resp.S3
 
 		return nil
 	}

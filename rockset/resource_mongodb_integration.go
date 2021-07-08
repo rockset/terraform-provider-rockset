@@ -69,14 +69,13 @@ func resourceMongoDBIntegrationRead(ctx context.Context, d *schema.ResourceData,
 
 	name := d.Id()
 
-	getReq := rc.IntegrationsApi.GetIntegration(ctx, name)
-	response, _, err := getReq.Execute()
+	response, err := rc.GetIntegration(ctx, name)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	_ = d.Set("name", response.Data.Name)
-	_ = d.Set("description", response.Data.Description)
+	_ = d.Set("name", response.Name)
+	_ = d.Set("description", response.Description)
 	// We cannot read the connection URI here. The API sanitizes it and removes secrets.
 
 	return diags
