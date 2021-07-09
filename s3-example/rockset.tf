@@ -31,26 +31,29 @@ resource rockset_s3_collection example {
   // we will bump the v# to a new number to force a new name
   // Collections cannot be updated, only replaced.
   name             = "cities-v1" 
-  integration_name = rockset_s3_integration.example.name
-  bucket           = aws_s3_bucket.rockset.bucket
-  pattern          = "cities.csv"
   retention_secs   = 10000
-  format = "csv"
 
-  csv {
-    first_line_as_column_names = false
-    column_names               = [
-      "country",
-      "city",
-      "population",
-      "visited"
-    ]
-    column_types = [ 
-      "STRING",
-      "STRING",
-      "STRING",
-      "STRING",
-    ]
+  source {
+    integration_name = rockset_s3_integration.example.name
+    bucket           = aws_s3_bucket.rockset.bucket
+    pattern          = "cities.csv"
+    format = "csv"
+
+    csv {
+      first_line_as_column_names = false
+      column_names               = [
+        "country",
+        "city",
+        "population",
+        "visited"
+      ]
+      column_types = [ 
+        "STRING",
+        "STRING",
+        "STRING",
+        "STRING",
+      ]
+    }
   }
 
   field_mapping {

@@ -1,8 +1,6 @@
 package rockset
 
 import (
-	"log"
-	"path/filepath"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -24,7 +22,7 @@ func TestAccS3Integration_Basic(t *testing.T) {
 		CheckDestroy:      testAccCheckRocksetS3IntegrationDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckS3IntegrationBasic(),
+				Config: getHCL("s3_integration.tf"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetS3IntegrationExists("rockset_s3_integration.test", &s3Integration),
 					resource.TestCheckResourceAttr("rockset_s3_integration.test", "name", testS3IntegrationName),
@@ -35,16 +33,6 @@ func TestAccS3Integration_Basic(t *testing.T) {
 			},
 		},
 	})
-}
-
-func testAccCheckS3IntegrationBasic() string {
-	hclPath := filepath.Join("..", "testdata", "s3_integration.tf")
-	hcl, err := getFileContents(hclPath)
-	if err != nil {
-		log.Fatalf("Unexpected error loading test data %s", hclPath)
-	}
-
-	return hcl
 }
 
 func testAccCheckRocksetS3IntegrationDestroy(s *terraform.State) error {

@@ -1,8 +1,8 @@
 terraform {
   required_providers {
     rockset = {
-      // Must be in both the module and the consuming side's requirements
-      source  = "terraform.rockset.com/rockset/rockset"
+      source  = "rockset/rockset"
+      version = ">= 0.2.0"
     }
     aws = {
       source  = "hashicorp/aws"
