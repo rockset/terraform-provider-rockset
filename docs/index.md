@@ -25,7 +25,7 @@ The preferred configuration method is by environment variables:
 
 `ROCKSET_APIKEY` and `ROCKSET_APISERVER`
 
-At this point in time the only valid option for api server is `api.rs2.usw2.rockset.com`
+At this point in time the only valid option for api server is `https://api.rs2.usw2.rockset.com`
 
 Please secure your Rockset api key and never share it or commit it in plain text to any repository.
 

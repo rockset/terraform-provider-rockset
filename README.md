@@ -18,7 +18,7 @@ E.g.
 #!/bin/bash
 
 export ROCKSET_APIKEY=$(aws ssm get-parameter --name '/terraform/rockset_api_key' --with-decryption --output text | awk '{print $7}')
-export ROCKSET_APISERVER="api.rs2.usw2.rockset.com"
+export ROCKSET_APISERVER="https://api.rs2.usw2.rockset.com"
 ```
 
 ### Environment variables
@@ -37,7 +37,7 @@ For the below config you would `export TF_VAR_ROCKSET_APIKEY="your apikey"`
 ```
 provider rockset {
   api_key = "var.ROCKSET_APIKEY"
-  api_server = "api.rs2.usw2.rockset.com"
+  api_server = "https://api.rs2.usw2.rockset.com"
 }
 ```
 
