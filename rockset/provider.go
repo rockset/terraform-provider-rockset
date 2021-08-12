@@ -51,7 +51,7 @@ func Provider() *schema.Provider {
 			"api_server": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     "api.rs2.usw2.rockset.com",
+				Default:     "https://api.rs2.usw2.rockset.com",
 				Description: "The API server for accessing Rockset",
 			},
 		},
