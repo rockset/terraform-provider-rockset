@@ -51,7 +51,7 @@ func Provider() *schema.Provider {
 			"api_server": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     "https://api.rs2.usw2.rockset.com",
+				Default:     "",
 				Description: "The API server for accessing Rockset",
 			},
 		},
@@ -73,7 +73,11 @@ func (c *Config) Client() (interface{}, diag.Diagnostics) {
 	var opts []rockset.RockOption
 
 	if c.APIKey != "" {
-		opts = append(opts, rockset.WithAPIKey(c.APIKey), rockset.WithAPIServer(c.APIServer))
+		opts = append(opts, rockset.WithAPIKey(c.APIKey))
+	}
+
+	if c.APIServer != "" {
+		opts = append(opts, rockset.WithAPIServer(c.APIServer))
 	}
 
 	rc, err := rockset.NewClient(opts...)
