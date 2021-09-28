@@ -37,14 +37,22 @@ func flattenBucketSourceParams(sourceType string, sources *[]openapi.Source) []i
 		m := make(map[string]interface{})
 		formatParams := source.FormatParams
 
-		if *formatParams.Json {
+		isJson, jsonOk := source.FormatParams.GetJsonOk()
+		csvParams, csvOk := source.FormatParams.GetCsvOk()
+		xmlParams, xmlOk := source.FormatParams.GetXmlOk()
+		if jsonOk && *isJson {
 			m["format"] = "json"
-		} else if formatParams.Csv != nil {
+		} else if csvOk && csvParams != nil {
 			m["format"] = "csv"
 			m["csv"] = flattenCsvParams(formatParams.Csv)
-		} else if formatParams.Xml != nil {
+		} else if xmlOk && xmlParams != nil {
 			m["format"] = "xml"
 			m["xml"] = flattenXmlParams(formatParams.Xml)
+		} else {
+			// There's a bug in the API currently
+			// format_params is null if the format is JSON
+			// TODO: Once fixed, this else path should be an error
+			m["format"] = "json"
 		}
 
 		m["integration_name"] = source.IntegrationName
