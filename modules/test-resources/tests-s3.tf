@@ -1,6 +1,7 @@
 locals {
   csv_path = "${path.module}/files/cities.csv"
   xml_path = "${path.module}/files/cities.xml"
+  json_path = "${path.module}/files/cities.json"
 }
 
 resource "aws_s3_bucket" "provider_tests" {
@@ -26,6 +27,13 @@ resource "aws_s3_bucket_object" "xml" {
   key    = "cities.xml"
   source = local.xml_path
   etag   = filemd5(local.xml_path)
+}
+
+resource "aws_s3_bucket_object" "json" {
+  bucket = aws_s3_bucket.provider_tests.bucket
+  key    = "cities.json"
+  source = local.json_path
+  etag   = filemd5(local.json_path)
 }
 
 resource "aws_iam_role" "rockset_s3_integration" {

@@ -1,0 +1,14 @@
+{
+  "cities": {
+     "city": [
+        {
+           "country": "USA",
+           "city": [
+              "Burlington"
+           ],
+           "population": "46000",
+           "visited": "true"
+        },
+     ]
+  }
+}
