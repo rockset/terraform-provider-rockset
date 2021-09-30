@@ -3,6 +3,7 @@ package rockset
 import (
 	"context"
 	"fmt"
+
 	"github.com/rockset/rockset-go-client/option"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -64,7 +65,7 @@ func resourceQueryLambda() *schema.Resource {
 							Required: true,
 						},
 						"default_parameter": {
-							Type:     schema.TypeList,
+							Type:     schema.TypeSet,
 							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -228,6 +229,8 @@ func resourceQueryLambdaDelete(ctx context.Context, d *schema.ResourceData, meta
 
 func makeQueryLambdaSQL(in interface{}) *openapi.QueryLambdaSql {
 	sql := openapi.QueryLambdaSql{}
+	empty := []openapi.QueryParameter{}
+	sql.DefaultParameters = &empty
 
 	if set, ok := in.(*schema.Set); ok {
 		for _, s := range set.List() {
@@ -237,11 +240,7 @@ func makeQueryLambdaSQL(in interface{}) *openapi.QueryLambdaSql {
 					case "query":
 						sql.Query = v.(string)
 					case "default_parameter":
-						if sql.DefaultParameters == nil {
-							empty := []openapi.QueryParameter{}
-							sql.DefaultParameters = &empty
-						}
-						*sql.DefaultParameters = append(*sql.DefaultParameters, makeDefaultParameters(v))
+						*sql.DefaultParameters = makeDefaultParameters(v)
 					}
 				}
 			}
@@ -266,27 +265,27 @@ func getQueryLambda(ctx context.Context, rc *rockset.RockClient, workspace strin
 	return nil, fmt.Errorf("query lambda %s not found in workspace %s", name, workspace)
 }
 
-func makeDefaultParameters(input interface{}) openapi.QueryParameter {
-	dp := openapi.QueryParameter{}
+func makeDefaultParameters(input interface{}) []openapi.QueryParameter {
+	dps := make([]openapi.QueryParameter, 0, input.(*schema.Set).Len())
 
-	if in, ok := input.([]interface{}); ok {
-		for _, i := range in {
-			if cfg, ok := i.(map[string]interface{}); ok {
-				for k, v := range cfg {
-					switch k {
-					case "name":
-						dp.Name = v.(string)
-					case "type":
-						dp.Type = v.(string)
-					case "value":
-						dp.Value = v.(string)
-					}
+	for _, i := range input.(*schema.Set).List() {
+		if cfg, ok := i.(map[string]interface{}); ok {
+			dp := openapi.QueryParameter{}
+			for k, v := range cfg {
+				switch k {
+				case "name":
+					dp.Name = v.(string)
+				case "type":
+					dp.Type = v.(string)
+				case "value":
+					dp.Value = v.(string)
 				}
 			}
+			dps = append(dps, dp)
 		}
 	}
 
-	return dp
+	return dps
 }
 
 func flattenQueryLambdaSQL(sql *openapi.QueryLambdaSql) []interface{} {

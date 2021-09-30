@@ -2,8 +2,6 @@ package rockset
 
 import (
 	"fmt"
-	"log"
-	"path/filepath"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -14,34 +12,35 @@ import (
 )
 
 const testQueryLambdaName = "terraform-provider-acceptance-tests-query-lambda-basic"
+const testQueryLambdaNameNoDefaults = "terraform-provider-acceptance-tests-query-lambda-no-defaults"
 
 func TestAccQueryLambda_Basic(t *testing.T) {
 	var queryLambda openapi.QueryLambda
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
-		CheckDestroy: testAccCheckRocksetQueryLambdaDestroy,
+		CheckDestroy:      testAccCheckRocksetQueryLambdaDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckQueryLambdaBasic(),
+				Config: getHCL("query_lambda_basic.tf"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetQueryLambdaExists("rockset_query_lambda.test", &queryLambda),
 					resource.TestCheckResourceAttr("rockset_query_lambda.test", "name", testQueryLambdaName),
 					resource.TestCheckResourceAttr("rockset_query_lambda.test", "description", "basic lambda"),
-					testAccCheckSql(t, &queryLambda, "SELECT * FROM commons._events WHERE _events._event_time > :timestamp LIMIT 1"),
+					testAccCheckSql(t, &queryLambda, "SELECT * FROM commons._events WHERE _events._event_time > :start AND _events._event_time < :end LIMIT 1"),
 					resource.TestCheckResourceAttrSet("rockset_query_lambda.test", "version"),
 					resource.TestCheckResourceAttrSet("rockset_query_lambda.test", "state"),
 				),
 				ExpectNonEmptyPlan: false,
 			},
 			{
-				Config: testAccCheckQueryLambdaUpdated(),
+				Config: getHCL("query_lambda_basic_updated.tf"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetQueryLambdaExists("rockset_query_lambda.test", &queryLambda),
 					resource.TestCheckResourceAttr("rockset_query_lambda.test", "name", testQueryLambdaName),
 					resource.TestCheckResourceAttr("rockset_query_lambda.test", "description", "updated description"),
-					testAccCheckSql(t, &queryLambda, "SELECT * FROM commons._events WHERE _events._event_time >= :timestamp LIMIT 2"),
+					testAccCheckSql(t, &queryLambda, "SELECT * FROM commons._events WHERE _events._event_time > :start AND _events._event_time < :end LIMIT 2"),
 					resource.TestCheckResourceAttrSet("rockset_query_lambda.test", "version"),
 					resource.TestCheckResourceAttrSet("rockset_query_lambda.test", "state"),
 				),
@@ -51,24 +50,28 @@ func TestAccQueryLambda_Basic(t *testing.T) {
 	})
 }
 
-func testAccCheckQueryLambdaBasic() string {
-	hclPath := filepath.Join("..", "testdata", "query_lambda_basic.tf")
-	hclString, err := getFileContents(hclPath)
-	if err != nil {
-		log.Fatalf("Unexpected error loading test data %s", hclPath)
-	}
+func TestAccQueryLambda_NoDefaults(t *testing.T) {
+	var queryLambda openapi.QueryLambda
 
-	return hclString
-}
-
-func testAccCheckQueryLambdaUpdated() string {
-	hclPath := filepath.Join("..", "testdata", "query_lambda_basic_updated.tf")
-	hclString, err := getFileContents(hclPath)
-	if err != nil {
-		log.Fatalf("Unexpected error loading test data %s", hclPath)
-	}
-
-	return hclString
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckRocksetQueryLambdaDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: getHCL("query_lambda_no_defaults.tf"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRocksetQueryLambdaExists("rockset_query_lambda.test", &queryLambda),
+					resource.TestCheckResourceAttr("rockset_query_lambda.test", "name", testQueryLambdaNameNoDefaults),
+					resource.TestCheckResourceAttr("rockset_query_lambda.test", "description", "basic lambda"),
+					testAccCheckSql(t, &queryLambda, "SELECT * FROM commons._events LIMIT 1"),
+					resource.TestCheckResourceAttrSet("rockset_query_lambda.test", "version"),
+					resource.TestCheckResourceAttrSet("rockset_query_lambda.test", "state"),
+				),
+				ExpectNonEmptyPlan: false,
+			},
+		},
+	})
 }
 
 func testAccCheckRocksetQueryLambdaDestroy(s *terraform.State) error {
