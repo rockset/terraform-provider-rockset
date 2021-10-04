@@ -78,7 +78,7 @@ func testAccCheckRocksetQueryLambdaDestroy(s *terraform.State) error {
 	rc := testAccProvider.Meta().(*rockset.RockClient)
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "rockset_api_key" {
+		if rs.Type != "rockset_query_lambda" {
 			continue
 		}
 
