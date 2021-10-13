@@ -1,6 +1,7 @@
 package rockset
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"reflect"
@@ -22,7 +23,7 @@ func TestAccAlias_Basic(t *testing.T) {
 	var alias openapi.Alias
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
+		PreCheck:          func() { testAccPreCheck(t); testAccRemoveAlias(t, testAliasWorkspace, testAliasName) },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckRocksetAliasDestroy,
 		Steps: []resource.TestStep{
@@ -72,6 +73,18 @@ func TestAccAlias_Basic(t *testing.T) {
 			},
 		},
 	})
+}
+
+// clean up any lingering test alias from a previous run
+func testAccRemoveAlias(t *testing.T, workspace, alias string) {
+	rc, err := rockset.NewClient()
+	if err != nil {
+		t.Fatal("could not create rockset client")
+	}
+	err = rc.DeleteAlias(context.TODO(), workspace, alias)
+	if err != nil {
+		t.Logf("could not delete alias %s.%s: %v", workspace, alias, err)
+	}
 }
 
 func testAccCheckAliasBasic() string {
