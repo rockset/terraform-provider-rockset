@@ -46,6 +46,12 @@ func baseCollectionSchema() map[string]*schema.Schema {
 			Optional:     true,
 			ValidateFunc: validation.IntAtLeast(1),
 		},
+		"field_mapping_query": {
+			Type:        schema.TypeString,
+			ForceNew:    true,
+			Optional:    true,
+			Description: "Field mapping SQL query.",
+		},
 		"field_mapping": {
 			Description: "List of field mappings.",
 			Type:        schema.TypeList,
@@ -290,6 +296,11 @@ func parseBaseCollection(collection *openapi.Collection, d *schema.ResourceData)
 		return err
 	}
 
+	err = d.Set("field_mapping_query", collection.GetFieldMappingQuery().Sql)
+	if err != nil {
+		return err
+	}
+
 	err = d.Set("clustering_key", flattenClusteringKeys(collection.GetClusteringKey()))
 	if err != nil {
 		return err
@@ -327,6 +338,11 @@ func createBaseCollectionRequest(d *schema.ResourceData) *openapi.CreateCollecti
 		// But the value is in fact a list.
 		clusteringKeys := makeClusteringKeys(v.([]interface{}))
 		params.ClusteringKey = clusteringKeys
+	}
+
+	if v, ok := d.GetOk("field_mapping_query"); ok {
+		fmq := v.(string)
+		params.FieldMappingQuery = &openapi.FieldMappingQuery{Sql: &fmq}
 	}
 
 	return params

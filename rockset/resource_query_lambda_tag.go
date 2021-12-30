@@ -113,7 +113,15 @@ func resourceQueryLambdaTagDelete(ctx context.Context, d *schema.ResourceData, m
 
 	workspace, queryLambdaName, tagName := fromQueryLambdaTagID(d.Id())
 
-	err := rc.DeleteQueryLambdaTag(ctx, workspace, queryLambdaName, tagName)
+	ql, err := rc.GetQueryLambdaVersionByTag(ctx, workspace, queryLambdaName, tagName)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	v := ql.GetVersion()
+	v.GetVersion()
+
+	err = rc.DeleteQueryLambdaVersion(ctx, workspace, queryLambdaName, v.GetVersion())
 	if err != nil {
 		return diag.FromErr(err)
 	}

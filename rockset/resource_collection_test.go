@@ -16,6 +16,7 @@ const testCollectionName = "terraform-provider-acceptance-tests-basic"
 const testCollectionWorkspace = "commons"
 const testCollectionDescription = "Terraform provider acceptance tests."
 const testCollectionNameFieldMappings = "terraform-provider-acceptance-tests-fieldmapping"
+const testCollectionNameFieldMappingQuery = "terraform-provider-acceptance-tests-fieldmappingquery"
 const testCollectionNameClustering = "terraform-provider-acceptance-tests-clustering"
 
 /*
@@ -28,9 +29,9 @@ func TestAccCollection_Basic(t *testing.T) {
 	var collection openapi.Collection
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
-		CheckDestroy: testAccCheckRocksetCollectionDestroy,
+		CheckDestroy:      testAccCheckRocksetCollectionDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckCollectionBasic(),
@@ -62,9 +63,9 @@ func TestAccCollection_FieldMapping(t *testing.T) {
 	var collection openapi.Collection
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
-		CheckDestroy: testAccCheckRocksetCollectionDestroy,
+		CheckDestroy:      testAccCheckRocksetCollectionDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckCollectionFieldMapping(),
@@ -82,13 +83,37 @@ func TestAccCollection_FieldMapping(t *testing.T) {
 	})
 }
 
+func TestAccCollection_FieldMappingQuery(t *testing.T) {
+	var collection openapi.Collection
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckRocksetCollectionDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckCollectionFieldMappingQuery(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRocksetCollectionExists("rockset_collection.test", &collection),
+					resource.TestCheckResourceAttr("rockset_collection.test", "name", testCollectionNameFieldMappingQuery),
+					resource.TestCheckResourceAttr("rockset_collection.test", "workspace", testCollectionWorkspace),
+					resource.TestCheckResourceAttr("rockset_collection.test", "description", testCollectionDescription),
+					resource.TestCheckResourceAttr("rockset_collection.test", "field_mapping_query", "SELECT * FROM _input"),
+					testAccCheckRetentionSecsMatches(&collection, 65),
+				),
+				ExpectNonEmptyPlan: false,
+			},
+		},
+	})
+}
+
 func TestAccCollection_ClusteringKey(t *testing.T) {
 	var collection openapi.Collection
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
-		CheckDestroy: testAccCheckRocksetCollectionDestroy,
+		CheckDestroy:      testAccCheckRocksetCollectionDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckCollectionClusteringKeyAuto(),
@@ -144,6 +169,19 @@ resource rockset_collection test {
 			sql        = "CAST(:pop as int)"
 		}
 	}
+}
+`, testCollectionNameFieldMappings, testCollectionWorkspace, testCollectionDescription)
+}
+
+func testAccCheckCollectionFieldMappingQuery() string {
+	return fmt.Sprintf(`
+resource rockset_collection test {
+	name        = "%s"
+	workspace   = "%s"
+	description = "%s"
+	retention_secs 	= 65
+
+	field_mapping_query = "SELECT * FROM _input"
 }
 `, testCollectionNameFieldMappings, testCollectionWorkspace, testCollectionDescription)
 }

@@ -48,7 +48,7 @@ func testAccCheckGCSSourcesExpected(t *testing.T, collection *openapi.Collection
 		source := sources[0]
 
 		assert.Equal(t, source.GetIntegrationName(), "terraform-provider-acceptance-tests-gcs-collection")
-		require.Len(t,  collection.GetFieldMappings(), 2)
+		require.Len(t, collection.GetFieldMappings(), 2)
 		return nil
 	}
 }

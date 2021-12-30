@@ -19,7 +19,6 @@ func TestAccAccount_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "account_id", "318212636800"),
 					resource.TestCheckResourceAttr(resourceName, "organization", "Rockset Circleci"),
 					resource.TestCheckResourceAttr(resourceName, "rockset_user", "arn:aws:iam::318212636800:user/rockset"),
-					resource.TestCheckResourceAttr(resourceName, "company", "Used for testing of rockset-go-client and terraform-provider-rockset"),
 				),
 			},
 		},

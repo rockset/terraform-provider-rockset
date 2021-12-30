@@ -105,7 +105,7 @@ func resourceApiKeyRead(ctx context.Context, d *schema.ResourceData, meta interf
 		return diag.FromErr(err)
 	}
 
-	var options  []option.APIKeyOption
+	var options []option.APIKeyOption
 	if user != "" {
 		options = append(options, option.ForUser(user))
 	}

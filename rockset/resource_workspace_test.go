@@ -17,9 +17,9 @@ func TestAccWorkspace_Basic(t *testing.T) {
 	var workspace openapi.Workspace
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
-		CheckDestroy: testAccCheckRocksetWorkspaceDestroy,
+		CheckDestroy:      testAccCheckRocksetWorkspaceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckWorkspaceBasic(),

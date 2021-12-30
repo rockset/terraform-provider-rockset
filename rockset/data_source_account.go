@@ -32,11 +32,6 @@ func dataSourceRocksetAccount() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 			},
-			"company": {
-				Description: "The name of the company for the API key.",
-				Type:        schema.TypeString,
-				Computed:    true,
-			},
 			"rockset_user": {
 				Description: "The name of the Rockset user used for AWS trust policies.",
 				Type:        schema.TypeString,
@@ -67,6 +62,7 @@ func dataSourceRocksetAccount() *schema.Resource {
 	}
 }
 
+// TODO: this should come from the API call, but it doesn't expose it yet
 const accountID = "318212636800"
 
 func dataSourceReadRocksetAccount(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -88,9 +84,6 @@ func dataSourceReadRocksetAccount(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 	if err = d.Set("rockset_user", org.RocksetUser); err != nil {
-		return diag.FromErr(err)
-	}
-	if err = d.Set("company", org.CompanyName); err != nil {
 		return diag.FromErr(err)
 	}
 	if err = d.Set("clusters", flattenClusterParams(*org.Clusters)); err != nil {
