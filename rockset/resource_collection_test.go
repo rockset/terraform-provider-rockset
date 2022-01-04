@@ -183,7 +183,7 @@ resource rockset_collection test {
 
 	field_mapping_query = "SELECT * FROM _input"
 }
-`, testCollectionNameFieldMappings, testCollectionWorkspace, testCollectionDescription)
+`, testCollectionNameFieldMappingQuery, testCollectionWorkspace, testCollectionDescription)
 }
 
 func testAccCheckCollectionBasic() string {

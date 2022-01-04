@@ -295,8 +295,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/posener/complete v1.1.1/go.mod h1:em0nMJCgc9GFtwrmVmEMR/ZL6WyhyjMBndrE9hABlRI=
 github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4/go.mod h1:xMI15A0UPsDsEKsMN9yxemIoYk6Tm2C1GtYGdfGttqA=
-github.com/rockset/rockset-go-client v0.13.1 h1:rrC5H1Gl6Gj0E8TyXtH9Uh7YLSiia/+/c9WvzRE7NlE=
-github.com/rockset/rockset-go-client v0.13.1/go.mod h1:kwf1hcc8ERyaJJTmmRZS41/hQWg8fn+V1At1AKrv38s=
+github.com/rockset/rockset-go-client v0.13.2 h1:G4YYDYvHt4iSK0RFMqMfv6DvC826HdBr+WRTUey+BHo=
+github.com/rockset/rockset-go-client v0.13.2/go.mod h1:kwf1hcc8ERyaJJTmmRZS41/hQWg8fn+V1At1AKrv38s=
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
 github.com/rs/xid v1.3.0/go.mod h1:trrq9SKmegXys3aeAKXMUTdJsYXVwGY3RLcfgqegfbg=
 github.com/rs/zerolog v1.26.1 h1:/ihwxqH+4z8UxyI70wM1z9yCvkWcfz/a3mj48k/Zngc=

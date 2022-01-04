@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.10.1
-	github.com/rockset/rockset-go-client v0.13.1
+	github.com/rockset/rockset-go-client v0.13.2
 	github.com/rs/zerolog v1.26.1
 	github.com/stretchr/testify v1.7.0
 )
