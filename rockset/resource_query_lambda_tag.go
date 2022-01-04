@@ -96,7 +96,7 @@ func resourceQueryLambdaTagRead(ctx context.Context, d *schema.ResourceData, met
 
 	queryLambdaTag, err := rc.GetQueryLambdaVersionByTag(ctx, workspace, queryLambdaName, tagName)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("failed to read query lambda tag %s.%s:%s: %v", workspace, queryLambdaName, tagName, err)
 	}
 
 	err = parseQueryLambdaTag(&queryLambdaTag, d)
@@ -115,7 +115,7 @@ func resourceQueryLambdaTagDelete(ctx context.Context, d *schema.ResourceData, m
 
 	err := rc.DeleteQueryLambdaTag(ctx, workspace, queryLambdaName, tagName)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("failed to delete query lambda tag %s.%s:%s: %v", workspace, queryLambdaName, tagName, err)
 	}
 
 	return diags

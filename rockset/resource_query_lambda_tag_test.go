@@ -53,7 +53,7 @@ func testAccCheckRocksetQueryLambdaTagDestroy(s *terraform.State) error {
 		// An error would mean we didn't find the key, we expect an error
 		if err == nil {
 			// We did not get an error, so we failed to delete the key.
-			return fmt.Errorf("Query Lambda %s still exists.", rs.Primary.ID)
+			return fmt.Errorf("query Lambda %s still exists", rs.Primary.ID)
 		}
 	}
 

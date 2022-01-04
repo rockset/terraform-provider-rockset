@@ -59,6 +59,12 @@ func gcsCollectionSchema() map[string]*schema.Schema {
 					"format": formatSchema(),
 					"csv":    csvSchema(),
 					"xml":    xmlSchema(),
+					"field_mapping_query": {
+						Type:        schema.TypeString,
+						ForceNew:    true,
+						Optional:    true,
+						Description: "Field mapping SQL query.",
+					},
 				},
 			},
 		},

@@ -2,7 +2,6 @@ package rockset
 
 import (
 	"context"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rockset/rockset-go-client"
@@ -46,8 +45,14 @@ func s3CollectionSchema() map[string]*schema.Schema {
 						Description: "S3 bucket containing the target data.",
 					},
 					"format": formatSchema(),
-					"csv": csvSchema(),
-					"xml": xmlSchema(),
+					"csv":    csvSchema(),
+					"xml":    xmlSchema(),
+					"field_mapping_query": {
+						Type:        schema.TypeString,
+						ForceNew:    true,
+						Optional:    true,
+						Description: "Field mapping SQL query.",
+					},
 				},
 			},
 		},

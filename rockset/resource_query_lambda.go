@@ -219,9 +219,9 @@ func resourceQueryLambdaDelete(ctx context.Context, d *schema.ResourceData, meta
 	var diags diag.Diagnostics
 
 	workspace, name := workspaceAndNameFromID(d.Id())
-	_, _, err := rc.QueryLambdasApi.DeleteQueryLambda(ctx, workspace, name).Execute()
+	err := rc.DeleteQueryLambda(ctx, workspace, name)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.Errorf("failed to delete query lambda %s.%s: %v", workspace, name, err)
 	}
 
 	return diags
@@ -229,7 +229,7 @@ func resourceQueryLambdaDelete(ctx context.Context, d *schema.ResourceData, meta
 
 func makeQueryLambdaSQL(in interface{}) *openapi.QueryLambdaSql {
 	sql := openapi.QueryLambdaSql{}
-	empty := []openapi.QueryParameter{}
+	var empty []openapi.QueryParameter
 	sql.DefaultParameters = &empty
 
 	if set, ok := in.(*schema.Set); ok {

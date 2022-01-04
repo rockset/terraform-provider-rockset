@@ -19,9 +19,9 @@ func TestAccApiKey_Basic(t *testing.T) {
 	var apiKey openapi.ApiKey
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
-		CheckDestroy: testAccCheckRocksetApiKeyDestroy,
+		CheckDestroy:      testAccCheckRocksetApiKeyDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckApiKeyBasic(),
@@ -99,7 +99,7 @@ func testAccCheckRocksetApiKeyDestroy(s *terraform.State) error {
 			return err
 		}
 
-		var options  []option.APIKeyOption
+		var options []option.APIKeyOption
 		if user != "" {
 			options = append(options, option.ForUser(user))
 		}
@@ -137,7 +137,7 @@ func testAccCheckRocksetApiKeyExists(resource string, apiKey *openapi.ApiKey) re
 			return err
 		}
 
-		var options  []option.APIKeyOption
+		var options []option.APIKeyOption
 		if user != "" {
 			options = append(options, option.ForUser(user))
 		}

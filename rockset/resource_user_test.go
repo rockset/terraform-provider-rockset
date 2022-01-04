@@ -19,9 +19,9 @@ func TestAccUser_Basic(t *testing.T) {
 	var user openapi.User
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
-		CheckDestroy: testAccCheckRocksetUserDestroy,
+		CheckDestroy:      testAccCheckRocksetUserDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckUserBasic(),

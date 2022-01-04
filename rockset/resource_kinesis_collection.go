@@ -60,6 +60,12 @@ func kinesisCollectionSchema() map[string]*schema.Schema {
 							Type: schema.TypeString,
 						},
 					},
+					"field_mapping_query": {
+						Type:        schema.TypeString,
+						ForceNew:    true,
+						Optional:    true,
+						Description: "Field mapping SQL query.",
+					},
 				},
 			},
 		},
