@@ -131,6 +131,30 @@ func TestAccCollection_ClusteringKey(t *testing.T) {
 	})
 }
 
+func TestAccCollection_InsertOnly(t *testing.T) {
+	var collection openapi.Collection
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckRocksetCollectionDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckCollectionInsertOnly(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRocksetCollectionExists("rockset_collection.test", &collection),
+					resource.TestCheckResourceAttr("rockset_collection.test", "name", testCollectionName),
+					resource.TestCheckResourceAttr("rockset_collection.test", "workspace", testCollectionWorkspace),
+					resource.TestCheckResourceAttr("rockset_collection.test", "description", testCollectionDescription),
+					resource.TestCheckResourceAttr("rockset_collection.test", "insert_only", "true"),
+					testAccCheckRetentionSecsMatches(&collection, 60),
+				),
+				ExpectNonEmptyPlan: false,
+			},
+		},
+	})
+}
+
 func testAccCheckCollectionClusteringKeyAuto() string {
 	return fmt.Sprintf(`
 resource rockset_collection test {
@@ -144,6 +168,18 @@ resource rockset_collection test {
 	}
 }
 `, testCollectionNameClustering, testCollectionWorkspace, testCollectionDescription)
+}
+
+func testAccCheckCollectionInsertOnly() string {
+	return fmt.Sprintf(`
+resource rockset_collection test {
+	name						= "%s"
+	workspace				= "%s"
+	description			= "%s"
+	retention_secs	= 60
+	insert_only     = "true"
+}
+`, testCollectionName, testCollectionWorkspace, testCollectionDescription)
 }
 
 func testAccCheckCollectionFieldMapping() string {
