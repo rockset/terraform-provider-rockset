@@ -19,38 +19,44 @@ import (
 // for just a write api collection.
 func baseCollectionSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"name": {
-			Description:  "Unique identifier for the collection. Can contain alphanumeric or dash characters.",
-			Type:         schema.TypeString,
-			ForceNew:     true,
-			Required:     true,
-			ValidateFunc: rocksetNameValidator,
-		},
+		"clustering_key": {
+			Description: "List of clustering fields.",
+			Type:        schema.TypeList,
+			ForceNew:    true,
+			Optional:    true,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"field_name": {
+						Description: "The name of a field. Parsed as a SQL qualified name.",
+						Type:        schema.TypeString,
+						ForceNew:    true,
+						Required:    true,
+					},
+					"type": {
+						Description: "The type of partitions on a field.",
+						Type:        schema.TypeString,
+						ForceNew:    true,
+						Optional:    true,
+					},
+					"keys": {
+						Description: "The values for partitioning of a field.",
+						Type:        schema.TypeList,
+						ForceNew:    true,
+						Optional:    true,
+						MinItems:    1,
+						Elem: &schema.Schema{
+							Type: schema.TypeString,
+						},
+					},
+				},
+			},
+		}, // End clustering_key
 		"description": {
 			Description: "Text describing the collection.",
 			Type:        schema.TypeString,
 			Default:     "created by Rockset terraform provider",
 			ForceNew:    true,
 			Optional:    true,
-		},
-		"workspace": {
-			Description: "The name of the workspace.",
-			Type:        schema.TypeString,
-			ForceNew:    true,
-			Required:    true,
-		},
-		"retention_secs": {
-			Description:  "Number of seconds after which data is purged. Based on event time.",
-			Type:         schema.TypeInt,
-			ForceNew:     true,
-			Optional:     true,
-			ValidateFunc: validation.IntAtLeast(1),
-		},
-		"field_mapping_query": {
-			Type:        schema.TypeString,
-			ForceNew:    true,
-			Optional:    true,
-			Description: "Field mapping SQL query.",
 		},
 		"field_mapping": {
 			Description: "List of field mappings.",
@@ -139,38 +145,12 @@ func baseCollectionSchema() map[string]*schema.Schema {
 				},
 			},
 		}, // End field_mapping
-		"clustering_key": {
-			Description: "List of clustering fields.",
-			Type:        schema.TypeList,
+		"field_mapping_query": {
+			Type:        schema.TypeString,
 			ForceNew:    true,
 			Optional:    true,
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"field_name": {
-						Description: "The name of a field. Parsed as a SQL qualified name.",
-						Type:        schema.TypeString,
-						ForceNew:    true,
-						Required:    true,
-					},
-					"type": {
-						Description: "The type of partitions on a field.",
-						Type:        schema.TypeString,
-						ForceNew:    true,
-						Optional:    true,
-					},
-					"keys": {
-						Description: "The values for partitioning of a field.",
-						Type:        schema.TypeList,
-						ForceNew:    true,
-						Optional:    true,
-						MinItems:    1,
-						Elem: &schema.Schema{
-							Type: schema.TypeString,
-						},
-					},
-				},
-			},
-		}, // End clustering_key
+			Description: "Field mapping SQL query.",
+		},
 		"field_schemas": {
 			Description: "List of field schemas.",
 			Type:        schema.TypeList,
@@ -223,6 +203,13 @@ func baseCollectionSchema() map[string]*schema.Schema {
 				},
 			},
 		}, // End field_schemas
+		"insert_only": {
+			Type:        schema.TypeBool,
+			ForceNew:    true,
+			Optional:    true,
+			Default:     false,
+			Description: "If true disallows updates and deletes, but makes indexing more efficient",
+		},
 		"inverted_index_group_encoding_options": {
 			Description: "Inverted index group encoding options.",
 			Type:        schema.TypeSet,
@@ -259,6 +246,26 @@ func baseCollectionSchema() map[string]*schema.Schema {
 				},
 			},
 		}, // End inverted_index_group_encoding_options
+		"name": {
+			Description:  "Unique identifier for the collection. Can contain alphanumeric or dash characters.",
+			Type:         schema.TypeString,
+			ForceNew:     true,
+			Required:     true,
+			ValidateFunc: rocksetNameValidator,
+		},
+		"retention_secs": {
+			Description:  "Number of seconds after which data is purged. Based on event time.",
+			Type:         schema.TypeInt,
+			ForceNew:     true,
+			Optional:     true,
+			ValidateFunc: validation.IntAtLeast(1),
+		},
+		"workspace": {
+			Description: "The name of the workspace.",
+			Type:        schema.TypeString,
+			ForceNew:    true,
+			Required:    true,
+		},
 	} // End schema return
 } // End func
 
@@ -306,6 +313,11 @@ func parseBaseCollection(collection *openapi.Collection, d *schema.ResourceData)
 		return err
 	}
 
+	err = d.Set("insert_only", collection.GetInsertOnly())
+	if err != nil {
+		return err
+	}
+
 	return nil // No errors
 }
 
@@ -343,6 +355,11 @@ func createBaseCollectionRequest(d *schema.ResourceData) *openapi.CreateCollecti
 	if v, ok := d.GetOk("field_mapping_query"); ok {
 		fmq := v.(string)
 		params.FieldMappingQuery = &openapi.FieldMappingQuery{Sql: &fmq}
+	}
+
+	if v, ok := d.GetOk("insert_only"); ok {
+		insertOnly := v.(bool)
+		params.InsertOnly = &insertOnly
 	}
 
 	return params
