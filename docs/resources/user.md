@@ -17,11 +17,11 @@ Manages a Rockset User.
 
 ### Required
 
-- **email** (String) Email address of the user. Also used to identify the user.
-- **roles** (List of String) List of roles for the user. E.g. 'admin', 'member', 'read-only'.
+- `email` (String) Email address of the user. Also used to identify the user.
+- `roles` (List of String) List of roles for the user. E.g. 'admin', 'member', 'read-only'.
 
 ### Optional
 
-- **id** (String) The ID of this resource.
+- `id` (String) The ID of this resource.
 
 

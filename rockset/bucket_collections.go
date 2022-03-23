@@ -17,7 +17,7 @@ import (
 func parseBucketCollection(sourceType string, collection *openapi.Collection, d *schema.ResourceData) error {
 	var err error
 
-	sourcesList := *collection.Sources
+	sourcesList := collection.Sources
 	sourcesCount := len(sourcesList)
 	if sourcesCount < 1 {
 		return fmt.Errorf("expected %s to have at least 1 source", collection.GetName())
@@ -73,7 +73,7 @@ func flattenBucketSourceParams(sourceType string, sources *[]openapi.Source) []i
 	return convertedList
 }
 
-func makeBucketSourceParams(sourceType string, in interface{}) (*[]openapi.Source, error) {
+func makeBucketSourceParams(sourceType string, in interface{}) ([]openapi.Source, error) {
 	sources := make([]openapi.Source, 0, in.(*schema.Set).Len())
 
 	for _, i := range in.(*schema.Set).List() {
@@ -128,7 +128,7 @@ func makeBucketSourceParams(sourceType string, in interface{}) (*[]openapi.Sourc
 		}
 	}
 
-	return &sources, nil
+	return sources, nil
 }
 
 func flattenCsvParams(params *openapi.CsvParams) []interface{} {
@@ -139,8 +139,8 @@ func flattenCsvParams(params *openapi.CsvParams) []interface{} {
 	m["encoding"] = *params.Encoding
 	m["escape_char"] = *params.EscapeChar
 	m["quote_char"] = *params.QuoteChar
-	m["column_names"] = *params.ColumnNames
-	m["column_types"] = *params.ColumnTypes
+	m["column_names"] = params.ColumnNames
+	m["column_types"] = params.ColumnTypes
 
 	return []interface{}{m}
 }
@@ -163,9 +163,9 @@ func makeCsvParams(in interface{}) *openapi.CsvParams {
 				case "escape_char":
 					m.EscapeChar = toStringPtrNilIfEmpty(v.(string))
 				case "column_names":
-					m.ColumnNames = toStringArrayPtr(toStringArray(v.([]interface{})))
+					m.ColumnNames = toStringArray(v.([]interface{}))
 				case "column_types":
-					m.ColumnTypes = toStringArrayPtr(toStringArray(v.([]interface{})))
+					m.ColumnTypes = toStringArray(v.([]interface{}))
 				}
 			}
 		}

@@ -17,12 +17,12 @@ Manages a Rockset Kinesis Integration.
 
 ### Required
 
-- **aws_role_arn** (String) The AWS Role Arn to use for this integration.
-- **name** (String) Unique identifier for the integration. Can contain alphanumeric or dash characters.
+- `aws_role_arn` (String) The AWS Role Arn to use for this integration.
+- `name` (String) Unique identifier for the integration. Can contain alphanumeric or dash characters.
 
 ### Optional
 
-- **description** (String) Text describing the integration.
-- **id** (String) The ID of this resource.
+- `description` (String) Text describing the integration.
+- `id` (String) The ID of this resource.
 
 

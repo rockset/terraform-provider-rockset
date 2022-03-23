@@ -17,12 +17,12 @@ Manages a Rockset MongoDB Integration.
 
 ### Required
 
-- **connection_uri** (String, Sensitive) MongoDB connection URI string. The password is scrubbed from the URI when fetched by the API so this field is NOT set on imports and reads.
-- **name** (String) Unique identifier for the integration. Can contain alphanumeric or dash characters.
+- `connection_uri` (String, Sensitive) MongoDB connection URI string. The password is scrubbed from the URI when fetched by the API so this field is NOT set on imports and reads.
+- `name` (String) Unique identifier for the integration. Can contain alphanumeric or dash characters.
 
 ### Optional
 
-- **description** (String) Text describing the integration.
-- **id** (String) The ID of this resource.
+- `description` (String) Text describing the integration.
+- `id` (String) The ID of this resource.
 
 

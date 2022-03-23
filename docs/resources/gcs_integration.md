@@ -17,12 +17,12 @@ Manages a Rockset GCS Integration.
 
 ### Required
 
-- **name** (String) Unique identifier for the integration. Can contain alphanumeric or dash characters.
-- **service_account_key** (String) The GCP service account key JSON.
+- `name` (String) Unique identifier for the integration. Can contain alphanumeric or dash characters.
+- `service_account_key` (String) The GCP service account key JSON.
 
 ### Optional
 
-- **description** (String) Text describing the integration.
-- **id** (String) The ID of this resource.
+- `description` (String) Text describing the integration.
+- `id` (String) The ID of this resource.
 
 
