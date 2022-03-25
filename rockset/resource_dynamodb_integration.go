@@ -23,22 +23,28 @@ func resourceDynamoDBIntegration() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
 				Description:  "Unique identifier for the integration. Can contain alphanumeric or dash characters.",
 				Type:         schema.TypeString,
 				ForceNew:     true,
 				Required:     true,
 				ValidateFunc: rocksetNameValidator,
 			},
-			"description": &schema.Schema{
+			"description": {
 				Description: "Text describing the integration.",
 				Type:        schema.TypeString,
 				Default:     "created by Rockset terraform provider",
 				ForceNew:    true,
 				Optional:    true,
 			},
-			"aws_role_arn": &schema.Schema{
+			"aws_role_arn": {
 				Description: "The AWS Role Arn to use for this integration.",
+				Type:        schema.TypeString,
+				ForceNew:    true,
+				Required:    true,
+			},
+			"s3_export_bucket_name": {
+				Description: "AWS S3 bucket name used for exporting the DynamoDB tables.",
 				Type:        schema.TypeString,
 				ForceNew:    true,
 				Required:    true,
@@ -53,6 +59,7 @@ func resourceDynamoDBIntegrationCreate(ctx context.Context, d *schema.ResourceDa
 
 	r, err := rc.CreateDynamoDBIntegration(ctx, d.Get("name").(string),
 		option.AWSRole(d.Get("aws_role_arn").(string)),
+		d.Get("s3_export_bucket_name").(string),
 		option.WithDynamoDBIntegrationDescription(d.Get("description").(string)))
 	if err != nil {
 		return diag.FromErr(err)
@@ -74,9 +81,10 @@ func resourceDynamoDBIntegrationRead(ctx context.Context, d *schema.ResourceData
 		return diag.FromErr(err)
 	}
 
-	_ = d.Set("name", integration.Name)
-	_ = d.Set("description", integration.Description)
-	_ = d.Set("aws_role_arn", integration.Dynamodb.AwsRole.AwsRoleArn)
+	_ = d.Set("name", integration.GetName())
+	_ = d.Set("description", integration.GetDescription())
+	_ = d.Set("aws_role_arn", integration.Dynamodb.AwsRole.GetAwsRoleArn())
+	_ = d.Set("s3_export_bucket_name", integration.Dynamodb.GetS3ExportBucketName())
 
 	return diags
 }
