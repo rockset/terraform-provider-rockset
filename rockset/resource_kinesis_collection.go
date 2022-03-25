@@ -154,7 +154,7 @@ func parseKinesisCollection(collection *openapi.Collection, d *schema.ResourceDa
 
 	var err error
 
-	sourcesList := *collection.Sources
+	sourcesList := collection.Sources
 	sourcesCount := len(sourcesList)
 	if sourcesCount < 1 {
 		return fmt.Errorf("expected %s to have at least 1 source", collection.GetName())
@@ -200,7 +200,7 @@ func flattenKinesisSourceParams(sources *[]openapi.Source) []interface{} {
 	return convertedList
 }
 
-func makeKinesisSourceParams(in interface{}) *[]openapi.Source {
+func makeKinesisSourceParams(in interface{}) []openapi.Source {
 	sources := make([]openapi.Source, 0, in.(*schema.Set).Len())
 
 	for _, i := range in.(*schema.Set).List() {
@@ -211,7 +211,7 @@ func makeKinesisSourceParams(in interface{}) *[]openapi.Source {
 			source.FormatParams = &format
 			// API returns an empty list if this isn't set...
 			// So we have to default it to an empty list here.
-			source.Kinesis.DmsPrimaryKey = toStringArrayPtr(make([]string, 0))
+			source.Kinesis.DmsPrimaryKey = make([]string, 0)
 
 			for k, v := range val {
 				switch k {
@@ -232,12 +232,12 @@ func makeKinesisSourceParams(in interface{}) *[]openapi.Source {
 						source.FormatParams.PostgresDms = openapi.PtrBool(true)
 					}
 				case "dms_primary_key":
-					source.Kinesis.DmsPrimaryKey = toStringArrayPtr(toStringArray(v.([]interface{})))
+					source.Kinesis.DmsPrimaryKey = toStringArray(v.([]interface{}))
 				}
 			}
 			sources = append(sources, source)
 		}
 	}
 
-	return &sources
+	return sources
 }

@@ -14,6 +14,7 @@ import (
 const testDynamoDBIntegrationName = "terraform-provider-acceptance-test-dynamodb-integration"
 const testDynamoDBIntegrationDescription = "Terraform provider acceptance tests."
 const testDynamoDBIntegrationRoleArn = "arn:aws:iam::469279130686:role/terraform-provider-rockset-tests-dynamo"
+const testDynamoDBIntegrationS3Bucket = "terraform-provider-rockset-tests"
 
 func TestAccDynamoDBIntegration_Basic(t *testing.T) {
 	var dynamoDBIntegration openapi.DynamodbIntegration
@@ -30,6 +31,7 @@ func TestAccDynamoDBIntegration_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr("rockset_dynamodb_integration.test", "name", testDynamoDBIntegrationName),
 					resource.TestCheckResourceAttr("rockset_dynamodb_integration.test", "description", testDynamoDBIntegrationDescription),
 					resource.TestCheckResourceAttr("rockset_dynamodb_integration.test", "aws_role_arn", testDynamoDBIntegrationRoleArn),
+					resource.TestCheckResourceAttr("rockset_dynamodb_integration.test", "s3_export_bucket_name", testDynamoDBIntegrationS3Bucket),
 				),
 				ExpectNonEmptyPlan: false,
 			},

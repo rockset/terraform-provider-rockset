@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rockset/rockset-go-client"
-	"github.com/rockset/rockset-go-client/openapi"
 	"github.com/rockset/rockset-go-client/option"
 )
 
@@ -48,54 +47,13 @@ func resourceKinesisIntegration() *schema.Resource {
 	}
 }
 
-// TODO: Replace once fixed in go client
-func CreateKinesisIntegration(rc *rockset.RockClient, ctx context.Context, name string, creds option.AWSCredentialsFn,
-	options ...option.KinesisIntegrationOption) (openapi.Integration, error) {
-	var err error
-	var resp openapi.CreateIntegrationResponse
-	q := rc.IntegrationsApi.CreateIntegration(ctx)
-	req := openapi.NewCreateIntegrationRequest(name)
-
-	c := option.AWSCredentials{}
-	creds(&c)
-
-	opts := option.KinesisIntegration{}
-	for _, o := range options {
-		o(&opts)
-	}
-
-	req.Kinesis = &openapi.KinesisIntegration{}
-	if opts.Description != nil {
-		req.Description = opts.Description
-	}
-	if c.AwsRole != nil {
-		req.Kinesis.AwsRole = c.AwsRole
-	}
-
-	err = rc.Retry(ctx, func() error {
-		resp, _, err = q.Body(*req).Execute()
-		return err
-	})
-
-	if err != nil {
-		return openapi.Integration{}, err
-	}
-
-	return resp.GetData(), nil
-}
-
 func resourceKinesisIntegrationCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	rc := meta.(*rockset.RockClient)
 	var diags diag.Diagnostics
 
-	// TODO: replace once go client is fixed
-	r, err := CreateKinesisIntegration(rc, ctx, d.Get("name").(string),
+	r, err := rc.CreateKinesisIntegration(ctx, d.Get("name").(string),
 		option.AWSRole(d.Get("aws_role_arn").(string)),
 		option.WithKinesisIntegrationDescription(d.Get("description").(string)))
-
-	// r, err := rc.CreateKinesisIntegration(ctx, d.Get("name").(string),
-	// 	option.AWSRole(d.Get("aws_role_arn").(string)),
-	// 	option.WithKinesisIntegrationDescription(d.Get("description").(string)))
 	if err != nil {
 		return diag.FromErr(err)
 	}

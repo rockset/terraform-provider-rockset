@@ -1,12 +1,10 @@
-# [BETA] Terraform Provider for Rockset
+# Terraform Provider for Rockset
 
-**This is a work in progress and is considered a beta at this point in time. No official support provided until GA.**
+This terraform provider implements the Rockset API. See the docs folder for which resources have been implemented.
 
-This terraform provider implements the Rockset API. See the docs folder for what has been implemented so far.
+## Setting and securing your Rockset API Key
 
-## Setting and securing your Rockset api key
-
-We encourage you to keep your rockset api key secure and *never put it in plain text in terraform provider config or commit it to repositories*. 
+We encourage you to keep your Rockset api key secure and *never* put it in plain text in terraform provider config or commit it to repositories. 
 Using environment variables is the recommended way to configure the provider or run the acceptance tests.
 
 ### Securing your key

@@ -230,7 +230,7 @@ func resourceQueryLambdaDelete(ctx context.Context, d *schema.ResourceData, meta
 func makeQueryLambdaSQL(in interface{}) *openapi.QueryLambdaSql {
 	sql := openapi.QueryLambdaSql{}
 	var empty []openapi.QueryParameter
-	sql.DefaultParameters = &empty
+	sql.DefaultParameters = empty
 
 	if set, ok := in.(*schema.Set); ok {
 		for _, s := range set.List() {
@@ -240,7 +240,7 @@ func makeQueryLambdaSQL(in interface{}) *openapi.QueryLambdaSql {
 					case "query":
 						sql.Query = v.(string)
 					case "default_parameter":
-						*sql.DefaultParameters = makeDefaultParameters(v)
+						sql.DefaultParameters = makeDefaultParameters(v)
 					}
 				}
 			}
@@ -293,7 +293,7 @@ func flattenQueryLambdaSQL(sql *openapi.QueryLambdaSql) []interface{} {
 	m["query"] = sql.Query
 
 	var r []interface{}
-	for _, qp := range *sql.DefaultParameters {
+	for _, qp := range sql.DefaultParameters {
 		m := make(map[string]interface{})
 		m["name"] = qp.Name
 		m["type"] = qp.Type

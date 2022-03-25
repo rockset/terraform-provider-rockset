@@ -17,13 +17,13 @@ Manages an alias for a set of collections.
 
 ### Required
 
-- **collections** (List of String) List of collections for this alias to refer to.
-- **name** (String) Unique identifier for the alias. Can contain alphanumeric or dash characters.
-- **workspace** (String) Name of the workspace the alias will be in.
+- `collections` (List of String) List of collections for this alias to refer to.
+- `name` (String) Unique identifier for the alias. Can contain alphanumeric or dash characters.
+- `workspace` (String) Name of the workspace the alias will be in.
 
 ### Optional
 
-- **description** (String) Text describing the alias.
-- **id** (String) The ID of this resource.
+- `description` (String) Text describing the alias.
+- `id` (String) The ID of this resource.
 
 

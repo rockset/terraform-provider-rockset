@@ -7,9 +7,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceRocksetusers() *schema.Resource {
+func dataSourceRocksetUsers() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceReadRocksetusers,
+		ReadContext: dataSourceReadRocksetUsers,
 
 		Schema: map[string]*schema.Schema{
 			"sample_attribute": {
@@ -20,7 +20,7 @@ func dataSourceRocksetusers() *schema.Resource {
 		}}
 }
 
-func dataSourceReadRocksetusers(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceReadRocksetUsers(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	//rc := meta.(*rockset.RockClient)
 	//var diags diag.Diagnostics
 

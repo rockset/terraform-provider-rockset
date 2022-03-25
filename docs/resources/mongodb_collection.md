@@ -17,31 +17,33 @@ Manages a collection with an MongoDB source attached.
 
 ### Required
 
-- **name** (String) Unique identifier for the collection. Can contain alphanumeric or dash characters.
-- **workspace** (String) The name of the workspace.
+- `name` (String) Unique identifier for the collection. Can contain alphanumeric or dash characters.
+- `workspace` (String) The name of the workspace.
 
 ### Optional
 
-- **clustering_key** (Block List) List of clustering fields. (see [below for nested schema](#nestedblock--clustering_key))
-- **description** (String) Text describing the collection.
-- **field_mapping** (Block List) List of field mappings. (see [below for nested schema](#nestedblock--field_mapping))
-- **field_schemas** (Block List) List of field schemas. (see [below for nested schema](#nestedblock--field_schemas))
-- **id** (String) The ID of this resource.
-- **inverted_index_group_encoding_options** (Block Set, Max: 1) Inverted index group encoding options. (see [below for nested schema](#nestedblock--inverted_index_group_encoding_options))
-- **retention_secs** (Number) Number of seconds after which data is purged. Based on event time.
-- **source** (Block Set) Defines a source for this collection. (see [below for nested schema](#nestedblock--source))
+- `clustering_key` (Block List) List of clustering fields. (see [below for nested schema](#nestedblock--clustering_key))
+- `description` (String) Text describing the collection.
+- `field_mapping` (Block List) List of field mappings. (see [below for nested schema](#nestedblock--field_mapping))
+- `field_mapping_query` (String) Field mapping SQL query.
+- `field_schemas` (Block List) List of field schemas. (see [below for nested schema](#nestedblock--field_schemas))
+- `id` (String) The ID of this resource.
+- `insert_only` (Boolean) If true disallows updates and deletes, but makes indexing more efficient
+- `inverted_index_group_encoding_options` (Block Set, Max: 1) Inverted index group encoding options. (see [below for nested schema](#nestedblock--inverted_index_group_encoding_options))
+- `retention_secs` (Number) Number of seconds after which data is purged. Based on event time.
+- `source` (Block Set) Defines a source for this collection. (see [below for nested schema](#nestedblock--source))
 
 <a id="nestedblock--clustering_key"></a>
 ### Nested Schema for `clustering_key`
 
 Required:
 
-- **field_name** (String) The name of a field. Parsed as a SQL qualified name.
+- `field_name` (String) The name of a field. Parsed as a SQL qualified name.
 
 Optional:
 
-- **keys** (List of String) The values for partitioning of a field.
-- **type** (String) The type of partitions on a field.
+- `keys` (List of String) The values for partitioning of a field.
+- `type` (String) The type of partitions on a field.
 
 
 <a id="nestedblock--field_mapping"></a>
@@ -49,21 +51,21 @@ Optional:
 
 Required:
 
-- **name** (String) Name of the field mapping.
-- **output_field** (Block Set, Min: 1, Max: 1) List of output fields. (see [below for nested schema](#nestedblock--field_mapping--output_field))
+- `name` (String) Name of the field mapping.
+- `output_field` (Block Set, Min: 1, Max: 1) List of output fields. (see [below for nested schema](#nestedblock--field_mapping--output_field))
 
 Optional:
 
-- **input_fields** (Block List) List of input fields. (see [below for nested schema](#nestedblock--field_mapping--input_fields))
+- `input_fields` (Block List) List of input fields. (see [below for nested schema](#nestedblock--field_mapping--input_fields))
 
 <a id="nestedblock--field_mapping--output_field"></a>
 ### Nested Schema for `field_mapping.output_field`
 
 Required:
 
-- **field_name** (String) Name of the new field created by your SQL expression.
-- **on_error** (String) Specifies the behavior for when there is an error while evaluating the SQL expression defined in the sql parameter. It accepts two valid strings as input: SKIP, which skips only this output field but continues the update, or FAIL, which causes this update to fail entirely.
-- **sql** (String) A string SQL expression used to define the new field being created. It may optionally take another field name as a parameter, or a param name alias specified in an input_fields field mapping.
+- `field_name` (String) Name of the new field created by your SQL expression.
+- `on_error` (String) Specifies the behavior for when there is an error while evaluating the SQL expression defined in the sql parameter. It accepts two valid strings as input: SKIP, which skips only this output field but continues the update, or FAIL, which causes this update to fail entirely.
+- `sql` (String) A string SQL expression used to define the new field being created. It may optionally take another field name as a parameter, or a param name alias specified in an input_fields field mapping.
 
 
 <a id="nestedblock--field_mapping--input_fields"></a>
@@ -71,10 +73,10 @@ Required:
 
 Required:
 
-- **field_name** (String) Name of the field in your input data to apply this field mapping to.
-- **if_missing** (String) Specifies the behavior for when the field evaluates to either NULL or UNDEFINED. It accepts two valid strings as input: SKIP, which skips the update for this document entirely, or PASS, which will simply set this field to NULL.
-- **is_drop** (Boolean) Specifies whether or not to drop this field completely from the document as it is being inserted.
-- **param** (String) Name alias for this field which can be referred to in a SQL expression in the output_field attribute.
+- `field_name` (String) Name of the field in your input data to apply this field mapping to.
+- `if_missing` (String) Specifies the behavior for when the field evaluates to either NULL or UNDEFINED. It accepts two valid strings as input: SKIP, which skips the update for this document entirely, or PASS, which will simply set this field to NULL.
+- `is_drop` (Boolean) Specifies whether or not to drop this field completely from the document as it is being inserted.
+- `param` (String) Name alias for this field which can be referred to in a SQL expression in the output_field attribute.
 
 
 
@@ -83,11 +85,11 @@ Required:
 
 Required:
 
-- **column_index_mode** (String) Whether to have store or no_store.
-- **field_name** (String) The name of a field. Parsed as a SQL qualified name.
-- **index_mode** (String) Whether to have index or no_index.
-- **range_index_mode** (String) Whether to have v1_index or no_index.
-- **type_index_mode** (String) Whether to have index or no_index.
+- `column_index_mode` (String) Whether to have store or no_store.
+- `field_name` (String) The name of a field. Parsed as a SQL qualified name.
+- `index_mode` (String) Whether to have index or no_index.
+- `range_index_mode` (String) Whether to have v1_index or no_index.
+- `type_index_mode` (String) Whether to have index or no_index.
 
 
 <a id="nestedblock--inverted_index_group_encoding_options"></a>
@@ -95,10 +97,10 @@ Required:
 
 Required:
 
-- **doc_id_codec** (String) Doc id codec.
-- **event_time_codec** (String) Event time codec.
-- **group_size** (Number) Group size.
-- **restart_length** (Number) Restart length.
+- `doc_id_codec` (String) Doc id codec.
+- `event_time_codec` (String) Event time codec.
+- `group_size` (Number) Group size.
+- `restart_length` (Number) Restart length.
 
 
 <a id="nestedblock--source"></a>
@@ -106,22 +108,26 @@ Required:
 
 Required:
 
-- **collection_name** (String) MongoDB collection name of the target collection.
-- **database_name** (String) MongoDB database name containing the target collection.
-- **integration_name** (String) The name of the Rockset MongoDB integration.
+- `collection_name` (String) MongoDB collection name of the target collection.
+- `database_name` (String) MongoDB database name containing the target collection.
+- `integration_name` (String) The name of the Rockset MongoDB integration.
+
+Optional:
+
+- `field_mapping_query` (String) Field mapping SQL query.
 
 Read-Only:
 
-- **scan_end_time** (String) MongoDB scan end time.
-- **scan_records_processed** (Number) Number of records inserted using scan.
-- **scan_start_time** (String) MongoDB scan start time.
-- **scan_total_records** (Number) Number of records in MongoDB table at time of scan.
-- **state** (String) State of current ingest for this table.
-- **stream_last_delete_processed_at** (String) ISO-8601 date when delete from source was last processed.
-- **stream_last_insert_processed_at** (String) ISO-8601 date when new insert from source was last processed.
-- **stream_last_update_processed_at** (String) ISO-8601 date when update from source was last processed.
-- **stream_records_deleted** (Number) Number of new records deleted using stream.
-- **stream_records_inserted** (Number) Number of new records inserted using stream.
-- **stream_records_updated** (Number) Number of new records updated using stream.
+- `scan_end_time` (String) MongoDB scan end time.
+- `scan_records_processed` (Number) Number of records inserted using scan.
+- `scan_start_time` (String) MongoDB scan start time.
+- `scan_total_records` (Number) Number of records in MongoDB table at time of scan.
+- `state` (String) State of current ingest for this table.
+- `stream_last_delete_processed_at` (String) ISO-8601 date when delete from source was last processed.
+- `stream_last_insert_processed_at` (String) ISO-8601 date when new insert from source was last processed.
+- `stream_last_update_processed_at` (String) ISO-8601 date when update from source was last processed.
+- `stream_records_deleted` (Number) Number of new records deleted using stream.
+- `stream_records_inserted` (Number) Number of new records inserted using stream.
+- `stream_records_updated` (Number) Number of new records updated using stream.
 
 

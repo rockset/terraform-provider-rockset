@@ -6,36 +6,41 @@ description: |-
   
 ---
 
-# [BETA] Rockset Provider
+# Rockset Provider
 
-**This is a work in progress and is considered a beta at this point in time. No official support provided until GA.**
-
-Visit https://rockset.com/ for more information on Rockset.
+The [Rockset](https://rockset.com/) provider is used to interact with the 
+[Rockset REST API](https://rockset.com/docs/rest-api/) 
+via the [Go client](https://github.com/rockset/rockset-go-client)
+in order to configure resources of a Rockset organization.
 
 Visit https://github.com/rockset/terraform-provider-rockset to file any issues for bugs or feedback related to the provider.
 
-```
+## Example Usage
+
+```hcl
+terraform {
+  required_providers 
+    rockset = {
+      source  = "rockset/rockset"
+      version = "~> 0.4"
+    }
+  }
+}
+
 // Use env vars ROCKSET_APIKEY and ROCKSET_APISERVER to configure provider.
 provider rockset {}
 ```
+~> Hard-coding credentials into any Terraform configuration is not recommended, and risks secret leakage should this file ever be committed to a public version control system. See [Environment Variables](#environment-variables) for a better alternative.
 
-## Schema
+## Argument Reference
 
-The preferred configuration method is by environment variables:
+* `api_key` - (optional) Your Rockset [API key](https://rockset.com/docs/rest-api/#createapikey). If not present it will be sourced from the `ROCKSET_APIKEY` environment variable.
+* `api_server` - (optional) Your Rockset API server. If not present it will be sourced from the `ROCKSET_APISERVER` environment variable.
 
-`ROCKSET_APIKEY` and `ROCKSET_APISERVER`
+The preferred configuration method is by environment variables, as it doesn't expose the API key in a configuration file.
 
-For a list of valid options for `ROCKSET_APISERVER` visit:
+For a list of valid options for Rockset API server visit:
 
-https://docs.rockset.com/rest-api/
+https://rockset.com/docs/rest-api/
 
-If no api server is specified the default chosen will be us-west-2.
-
-Please secure your Rockset api key and never share it or commit it in plain text to any repository.
-
-Optionally you can configure your api key and api server directly.
-
-### Optional
-
-- **api_key** (String, Sensitive) The API key used to access Rockset
-- **api_server** (String) The API server for accessing Rockset
+If no API server is specified the default chosen will be `us-west-2`.

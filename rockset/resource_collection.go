@@ -202,7 +202,7 @@ func baseCollectionSchema() map[string]*schema.Schema {
 					},
 				},
 			},
-		}, // End field_schemas
+		},
 		"insert_only": {
 			Type:        schema.TypeBool,
 			ForceNew:    true,
@@ -349,7 +349,7 @@ func createBaseCollectionRequest(d *schema.ResourceData) *openapi.CreateCollecti
 		// The api and the go client use the singular 'ClusteringKey'
 		// But the value is in fact a list.
 		clusteringKeys := makeClusteringKeys(v.([]interface{}))
-		params.ClusteringKey = clusteringKeys
+		params.ClusteringKey = *clusteringKeys
 	}
 
 	if v, ok := d.GetOk("field_mapping_query"); ok {
@@ -462,7 +462,7 @@ func makeClusteringKeys(v []interface{}) *[]openapi.FieldPartition {
 
 		if v, ok := cfg["keys"]; ok {
 			partitionKeys := toStringArray(v.([]interface{}))
-			fp.Keys = &partitionKeys
+			fp.Keys = partitionKeys
 		}
 
 		clusteringKeys = append(clusteringKeys, fp)
@@ -520,7 +520,7 @@ func makeOutputField(in interface{}) *openapi.OutputField {
 	return &of
 }
 
-func makeInputFields(in interface{}) *[]openapi.InputField {
+func makeInputFields(in interface{}) []openapi.InputField {
 	fields := make([]openapi.InputField, 0)
 
 	if arr, ok := in.([]interface{}); ok {
@@ -559,7 +559,7 @@ func makeInputFields(in interface{}) *[]openapi.InputField {
 		}
 	}
 
-	return &fields
+	return fields
 }
 
 func flattenFieldMappings(fieldMappings []openapi.FieldMappingV2) []interface{} {
@@ -570,7 +570,7 @@ func flattenFieldMappings(fieldMappings []openapi.FieldMappingV2) []interface{} 
 
 		m["name"] = f.Name
 		m["output_field"] = flattenOutputField(*f.OutputField)
-		m["input_fields"] = flattenInputFields(*f.InputFields)
+		m["input_fields"] = flattenInputFields(f.InputFields)
 
 		out = append(out, m)
 	}

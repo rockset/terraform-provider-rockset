@@ -86,7 +86,7 @@ func dataSourceReadRocksetAccount(ctx context.Context, d *schema.ResourceData, m
 	if err = d.Set("rockset_user", org.RocksetUser); err != nil {
 		return diag.FromErr(err)
 	}
-	if err = d.Set("clusters", flattenClusterParams(*org.Clusters)); err != nil {
+	if err = d.Set("clusters", flattenClusterParams(org.Clusters)); err != nil {
 		return diag.FromErr(err)
 	}
 

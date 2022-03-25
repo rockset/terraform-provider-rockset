@@ -261,7 +261,7 @@ func testAccCheckRocksetCollectionDestroy(s *terraform.State) error {
 		// An error would mean we didn't find the key, we expect an error
 		if err == nil {
 			// We did not get an error, so we failed to delete the key.
-			return fmt.Errorf("Collection %s still exists.", rs.Primary.ID)
+			return fmt.Errorf("collection %s still exists", rs.Primary.ID)
 		}
 	}
 
@@ -294,50 +294,50 @@ func testAccCheckFieldMappingMatches(collection *openapi.Collection) resource.Te
 		foundFieldMappings := collection.GetFieldMappings()
 		numMappings := len(foundFieldMappings)
 		if numMappings != 1 {
-			return fmt.Errorf("Expected one field mapping, found %d.", numMappings)
+			return fmt.Errorf("expected one field mapping, found %d", numMappings)
 		}
 
 		fieldMapping := foundFieldMappings[0]
 		if fieldMapping.GetName() != "string to float" {
-			return fmt.Errorf("Field mapping name expected 'string to float' got %s", fieldMapping.GetName())
+			return fmt.Errorf("field mapping name expected 'string to float' got %s", fieldMapping.GetName())
 		}
 
 		inputFields := fieldMapping.GetInputFields()
 		numFields := len(inputFields)
 		if numFields != 1 {
-			return fmt.Errorf("Expected one input field, found %d.", numFields)
+			return fmt.Errorf("expected one input field, found %d", numFields)
 		}
 
 		inputField := inputFields[0]
 		if inputField.GetFieldName() != "population" {
-			return fmt.Errorf("Expected first input FieldName to be 'population', found %s.", inputField.GetFieldName())
+			return fmt.Errorf("expected first input FieldName to be 'population', found %s", inputField.GetFieldName())
 		}
 
 		if inputField.GetIfMissing() != "SKIP" {
-			return fmt.Errorf("Expected first input IfMissing to be 'SKIP', found %s.", inputField.GetIfMissing())
+			return fmt.Errorf("expected first input IfMissing to be 'SKIP', found %s", inputField.GetIfMissing())
 		}
 
 		if inputField.GetIsDrop() != false {
-			return fmt.Errorf("Expected first input IsDrop to be false, found %t.", inputField.GetIsDrop())
+			return fmt.Errorf("expected first input IsDrop to be false, found %t", inputField.GetIsDrop())
 		}
 
 		if inputField.GetParam() != "pop" {
-			return fmt.Errorf("Expected first input Param to be 'pop', found %s.", inputField.GetParam())
+			return fmt.Errorf("expected first input Param to be 'pop', found %s", inputField.GetParam())
 		}
 
 		outputField := fieldMapping.GetOutputField()
 		if outputField.GetFieldName() != "pop" {
-			return fmt.Errorf("Expected output FieldName to be 'pop', found %s.", outputField.GetFieldName())
+			return fmt.Errorf("expected output FieldName to be 'pop', found %s", outputField.GetFieldName())
 		}
 
 		outputValue := outputField.GetValue()
 		outputSql := outputValue.GetSql()
 		if outputSql != "CAST(:pop as int)" {
-			return fmt.Errorf("Expected output Value.Sql to be 'CAST(:pop as int)', found %s.", outputSql)
+			return fmt.Errorf("expected output Value.Sql to be 'CAST(:pop as int)', found %s", outputSql)
 		}
 
 		if outputField.GetOnError() != "FAIL" {
-			return fmt.Errorf("Expected output FieldName to be 'FAIL', found %s.", outputField.GetOnError())
+			return fmt.Errorf("expected output FieldName to be 'FAIL', found %s", outputField.GetOnError())
 		}
 
 		return nil
@@ -362,20 +362,20 @@ func testAccCheckClusteringKeyMatches(collection *openapi.Collection,
 		// Check just the first partition key, assume one is set
 		numKeys := len(collection.GetClusteringKey())
 		if numKeys != 1 {
-			return fmt.Errorf("Expected 1 clustering key, got %d", numKeys)
+			return fmt.Errorf("expected 1 clustering key, got %d", numKeys)
 		}
 		clusteringKey := collection.GetClusteringKey()[0]
 
 		if *clusteringKey.FieldName != fieldName {
-			return fmt.Errorf("Expected field name %s got %s", fieldName, *clusteringKey.FieldName)
+			return fmt.Errorf("expected field name %s got %s", fieldName, *clusteringKey.FieldName)
 		}
 
 		if *clusteringKey.Type != partitionType {
-			return fmt.Errorf("Expected type %s got %s", partitionType, *clusteringKey.Type)
+			return fmt.Errorf("expected type %s got %s", partitionType, *clusteringKey.Type)
 		}
 
-		if !reflect.DeepEqual(*clusteringKey.Keys, partitionKeys) {
-			return fmt.Errorf("Expected keys %s got %s", partitionKeys, *clusteringKey.Keys)
+		if !reflect.DeepEqual(clusteringKey.Keys, partitionKeys) {
+			return fmt.Errorf("expected keys %s got %s", partitionKeys, clusteringKey.Keys)
 		}
 
 		return nil

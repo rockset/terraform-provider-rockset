@@ -17,11 +17,23 @@ Gets information about the Rockset deployment for the specified api server.
 
 ### Optional
 
-- **id** (String) The ID of this resource.
+- `id` (String) The ID of this resource.
 
 ### Read-Only
 
-- **account_id** (String) The AWS account ID to reference in AWS policies.
-- **external_id** (String, Sensitive) The external ID to use in AWS trust policies.
+- `account_id` (String) The AWS account ID to reference in AWS policies.
+- `clusters` (List of Object) The Rockset clusters available to this API key. (see [below for nested schema](#nestedatt--clusters))
+- `external_id` (String, Sensitive) The external ID to use in AWS trust policies.
+- `organization` (String) The name of the organization for the API key.
+- `rockset_user` (String) The name of the Rockset user used for AWS trust policies.
+
+<a id="nestedatt--clusters"></a>
+### Nested Schema for `clusters`
+
+Read-Only:
+
+- `api_server` (String)
+- `aws_region` (String)
+- `type` (String)
 
 

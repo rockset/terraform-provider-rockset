@@ -169,7 +169,7 @@ func parseDynamoDBCollection(collection *openapi.Collection, d *schema.ResourceD
 
 	var err error
 
-	sourcesList := *collection.Sources
+	sourcesList := collection.Sources
 	sourcesCount := len(sourcesList)
 	if sourcesCount < 1 {
 		return fmt.Errorf("expected %s to have at least 1 source", collection.GetName())
@@ -211,7 +211,7 @@ func flattenSourceParams(sources *[]openapi.Source) []interface{} {
 	return convertedList
 }
 
-func makeSourceParams(in interface{}) *[]openapi.Source {
+func makeSourceParams(in interface{}) []openapi.Source {
 	sources := make([]openapi.Source, 0, in.(*schema.Set).Len())
 
 	for _, i := range in.(*schema.Set).List() {
@@ -235,5 +235,5 @@ func makeSourceParams(in interface{}) *[]openapi.Source {
 		}
 	}
 
-	return &sources
+	return sources
 }

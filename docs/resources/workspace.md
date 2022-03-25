@@ -17,15 +17,15 @@ Manages a Rockset workspace.
 
 ### Required
 
-- **name** (String) Unique identifier for workspace. Can contain alphanumeric or dash characters.
+- `name` (String) Unique identifier for workspace. Can contain alphanumeric or dash characters.
 
 ### Optional
 
-- **description** (String) Text describing the collection.
-- **id** (String) The ID of this resource.
+- `description` (String) Text describing the collection.
+- `id` (String) The ID of this resource.
 
 ### Read-Only
 
-- **created_by** (String) The user who created the workspace.
+- `created_by` (String) The user who created the workspace.
 
 

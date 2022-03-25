@@ -17,38 +17,38 @@ Manages a Rockset Query Lambda.
 
 ### Required
 
-- **name** (String) Unique identifier for the query lambda. Can contain alphanumeric or dash characters.
-- **sql** (Block Set, Min: 1) (see [below for nested schema](#nestedblock--sql))
-- **workspace** (String) The name of the workspace.
+- `name` (String) Unique identifier for the query lambda. Can contain alphanumeric or dash characters.
+- `sql` (Block Set, Min: 1) (see [below for nested schema](#nestedblock--sql))
+- `workspace` (String) The name of the workspace.
 
 ### Optional
 
-- **description** (String) Text describing the query lambda.
-- **id** (String) The ID of this resource.
+- `description` (String) Text describing the query lambda.
+- `id` (String) The ID of this resource.
 
 ### Read-Only
 
-- **state** (String) The latest state of this query lambda.
-- **version** (String) The latest version string of this query lambda.
+- `state` (String) The latest state of this query lambda.
+- `version` (String) The latest version string of this query lambda.
 
 <a id="nestedblock--sql"></a>
 ### Nested Schema for `sql`
 
 Required:
 
-- **query** (String)
+- `query` (String)
 
 Optional:
 
-- **default_parameter** (Block List) (see [below for nested schema](#nestedblock--sql--default_parameter))
+- `default_parameter` (Block Set) (see [below for nested schema](#nestedblock--sql--default_parameter))
 
 <a id="nestedblock--sql--default_parameter"></a>
 ### Nested Schema for `sql.default_parameter`
 
 Required:
 
-- **name** (String)
-- **type** (String)
-- **value** (String)
+- `name` (String)
+- `type` (String)
+- `value` (String)
 
 

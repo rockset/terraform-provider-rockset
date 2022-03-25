@@ -17,15 +17,15 @@ Manage a Rockset Api Key.
 
 ### Required
 
-- **name** (String) Name of the api key.
+- `name` (String) Name of the api key.
 
 ### Optional
 
-- **id** (String) The ID of this resource.
+- `id` (String) The ID of this resource.
 
 ### Read-Only
 
-- **key** (String, Sensitive) The resulting Rockset api key.
-- **user** (String) The user the key is created for.
+- `key` (String, Sensitive) The resulting Rockset api key.
+- `user` (String) The user the key is created for.
 
 
