@@ -19,6 +19,7 @@ Manages a Rockset DynamoDB Integration.
 
 - `aws_role_arn` (String) The AWS Role Arn to use for this integration.
 - `name` (String) Unique identifier for the integration. Can contain alphanumeric or dash characters.
+- `s3_export_bucket_name` (String) AWS S3 bucket name used for exporting the DynamoDB tables.
 
 ### Optional
 

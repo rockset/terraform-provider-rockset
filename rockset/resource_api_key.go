@@ -30,6 +30,12 @@ func resourceApiKey() *schema.Resource {
 				Required:    true,
 				ForceNew:    true,
 			},
+			"role": {
+				Description: "The role the api key will use.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+			},
 			"user": {
 				Description: "The user the key is created for.",
 				Type:        schema.TypeString,
@@ -66,7 +72,7 @@ func idToUserAndName(id string) (string, string, error) {
 	case 2:
 		return tokens[0], tokens[1], nil // Name, User
 	default:
-		return "", "", fmt.Errorf("Id %s is not of the expected format.", id) // Bad ID format
+		return "", "", fmt.Errorf("id %s is not of the expected format", id) // Bad ID format
 	}
 }
 
@@ -76,11 +82,17 @@ func resourceApiKeyCreate(ctx context.Context, d *schema.ResourceData, meta inte
 
 	name := d.Get("name").(string)
 	user := d.Get("user").(string)
+	role := d.Get("role").(string)
 	id := nameAndUserToId(name, user)
+
+	var opts []option.APIKeyRoleOption
+	if role != "" {
+		opts = append(opts, option.WithRole(role))
+	}
 
 	var err error
 	// Use CreateApiKey to create as current authenticated user
-	key, err := rc.CreateAPIKey(ctx, name)
+	key, err := rc.CreateAPIKey(ctx, name, opts...)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -115,10 +127,15 @@ func resourceApiKeyRead(ctx context.Context, d *schema.ResourceData, meta interf
 	}
 
 	if foundApiKey.GetName() == "" { // Failed to find
-		return diag.FromErr(fmt.Errorf("API key not found in list."))
+		return diag.FromErr(fmt.Errorf("API key not found in list"))
 	}
 
 	err = d.Set("name", foundApiKey.GetName())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("role", foundApiKey.GetRole())
 	if err != nil {
 		return diag.FromErr(err)
 	}

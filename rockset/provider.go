@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"regexp"
 	"strings"
 
@@ -33,6 +34,7 @@ func Provider() *schema.Provider {
 			"rockset_mongodb_integration":  resourceMongoDBIntegration(),
 			"rockset_query_lambda":         resourceQueryLambda(),
 			"rockset_query_lambda_tag":     resourceQueryLambdaTag(),
+			"rockset_role":                 resourceRole(),
 			"rockset_s3_collection":        resourceS3Collection(),
 			"rockset_s3_integration":       resourceS3Integration(),
 			"rockset_user":                 resourceUser(),
@@ -80,6 +82,10 @@ func (c *Config) Client() (interface{}, diag.Diagnostics) {
 
 	if c.APIServer != "" {
 		opts = append(opts, rockset.WithAPIServer(c.APIServer))
+	}
+
+	if debug := os.Getenv("ROCKSET_DEBUG"); debug == "true" {
+		opts = append(opts, rockset.WithHTTPDebug())
 	}
 
 	rc, err := rockset.NewClient(opts...)

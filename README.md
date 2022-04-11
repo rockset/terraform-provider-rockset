@@ -15,7 +15,7 @@ E.g.
 ```bash
 #!/bin/bash
 
-export ROCKSET_APIKEY=$(aws ssm get-parameter --name '/terraform/rockset_api_key' --with-decryption --output text | awk '{print $7}')
+export ROCKSET_APIKEY=$(aws ssm get-parameter --name '/terraform/rockset_api_key' --with-decryption --output text --query 'Parameter.Value')
 export ROCKSET_APISERVER="https://api.rs2.usw2.rockset.com"
 ```
 

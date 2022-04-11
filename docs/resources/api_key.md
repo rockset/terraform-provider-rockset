@@ -22,6 +22,7 @@ Manage a Rockset Api Key.
 ### Optional
 
 - `id` (String) The ID of this resource.
+- `role` (String) The role the api key will use.
 
 ### Read-Only
 
