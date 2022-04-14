@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rockset/rockset-go-client"
+	"github.com/rockset/terraform-provider-rockset/rockset/azure"
 )
 
 type Config struct {
@@ -21,25 +22,27 @@ type Config struct {
 func Provider() *schema.Provider {
 	return &schema.Provider{
 		ResourcesMap: map[string]*schema.Resource{
-			"rockset_alias":                resourceAlias(),
-			"rockset_api_key":              resourceApiKey(),
-			"rockset_collection":           resourceCollection(),
-			"rockset_dynamodb_collection":  resourceDynamoDBCollection(),
-			"rockset_dynamodb_integration": resourceDynamoDBIntegration(),
-			"rockset_gcs_collection":       resourceGCSCollection(),
-			"rockset_gcs_integration":      resourceGCSIntegration(),
-			"rockset_kinesis_collection":   resourceKinesisCollection(),
-			"rockset_kinesis_integration":  resourceKinesisIntegration(),
-			"rockset_mongodb_collection":   resourceMongoDBCollection(),
-			"rockset_mongodb_integration":  resourceMongoDBIntegration(),
-			"rockset_query_lambda":         resourceQueryLambda(),
-			"rockset_query_lambda_tag":     resourceQueryLambdaTag(),
-			"rockset_role":                 resourceRole(),
-			"rockset_s3_collection":        resourceS3Collection(),
-			"rockset_s3_integration":       resourceS3Integration(),
-			"rockset_user":                 resourceUser(),
-			"rockset_view":                 resourceView(),
-			"rockset_workspace":            resourceWorkspace(),
+			"rockset_alias":                  resourceAlias(),
+			"rockset_api_key":                resourceApiKey(),
+			"rockset_azure_blob_collection":  azure.BlobCollection(),
+			"rockset_azure_blob_integration": azure.BlobIntegration(),
+			"rockset_collection":             resourceCollection(),
+			"rockset_dynamodb_collection":    resourceDynamoDBCollection(),
+			"rockset_dynamodb_integration":   resourceDynamoDBIntegration(),
+			"rockset_gcs_collection":         resourceGCSCollection(),
+			"rockset_gcs_integration":        resourceGCSIntegration(),
+			"rockset_kinesis_collection":     resourceKinesisCollection(),
+			"rockset_kinesis_integration":    resourceKinesisIntegration(),
+			"rockset_mongodb_collection":     resourceMongoDBCollection(),
+			"rockset_mongodb_integration":    resourceMongoDBIntegration(),
+			"rockset_query_lambda":           resourceQueryLambda(),
+			"rockset_query_lambda_tag":       resourceQueryLambdaTag(),
+			"rockset_role":                   resourceRole(),
+			"rockset_s3_collection":          resourceS3Collection(),
+			"rockset_s3_integration":         resourceS3Integration(),
+			"rockset_user":                   resourceUser(),
+			"rockset_view":                   resourceView(),
+			"rockset_workspace":              resourceWorkspace(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"rockset_account": dataSourceRocksetAccount(),
