@@ -4,15 +4,15 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/rockset/rockset-go-client/option"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/rockset/rockset-go-client"
 	"github.com/rockset/rockset-go-client/openapi"
+	"github.com/rockset/rockset-go-client/option"
 )
 
-func resourceQueryLambda() *schema.Resource {
+func resourceQueryLambda() *schema.Resource { //nolint:funlen
 	return &schema.Resource{
 		Description: "Manages a Rockset Query Lambda.",
 
@@ -91,51 +91,53 @@ func resourceQueryLambda() *schema.Resource {
 	}
 }
 
-func resourceQueryLambdaCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	rc := meta.(*rockset.RockClient)
-	var diags diag.Diagnostics
+type qlFn func(context.Context, string, string, string, ...option.CreateQueryLambdaOption) (openapi.QueryLambdaVersion,
+	error)
 
-	workspace := d.Get("workspace").(string)
-	name := d.Get("name").(string)
-	sql := makeQueryLambdaSQL(d.Get("sql"))
-	options := makeQueryLambdaOptions(d.Get("description").(string), sql.DefaultParameters)
+func resourceQueryLambdaCreateOrUpdate(fn qlFn) schema.CreateContextFunc {
+	return func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+		var diags diag.Diagnostics
 
-	ql, err := rc.CreateQueryLambda(ctx, workspace, name, sql.Query, options...)
-	if err != nil {
-		return diag.FromErr(err)
-	}
+		workspace := d.Get("workspace").(string)
+		name := d.Get("name").(string)
+		sql := makeQueryLambdaSQL(d.Get("sql"))
+		options := makeQueryLambdaOptions(d.Get("description").(string), sql.DefaultParameters)
 
-	if ql.Version != nil {
-		err = d.Set("version", ql.Version)
+		ql, err := fn(ctx, workspace, name, sql.Query, options...)
 		if err != nil {
 			return diag.FromErr(err)
 		}
-	}
 
-	if ql.State != nil {
-		err = d.Set("state", ql.State)
-		if err != nil {
-			return diag.FromErr(err)
+		if ql.Version != nil {
+			err = d.Set("version", ql.Version)
+			if err != nil {
+				return diag.FromErr(err)
+			}
 		}
+
+		if ql.State != nil {
+			err = d.Set("state", ql.State)
+			if err != nil {
+				return diag.FromErr(err)
+			}
+		}
+
+		d.SetId(toID(workspace, name))
+
+		return diags
 	}
-
-	d.SetId(toID(workspace, name))
-
-	return diags
 }
 
-func makeQueryLambdaOptions(desc string, params []openapi.QueryParameter) []option.CreateQueryLambdaOption {
-	var options []option.CreateQueryLambdaOption
+func resourceQueryLambdaCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	rc := meta.(*rockset.RockClient)
+	fn := resourceQueryLambdaCreateOrUpdate(rc.CreateQueryLambda)
+	return fn(ctx, d, meta)
+}
 
-	if desc != "" {
-		options = append(options, option.WithQueryLambdaDescription(desc))
-	}
-
-	for _, p := range params {
-		options = append(options, option.WithDefaultParameter(p.Name, p.Type, p.Value))
-	}
-
-	return options
+func resourceQueryLambdaUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	rc := meta.(*rockset.RockClient)
+	fn := resourceQueryLambdaCreateOrUpdate(rc.UpdateQueryLambda)
+	return fn(ctx, d, meta)
 }
 
 func resourceQueryLambdaRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -183,39 +185,6 @@ func resourceQueryLambdaRead(ctx context.Context, d *schema.ResourceData, meta i
 	return diags
 }
 
-func resourceQueryLambdaUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	rc := meta.(*rockset.RockClient)
-	var diags diag.Diagnostics
-
-	workspace := d.Get("workspace").(string)
-	name := d.Get("name").(string)
-	sql := makeQueryLambdaSQL(d.Get("sql"))
-	options := makeQueryLambdaOptions(d.Get("description").(string), sql.DefaultParameters)
-
-	ql, err := rc.UpdateQueryLambda(ctx, workspace, name, sql.Query, options...)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	if ql.Version != nil {
-		err = d.Set("version", ql.Version)
-		if err != nil {
-			return diag.FromErr(err)
-		}
-	}
-
-	if ql.State != nil {
-		err = d.Set("state", ql.State)
-		if err != nil {
-			return diag.FromErr(err)
-		}
-	}
-
-	d.SetId(toID(workspace, name))
-
-	return diags
-}
-
 func resourceQueryLambdaDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	rc := meta.(*rockset.RockClient)
 	var diags diag.Diagnostics
@@ -227,6 +196,20 @@ func resourceQueryLambdaDelete(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	return diags
+}
+
+func makeQueryLambdaOptions(desc string, params []openapi.QueryParameter) []option.CreateQueryLambdaOption {
+	var options []option.CreateQueryLambdaOption
+
+	if desc != "" {
+		options = append(options, option.WithQueryLambdaDescription(desc))
+	}
+
+	for _, p := range params {
+		options = append(options, option.WithDefaultParameter(p.Name, p.Type, p.Value))
+	}
+
+	return options
 }
 
 func makeQueryLambdaSQL(in interface{}) openapi.QueryLambdaSql {
