@@ -97,30 +97,23 @@ func resourceQueryLambdaCreate(ctx context.Context, d *schema.ResourceData, meta
 
 	workspace := d.Get("workspace").(string)
 	name := d.Get("name").(string)
-
 	sql := makeQueryLambdaSQL(d.Get("sql"))
+	options := makeQueryLambdaOptions(d.Get("description").(string), sql.DefaultParameters)
 
-	q := rc.QueryLambdasApi.CreateQueryLambda(ctx, workspace)
-	params := openapi.NewCreateQueryLambdaRequest(name, *sql)
-	params.Description = toStringPtrNilIfEmpty(d.Get("description").(string))
-
-	// TODO: Use convenience method
-	resp, _, err := q.Body(*params).Execute()
+	ql, err := rc.CreateQueryLambda(ctx, workspace, name, sql.Query, options...)
 	if err != nil {
-		re := rockset.NewError(err)
-
-		return diag.FromErr(re)
+		return diag.FromErr(err)
 	}
 
-	if resp.Data.Version != nil {
-		err = d.Set("version", resp.Data.Version)
+	if ql.Version != nil {
+		err = d.Set("version", ql.Version)
 		if err != nil {
 			return diag.FromErr(err)
 		}
 	}
 
-	if resp.Data.State != nil {
-		err = d.Set("state", resp.Data.State)
+	if ql.State != nil {
+		err = d.Set("state", ql.State)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -129,6 +122,20 @@ func resourceQueryLambdaCreate(ctx context.Context, d *schema.ResourceData, meta
 	d.SetId(toID(workspace, name))
 
 	return diags
+}
+
+func makeQueryLambdaOptions(desc string, params []openapi.QueryParameter) []option.CreateQueryLambdaOption {
+	var options []option.CreateQueryLambdaOption
+
+	if desc != "" {
+		options = append(options, option.WithQueryLambdaDescription(desc))
+	}
+
+	for _, p := range params {
+		options = append(options, option.WithDefaultParameter(p.Name, p.Type, p.Value))
+	}
+
+	return options
 }
 
 func resourceQueryLambdaRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -182,28 +189,23 @@ func resourceQueryLambdaUpdate(ctx context.Context, d *schema.ResourceData, meta
 
 	workspace := d.Get("workspace").(string)
 	name := d.Get("name").(string)
-
 	sql := makeQueryLambdaSQL(d.Get("sql"))
+	options := makeQueryLambdaOptions(d.Get("description").(string), sql.DefaultParameters)
 
-	q := rc.QueryLambdasApi.UpdateQueryLambda(ctx, workspace, name)
-	params := openapi.NewUpdateQueryLambdaRequest()
-	params.Description = toStringPtrNilIfEmpty(d.Get("description").(string))
-	params.Sql = sql
-
-	resp, _, err := q.Body(*params).Execute()
+	ql, err := rc.UpdateQueryLambda(ctx, workspace, name, sql.Query, options...)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if resp.Data.Version != nil {
-		err = d.Set("version", resp.Data.Version)
+	if ql.Version != nil {
+		err = d.Set("version", ql.Version)
 		if err != nil {
 			return diag.FromErr(err)
 		}
 	}
 
-	if resp.Data.State != nil {
-		err = d.Set("state", resp.Data.State)
+	if ql.State != nil {
+		err = d.Set("state", ql.State)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -227,7 +229,7 @@ func resourceQueryLambdaDelete(ctx context.Context, d *schema.ResourceData, meta
 	return diags
 }
 
-func makeQueryLambdaSQL(in interface{}) *openapi.QueryLambdaSql {
+func makeQueryLambdaSQL(in interface{}) openapi.QueryLambdaSql {
 	sql := openapi.QueryLambdaSql{}
 	var empty []openapi.QueryParameter
 	sql.DefaultParameters = empty
@@ -247,10 +249,11 @@ func makeQueryLambdaSQL(in interface{}) *openapi.QueryLambdaSql {
 		}
 	}
 
-	return &sql
+	return sql
 }
 
-func getQueryLambda(ctx context.Context, rc *rockset.RockClient, workspace string, name string) (*openapi.QueryLambda, error) {
+func getQueryLambda(ctx context.Context, rc *rockset.RockClient, workspace string,
+	name string) (*openapi.QueryLambda, error) {
 	lambdas, err := rc.ListQueryLambdas(ctx, option.WithQueryLambdaWorkspace(workspace))
 	if err != nil {
 		return nil, err
