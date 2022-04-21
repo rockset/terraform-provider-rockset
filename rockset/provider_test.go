@@ -1,6 +1,7 @@
 package rockset
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io/ioutil"
@@ -8,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"text/template"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -88,6 +90,24 @@ func getHCL(filename string) string {
 	}
 
 	return hcl
+}
+
+// getHCLTemplate returns a rendered HCL config
+func getHCLTemplate(filename string, data any) string {
+	hclPath := filepath.Join("..", "testdata", filename)
+	hcl, err := getFileContents(hclPath)
+	if err != nil {
+		log.Fatalf("Unexpected error loading test data %s", hclPath)
+	}
+
+	var buf []byte
+	rendered := bytes.NewBuffer(buf)
+	t := template.Must(template.New("hcl").Parse(hcl))
+	if err = t.Execute(rendered, data); err != nil {
+		log.Fatalf("failed to render %s: %v", filename, err)
+	}
+
+	return rendered.String()
 }
 
 /*
