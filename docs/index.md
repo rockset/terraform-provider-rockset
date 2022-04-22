@@ -17,20 +17,38 @@ Visit https://github.com/rockset/terraform-provider-rockset to file any issues f
 
 ## Example Usage
 
-```hcl
-terraform {
-  required_providers 
-    rockset = {
-      source  = "rockset/rockset"
-      version = "~> 0.4"
-    }
-  }
-}
-
+```terraform
 // Use env vars ROCKSET_APIKEY and ROCKSET_APISERVER to configure provider.
 provider rockset {}
 ```
+
 ~> Hard-coding credentials into any Terraform configuration is not recommended, and risks secret leakage should this file ever be committed to a public version control system. See [Environment Variables](#environment-variables) for a better alternative.
+
+Creating an S3 integration and a collection from Rockset's sample datasets.
+
+```terraform
+resource rockset_workspace sample {
+  name = "sample"
+  description = "sample datasets"
+}
+
+resource rockset_s3_integration public {
+  name = "rockset-public-collections"
+  description = "Integration to access Rockset's public datasets"
+  aws_role_arn = "arn:aws:iam::469279130686:role/rockset-public-datasets"
+}
+
+resource rockset_s3_collection cities {
+  workspace = rockset_workspace.sample.name
+  name = "cities"
+  integration_name = rockset_s3_integration.public.name
+  source = {
+    bucket = "rockset-public-datasets"
+    prefix = "partial-cities"
+    format = "json"
+  }
+}
+```
 
 ## Argument Reference
 

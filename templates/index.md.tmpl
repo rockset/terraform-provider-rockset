@@ -17,20 +17,13 @@ Visit https://github.com/rockset/terraform-provider-rockset to file any issues f
 
 ## Example Usage
 
-```hcl
-terraform {
-  required_providers 
-    rockset = {
-      source  = "rockset/rockset"
-      version = "~> 0.4"
-    }
-  }
-}
+{{tffile "examples/provider/provider.tf"}}
 
-// Use env vars ROCKSET_APIKEY and ROCKSET_APISERVER to configure provider.
-provider rockset {}
-```
 ~> Hard-coding credentials into any Terraform configuration is not recommended, and risks secret leakage should this file ever be committed to a public version control system. See [Environment Variables](#environment-variables) for a better alternative.
+
+Creating an S3 integration and a collection from Rockset's sample datasets.
+
+{{tffile "examples/resources/rockset_s3_collection/resource.tf"}}
 
 ## Argument Reference
 

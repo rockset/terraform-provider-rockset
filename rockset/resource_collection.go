@@ -17,7 +17,7 @@ import (
 // It will implement all arguments except sources,
 // even though many of these won't likely be used
 // for just a write api collection.
-func baseCollectionSchema() map[string]*schema.Schema {
+func baseCollectionSchema() map[string]*schema.Schema { //nolint:funlen
 	return map[string]*schema.Schema{
 		"clustering_key": {
 			Description: "List of clustering fields.",
@@ -63,6 +63,7 @@ func baseCollectionSchema() map[string]*schema.Schema {
 			Type:        schema.TypeList,
 			ForceNew:    true,
 			Optional:    true,
+			Deprecated:  "Use a `field_mapping_query` instead",
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
 					"name": {
@@ -85,14 +86,17 @@ func baseCollectionSchema() map[string]*schema.Schema {
 									Required:    true,
 								},
 								"param": {
-									Description: "Name alias for this field which can be referred to in a SQL expression in the output_field attribute.",
-									Type:        schema.TypeString,
-									ForceNew:    true,
-									Required:    true,
+									Description: "Name alias for this field which can be referred to in a SQL " +
+										"expression in the output_field attribute.",
+									Type:     schema.TypeString,
+									ForceNew: true,
+									Required: true,
 								},
 								"if_missing": {
-									Description: "Specifies the behavior for when the field evaluates to either NULL or UNDEFINED. " +
-										"It accepts two valid strings as input: SKIP, which skips the update for this document entirely, or PASS, which will simply set this field to NULL.",
+									Description: "Specifies the behavior for when the field evaluates to either " +
+										"NULL or UNDEFINED. It accepts two valid strings as input: SKIP, which skips " +
+										"the update for this document entirely, or PASS, which will simply set this " +
+										"field to NULL.",
 									Type:     schema.TypeString,
 									ForceNew: true,
 									Required: true,
@@ -100,10 +104,11 @@ func baseCollectionSchema() map[string]*schema.Schema {
 										regexp.MustCompile("^(PASS|SKIP)$"), "must be either 'PASS' or 'SKIP'"),
 								},
 								"is_drop": {
-									Description: "Specifies whether or not to drop this field completely from the document as it is being inserted.",
-									Type:        schema.TypeBool,
-									ForceNew:    true,
-									Required:    true,
+									Description: "Specifies whether or not to drop this field completely from the " +
+										"document as it is being inserted.",
+									Type:     schema.TypeBool,
+									ForceNew: true,
+									Required: true,
 								},
 							},
 						},
@@ -125,14 +130,17 @@ func baseCollectionSchema() map[string]*schema.Schema {
 								},
 								"sql": {
 									Description: "A string SQL expression used to define the new field being created. " +
-										"It may optionally take another field name as a parameter, or a param name alias specified in an input_fields field mapping.",
+										"It may optionally take another field name as a parameter, or a param " +
+										"name alias specified in an input_fields field mapping.",
 									Type:     schema.TypeString,
 									ForceNew: true,
 									Required: true,
 								},
 								"on_error": {
-									Description: "Specifies the behavior for when there is an error while evaluating the SQL expression defined in the sql parameter. " +
-										"It accepts two valid strings as input: SKIP, which skips only this output field but continues the update, or FAIL, which causes this update to fail entirely.",
+									Description: "Specifies the behavior for when there is an error while evaluating " +
+										"the SQL expression defined in the sql parameter. It accepts two valid " +
+										"strings as input: SKIP, which skips only this output field but continues " +
+										"the update, or FAIL, which causes this update to fail entirely.",
 									Type:     schema.TypeString,
 									ForceNew: true,
 									Required: true,
@@ -275,7 +283,6 @@ func baseCollectionSchema() map[string]*schema.Schema {
 	puts them into the schema object.
 */
 func parseBaseCollection(collection *openapi.Collection, d *schema.ResourceData) error {
-
 	var err error
 
 	err = d.Set("name", collection.GetName())

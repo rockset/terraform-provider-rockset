@@ -13,7 +13,8 @@ import (
 
 func resourceApiKey() *schema.Resource {
 	return &schema.Resource{
-		Description: "Manage a Rockset Api Key.",
+		Description: "Manage a Rockset Api Key.\n\n" +
+			"~> Notice: API Keys are sensitive and should not ",
 
 		CreateContext: resourceApiKeyCreate,
 		ReadContext:   resourceApiKeyRead,
@@ -31,7 +32,7 @@ func resourceApiKey() *schema.Resource {
 				ForceNew:    true,
 			},
 			"role": {
-				Description: "The role the api key will use.",
+				Description: `The role the api key will use. If no specified, "All User Assigned Roles" will be used.`,
 				Type:        schema.TypeString,
 				Optional:    true,
 				ForceNew:    true,

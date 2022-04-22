@@ -18,7 +18,8 @@ func s3CollectionSchema() map[string]*schema.Schema {
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
 					"integration_name": {
-						Description:  "The name of the Rockset S3 integration.",
+						Description: "The name of the Rockset S3 integration. If no S3 integration is provided " +
+							"only data in public S3 buckets are accessible.",
 						Type:         schema.TypeString,
 						ForceNew:     true,
 						Required:     true,
@@ -28,15 +29,14 @@ func s3CollectionSchema() map[string]*schema.Schema {
 						Type:        schema.TypeString,
 						ForceNew:    true,
 						Optional:    true,
-						Default:     nil,
-						Description: "Simple path prefix to s3 key.",
+						Deprecated:  "use pattern instead",
+						Description: "Simple path prefix to S3 keys.",
 					},
 					"pattern": {
 						Type:        schema.TypeString,
 						ForceNew:    true,
 						Optional:    true,
-						Default:     nil,
-						Description: "Regex path prefix to s3 key.",
+						Description: "Regex path pattern to S3 keys.",
 					},
 					"bucket": {
 						Type:        schema.TypeString,
@@ -61,7 +61,21 @@ func s3CollectionSchema() map[string]*schema.Schema {
 
 func resourceS3Collection() *schema.Resource {
 	return &schema.Resource{
-		Description: "Manages a collection with an s3 source attached.",
+		Description: "Manages a collection with on or more S3 sources attached. " +
+			"Uses an S3 integration to access the S3 bucket. If no integration is provided, " +
+			"only data in public buckets are accessible.\n\n" +
+			"```hcl\n" +
+			`resource rockset_s3_collection cities {
+  workspace = "demo"
+  name = "cities"
+  source = {
+    bucket = "rockset-public-datasets"
+    prefix = "partial-cities"
+    format = "json"
+  }
+}
+` +
+			"```",
 
 		CreateContext: resourceS3CollectionCreate,
 		ReadContext:   resourceS3CollectionRead,
