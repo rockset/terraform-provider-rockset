@@ -65,15 +65,31 @@ func resourceS3Collection() *schema.Resource {
 			"Uses an S3 integration to access the S3 bucket. If no integration is provided, " +
 			"only data in public buckets are accessible.\n\n" +
 			"```hcl\n" +
-			`resource rockset_s3_collection cities {
-  workspace = "demo"
+			// TODO use go:generate to include this file
+			//   examples/resources/rockset_s3_collection/resource.tf
+			`resource rockset_workspace sample {
+  name = "sample"
+  description = "sample datasets"
+}
+
+resource rockset_s3_integration public {
+  name = "rockset-public-collections"
+  description = "Integration to access Rockset's public datasets"
+  aws_role_arn = "arn:aws:iam::469279130686:role/rockset-public-datasets"
+}
+
+resource rockset_s3_collection cities {
+  workspace = rockset_workspace.sample.name
   name = "cities"
+  integration_name = rockset_s3_integration.public.name
   source = {
     bucket = "rockset-public-datasets"
     prefix = "partial-cities"
     format = "json"
   }
 }
+
+
 ` +
 			"```",
 
