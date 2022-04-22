@@ -4,14 +4,14 @@ page_title: "rockset_api_key Resource - terraform-provider-rockset"
 subcategory: ""
 description: |-
   Manage a Rockset Api Key.
-  ~> Notice: API Keys are sensitive and should not
+  Can be used together with roles to scope the actions the api key can take.
 ---
 
 # rockset_api_key (Resource)
 
 Manage a Rockset Api Key.
 
-~> Notice: API Keys are sensitive and should not
+Can be used together with roles to scope the actions the api key can take.
 
 
 
@@ -25,7 +25,7 @@ Manage a Rockset Api Key.
 ### Optional
 
 - `id` (String) The ID of this resource.
-- `role` (String) The role the api key will use. If no specified, "All User Assigned Roles" will be used.
+- `role` (String) The role the api key will use. If not specified, "All User Assigned Roles" will be used.
 
 ### Read-Only
 
