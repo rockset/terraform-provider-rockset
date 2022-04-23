@@ -2,7 +2,6 @@ version: 2.1
 workflows:
   main:
     jobs:
-      - check
       - test
       - release:
           # Only run this job on git tag pushes
