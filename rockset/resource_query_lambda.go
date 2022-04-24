@@ -21,6 +21,8 @@ func resourceQueryLambda() *schema.Resource { //nolint:funlen
 		UpdateContext: resourceQueryLambdaUpdate,
 		DeleteContext: resourceQueryLambdaDelete,
 
+		CustomizeDiff: resourceQueryLambdaDiff,
+
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -89,6 +91,15 @@ func resourceQueryLambda() *schema.Resource { //nolint:funlen
 			},
 		},
 	}
+}
+
+// resourceQueryLambdaDiff checks if anything in the sql has changed, and if so, it'll
+// signal that the computer version will change
+func resourceQueryLambdaDiff(ctx context.Context, diff *schema.ResourceDiff, i interface{}) error {
+	if diff.HasChange("sql") {
+		return diff.SetNewComputed("version")
+	}
+	return nil
 }
 
 type qlFn func(context.Context, string, string, string, ...option.CreateQueryLambdaOption) (openapi.QueryLambdaVersion,

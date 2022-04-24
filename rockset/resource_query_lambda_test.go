@@ -12,7 +12,6 @@ import (
 )
 
 const testQueryLambdaName = "terraform-provider-acceptance-tests-query-lambda-basic"
-const testQueryLambdaNameNoDefaults = "terraform-provider-acceptance-tests-query-lambda-no-defaults"
 
 func TestAccQueryLambda_Basic(t *testing.T) {
 	var queryLambda openapi.QueryLambda
@@ -52,6 +51,9 @@ func TestAccQueryLambda_Basic(t *testing.T) {
 
 func TestAccQueryLambda_NoDefaults(t *testing.T) {
 	var queryLambda openapi.QueryLambda
+	type values struct {
+		Query string
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -59,12 +61,12 @@ func TestAccQueryLambda_NoDefaults(t *testing.T) {
 		CheckDestroy:      testAccCheckRocksetQueryLambdaDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: getHCL("query_lambda_no_defaults.tf"),
+				Config: getHCLTemplate("query_lambda_no_defaults.tf", values{"SELECT 1"}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetQueryLambdaExists("rockset_query_lambda.test", &queryLambda),
-					resource.TestCheckResourceAttr("rockset_query_lambda.test", "name", testQueryLambdaNameNoDefaults),
+					resource.TestCheckResourceAttr("rockset_query_lambda.test", "name", "tpat-ql-diff"),
 					resource.TestCheckResourceAttr("rockset_query_lambda.test", "description", "basic lambda"),
-					testAccCheckSql(t, &queryLambda, "SELECT * FROM commons._events LIMIT 1"),
+					testAccCheckSql(t, &queryLambda, "SELECT 1"),
 					resource.TestCheckResourceAttrSet("rockset_query_lambda.test", "version"),
 					resource.TestCheckResourceAttrSet("rockset_query_lambda.test", "state"),
 				),
@@ -118,12 +120,10 @@ func testAccCheckRocksetQueryLambdaExists(resource string, queryLambda *openapi.
 }
 
 func testAccCheckSql(t *testing.T, queryLambda *openapi.QueryLambda, expectedSql string) resource.TestCheckFunc {
-	assert := assert.New(t)
-
 	return func(state *terraform.State) error {
 		sql := queryLambda.LatestVersion.Sql.Query
 
-		assert.Equal(sql, expectedSql, "SQL string didn't match.")
+		assert.Equal(t, expectedSql, sql, "SQL string didn't match.")
 
 		return nil
 	}

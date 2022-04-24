@@ -1,8 +1,15 @@
 resource rockset_query_lambda test {
   workspace = "commons"
-  name      = "terraform-provider-acceptance-tests-query-lambda-no-defaults"
+  name      = "tpat-ql-diff"
   description = "basic lambda"
   sql {
-    query = "SELECT * FROM commons._events LIMIT 1"
+    query = "{{ .Query }}"
   }
+}
+
+resource rockset_query_lambda_tag test {
+  name = "test"
+  workspace = rockset_query_lambda.test.workspace
+  query_lambda = rockset_query_lambda.test.name
+  version = rockset_query_lambda.test.version
 }
