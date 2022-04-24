@@ -11,6 +11,19 @@ workflows:
             tags:
               only: /v[0-9]+(\.[0-9]+)*(-.*)*/
 jobs:
+  check:
+    docker:
+      - image: cimg/go:1.18
+    steps:
+      - checkout
+      - run: wget -q -O tfplugindocs.zip https://github.com/hashicorp/terraform-plugin-docs/releases/download/v0.7.0/tfplugindocs_0.7.0_linux_amd64.zip
+      - run: unzip -n tfplugindocs.zip
+      - run:
+          name: Generate documentation
+          command: ./tfplugindocs
+      - run:
+          name: Check if there are uncommitted document changes
+          command: git diff --exit-code ./docs || echo "must run tfplugindocs before committing" && exit 1
   release:
     docker:
       - image: cimg/go:1.18

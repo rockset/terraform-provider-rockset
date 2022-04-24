@@ -56,7 +56,8 @@ The `examples` folder will render examples into resource doc pages.
 
 The `templates` folder can be used to dictate how a page should render. Primarily used for the root page.
 
-`tfplugindocs` will render documentation based on what's in all the implemented resources.
+`tfplugindocs` will render documentation based on what's in all the implemented resources. You can preview the
+documentation using the [terraform doc-preview](https://registry.terraform.io/tools/doc-preview) page
 
 ## Testing
 Acceptance tests are written for all implemented resources and data sources. They can be run using `go test`. To run acceptance tests the environment variable `TF_ACC` must be set.

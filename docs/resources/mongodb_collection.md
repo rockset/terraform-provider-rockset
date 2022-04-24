@@ -24,7 +24,7 @@ Manages a collection with an MongoDB source attached.
 
 - `clustering_key` (Block List) List of clustering fields. (see [below for nested schema](#nestedblock--clustering_key))
 - `description` (String) Text describing the collection.
-- `field_mapping` (Block List) List of field mappings. (see [below for nested schema](#nestedblock--field_mapping))
+- `field_mapping` (Block List, Deprecated) List of field mappings. (see [below for nested schema](#nestedblock--field_mapping))
 - `field_mapping_query` (String) Field mapping SQL query.
 - `field_schemas` (Block List) List of field schemas. (see [below for nested schema](#nestedblock--field_schemas))
 - `id` (String) The ID of this resource.
