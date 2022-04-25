@@ -77,7 +77,7 @@ func testAccCheckRocksetWorkspaceDestroy(s *terraform.State) error {
 		// An error would mean we didn't find the key, we expect an error
 		if err == nil {
 			// We did not get an error, so we failed to delete the key.
-			return fmt.Errorf("Workspace %s still exists.", name)
+			return fmt.Errorf("workspace %s still exists", name)
 		}
 	}
 

@@ -39,9 +39,12 @@ func TestAccMongoDBIntegration_Basic(t *testing.T) {
 			{
 				Config: testAccCheckMongoDBIntegrationBasic(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRocksetMongoDBIntegrationExists("rockset_mongodb_integration.test", &mongoDBIntegration),
-					resource.TestCheckResourceAttr("rockset_mongodb_integration.test", "name", testMongoDBIntegrationName),
-					resource.TestCheckResourceAttr("rockset_mongodb_integration.test", "description", testMongoDBIntegrationDescription),
+					testAccCheckRocksetMongoDBIntegrationExists("rockset_mongodb_integration.test",
+						&mongoDBIntegration),
+					resource.TestCheckResourceAttr("rockset_mongodb_integration.test", "name",
+						testMongoDBIntegrationName),
+					resource.TestCheckResourceAttr("rockset_mongodb_integration.test", "description",
+						testMongoDBIntegrationDescription),
 				),
 				ExpectNonEmptyPlan: false,
 			},

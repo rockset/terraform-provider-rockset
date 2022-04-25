@@ -77,7 +77,7 @@ func testAccCheckRocksetUserDestroy(s *terraform.State) error {
 		// An error would mean we didn't find the key, we expect an error
 		if err == nil {
 			// We did not get an error, so we failed to delete the key.
-			return fmt.Errorf("User %s still exists.", email)
+			return fmt.Errorf("user %s still exists", email)
 		}
 	}
 
@@ -108,7 +108,7 @@ func testAccCheckRocksetUserExists(resource string, user *openapi.User) resource
 func testAccUserRoleListMatches(user *openapi.User, expectedRoles []string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		if !reflect.DeepEqual(user.GetRoles(), expectedRoles) {
-			return fmt.Errorf("Expected %s collections, got %s.", expectedRoles, user.GetRoles())
+			return fmt.Errorf("expected %s collections, got %s", expectedRoles, user.GetRoles())
 		}
 
 		return nil

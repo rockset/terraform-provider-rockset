@@ -25,10 +25,14 @@ func TestAccDynamoDBCollection_Basic(t *testing.T) {
 			{
 				Config: getHCL("dynamodb_collection.tf"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRocksetCollectionExists("rockset_dynamodb_collection.test", &collection), // Reused from base collection
-					resource.TestCheckResourceAttr("rockset_dynamodb_collection.test", "name", testDynamoDBCollectionName),
-					resource.TestCheckResourceAttr("rockset_dynamodb_collection.test", "workspace", testDynamoDBCollectionWorkspace),
-					resource.TestCheckResourceAttr("rockset_dynamodb_collection.test", "description", testDynamoDBCollectionDescription),
+					testAccCheckRocksetCollectionExists("rockset_dynamodb_collection.test",
+						&collection), // Reused from base collection
+					resource.TestCheckResourceAttr("rockset_dynamodb_collection.test", "name",
+						testDynamoDBCollectionName),
+					resource.TestCheckResourceAttr("rockset_dynamodb_collection.test", "workspace",
+						testDynamoDBCollectionWorkspace),
+					resource.TestCheckResourceAttr("rockset_dynamodb_collection.test", "description",
+						testDynamoDBCollectionDescription),
 					testAccCheckRetentionSecsMatches(&collection, 3600),
 					testAccCheckDynamoDBSourcesExpected(t, &collection),
 				),
@@ -39,11 +43,9 @@ func TestAccDynamoDBCollection_Basic(t *testing.T) {
 }
 
 func testAccCheckDynamoDBSourcesExpected(t *testing.T, collection *openapi.Collection) resource.TestCheckFunc {
-	assert := assert.New(t)
-
 	return func(state *terraform.State) error {
 		sources := collection.GetSources()
-		assert.Equal(len(sources), 2)
+		assert.Equal(t, len(sources), 2)
 
 		// With a set, order isn't considered
 		var source1Index int
@@ -55,22 +57,22 @@ func testAccCheckDynamoDBSourcesExpected(t *testing.T, collection *openapi.Colle
 			source1Index = 1
 			source2Index = 0
 		} else {
-			return fmt.Errorf("Unexpected table name on first source.")
+			return fmt.Errorf("unexpected table name on first source")
 		}
 
 		// Source 1
-		assert.Equal(sources[source1Index].GetIntegrationName(), "terraform-provider-acceptance-test-dynamodb-collection-1")
-		assert.Equal(sources[source1Index].Dynamodb.GetRcu(), int64(5))
-		assert.Equal(sources[source1Index].Dynamodb.GetAwsRegion(), "us-west-2")
-		assert.Equal(sources[source1Index].Dynamodb.GetTableName(), "terraform-provider-rockset-tests-1")
-		//assert.Equal(sources[source1Index].Dynamodb.Status.GetScanRecordsProcessed(), int64(1))
+		assert.Equal(t, sources[source1Index].GetIntegrationName(), "terraform-provider-acceptance-test-dynamodb-collection-1")
+		assert.Equal(t, sources[source1Index].Dynamodb.GetRcu(), int64(5))
+		assert.Equal(t, sources[source1Index].Dynamodb.GetAwsRegion(), "us-west-2")
+		assert.Equal(t, sources[source1Index].Dynamodb.GetTableName(), "terraform-provider-rockset-tests-1")
+		// assert.Equal(sources[source1Index].Dynamodb.Status.GetScanRecordsProcessed(), int64(1))
 
 		// Source 2
-		assert.Equal(sources[source2Index].GetIntegrationName(), "terraform-provider-acceptance-test-dynamodb-collection-1")
-		assert.Equal(sources[source2Index].Dynamodb.GetRcu(), int64(5))
-		assert.Equal(sources[source2Index].Dynamodb.GetAwsRegion(), "us-west-2")
-		assert.Equal(sources[source2Index].Dynamodb.GetTableName(), "terraform-provider-rockset-tests-2")
-		//assert.Equal(sources[source2Index].Dynamodb.Status.GetScanRecordsProcessed(), int64(1))
+		assert.Equal(t, sources[source2Index].GetIntegrationName(), "terraform-provider-acceptance-test-dynamodb-collection-1")
+		assert.Equal(t, sources[source2Index].Dynamodb.GetRcu(), int64(5))
+		assert.Equal(t, sources[source2Index].Dynamodb.GetAwsRegion(), "us-west-2")
+		assert.Equal(t, sources[source2Index].Dynamodb.GetTableName(), "terraform-provider-rockset-tests-2")
+		// assert.Equal(sources[source2Index].Dynamodb.Status.GetScanRecordsProcessed(), int64(1))
 
 		return nil
 	}

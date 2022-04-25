@@ -13,7 +13,7 @@ func resourceS3Integration() *schema.Resource {
 	return &schema.Resource{
 		Description: "Manages a Rockset S3 Integration.",
 
-		// No updateable fields at this time, all fields require recreation.
+		// No updatable fields at this time, all fields require recreation.
 		CreateContext: resourceS3IntegrationCreate,
 		ReadContext:   resourceS3IntegrationRead,
 		DeleteContext: resourceIntegrationDelete,

@@ -3,8 +3,10 @@ package rockset
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/rockset/rockset-go-client"
 	"github.com/rockset/rockset-go-client/openapi"
 	"github.com/rockset/rockset-go-client/option"
@@ -67,9 +69,10 @@ func resourceRole() *schema.Resource {
 							Type:        schema.TypeString,
 						},
 						"cluster": {
-							Description: "Rockset cluster ID for which this action is allowed. Only applies to Workspace actions. Defaults to '*ALL*' if not specified.",
-							Optional:    true,
-							Type:        schema.TypeString,
+							Description: "Rockset cluster ID for which this action is allowed. " +
+								"Only applies to Workspace actions. Defaults to '*ALL*' if not specified.",
+							Optional: true,
+							Type:     schema.TypeString,
 						},
 					},
 				},

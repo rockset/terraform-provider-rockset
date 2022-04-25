@@ -218,7 +218,8 @@ func formatSchema() *schema.Schema {
 		Required: true,
 		ValidateFunc: validation.StringMatch(
 			regexp.MustCompile("^(json|csv|xml)$"), "only 'json', 'xml', or 'csv' is supported"),
-		Description: "Format of the data. One of: json, csv, xml. xml and csv blocks can only be set for their respective formats. ",
+		Description: "Format of the data. One of: json, csv, xml. xml and csv blocks can only be set for " +
+			"their respective formats. ",
 	}
 }
 
@@ -281,11 +282,12 @@ func csvSchema() *schema.Schema {
 					Description: "Character within which a cell value is enclosed. Defaults to double quote.",
 				},
 				"escape_char": {
-					Type:        schema.TypeString,
-					ForceNew:    true,
-					Optional:    true,
-					Default:     `\`,
-					Description: "Escape character removes any special meaning from the character that follows it . Defaults to backslash.",
+					Type:     schema.TypeString,
+					ForceNew: true,
+					Optional: true,
+					Default:  `\`,
+					Description: "Escape character removes any special meaning from the character that follows it. " +
+						"Defaults to backslash.",
 				},
 			},
 		},

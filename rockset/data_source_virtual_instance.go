@@ -20,7 +20,8 @@ func dataSourceRocksetVirtualInstance() *schema.Resource {
 		}}
 }
 
-func dataSourceReadRocksetVirtualInstance(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceReadRocksetVirtualInstance(ctx context.Context, d *schema.ResourceData,
+	meta interface{}) diag.Diagnostics {
 	//rc := meta.(*rockset.RockClient)
 	//var diags diag.Diagnostics
 

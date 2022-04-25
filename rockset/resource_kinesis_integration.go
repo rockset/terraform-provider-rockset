@@ -13,7 +13,7 @@ func resourceKinesisIntegration() *schema.Resource {
 	return &schema.Resource{
 		Description: "Manages a Rockset Kinesis Integration.",
 
-		// No updateable fields at this time, all fields require recreation.
+		// No updatable fields at this time, all fields require recreation.
 		CreateContext: resourceKinesisIntegrationCreate,
 		ReadContext:   resourceKinesisIntegrationRead,
 		DeleteContext: resourceIntegrationDelete, // common among <type>integrations
@@ -23,14 +23,14 @@ func resourceKinesisIntegration() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
 				Description:  "Unique identifier for the integration. Can contain alphanumeric or dash characters.",
 				Type:         schema.TypeString,
 				ForceNew:     true,
 				Required:     true,
 				ValidateFunc: rocksetNameValidator,
 			},
-			"description": &schema.Schema{
+			"description": {
 				Description: "Text describing the integration.",
 				Type:        schema.TypeString,
 				Default:     "created by Rockset terraform provider",

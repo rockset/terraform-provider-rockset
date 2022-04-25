@@ -244,7 +244,7 @@ resource rockset_collection test {
 }
 
 /*
-	Check if any type of collection was successfuly destroyed
+	Check if any type of collection was successfully destroyed
 */
 func testAccCheckRocksetCollectionDestroy(s *terraform.State) error {
 	rc := testAccProvider.Meta().(*rockset.RockClient)
@@ -357,7 +357,6 @@ func testAccCheckRetentionSecsMatches(collection *openapi.Collection, expectedVa
 
 func testAccCheckClusteringKeyMatches(collection *openapi.Collection,
 	fieldName string, partitionType string, partitionKeys []string) resource.TestCheckFunc {
-
 	return func(state *terraform.State) error {
 		// Check just the first partition key, assume one is set
 		numKeys := len(collection.GetClusteringKey())

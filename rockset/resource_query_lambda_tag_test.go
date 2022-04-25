@@ -60,7 +60,8 @@ func testAccCheckRocksetQueryLambdaTagDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckRocksetQueryLambdaTagExists(resource string, queryLambdaTag *openapi.QueryLambdaTag) resource.TestCheckFunc {
+func testAccCheckRocksetQueryLambdaTagExists(resource string,
+	queryLambdaTag *openapi.QueryLambdaTag) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		rc := testAccProvider.Meta().(*rockset.RockClient)
 

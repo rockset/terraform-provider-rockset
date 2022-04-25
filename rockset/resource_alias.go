@@ -24,21 +24,21 @@ func resourceAlias() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
 				Description:  "Unique identifier for the alias. Can contain alphanumeric or dash characters.",
 				Type:         schema.TypeString,
 				ForceNew:     true,
 				Required:     true,
 				ValidateFunc: rocksetNameValidator,
 			},
-			"workspace": &schema.Schema{
+			"workspace": {
 				Description:  "Name of the workspace the alias will be in.",
 				Type:         schema.TypeString,
 				ForceNew:     true,
 				Required:     true,
 				ValidateFunc: rocksetNameValidator,
 			},
-			"description": &schema.Schema{
+			"description": {
 				Description: "Text describing the alias.",
 				Type:        schema.TypeString,
 				Default:     "created by Rockset terraform provider",
@@ -66,7 +66,8 @@ func resourceAlias() *schema.Resource {
 	}
 }
 
-func aliasCollectionsSet(ctx context.Context, rc *rockset.RockClient, workspace string, name string, collections []string) rockset.RetryCheck {
+func aliasCollectionsSet(ctx context.Context, rc *rockset.RockClient, workspace string, name string,
+	collections []string) rockset.RetryCheck {
 	/*
 		Implements a Retry func to wait for the create or update
 		to finalize and show the specified collections.

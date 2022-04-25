@@ -13,7 +13,7 @@ func resourceDynamoDBIntegration() *schema.Resource {
 	return &schema.Resource{
 		Description: "Manages a Rockset DynamoDB Integration.",
 
-		// No updateable fields at this time, all fields require recreation.
+		// No updatable fields at this time, all fields require recreation.
 		CreateContext: resourceDynamoDBIntegrationCreate,
 		ReadContext:   resourceDynamoDBIntegrationRead,
 		DeleteContext: resourceIntegrationDelete, // common among <type>integrations

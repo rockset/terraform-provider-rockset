@@ -20,7 +20,8 @@ func dataSourceRocksetQueryLambdaTags() *schema.Resource {
 		}}
 }
 
-func dataSourceReadRocksetQueryLambdaTags(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceReadRocksetQueryLambdaTags(ctx context.Context, d *schema.ResourceData,
+	meta interface{}) diag.Diagnostics {
 	//rc := meta.(*rockset.RockClient)
 	//var diags diag.Diagnostics
 
