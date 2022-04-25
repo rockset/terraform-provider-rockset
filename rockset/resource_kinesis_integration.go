@@ -71,7 +71,7 @@ func resourceKinesisIntegrationRead(ctx context.Context, d *schema.ResourceData,
 
 	response, err := rc.GetIntegration(ctx, name)
 	if err != nil {
-		return diag.FromErr(err)
+		return checkForNotFoundError(d, err)
 	}
 
 	_ = d.Set("name", response.Name)

@@ -112,7 +112,7 @@ func resourceGCSCollectionRead(ctx context.Context, d *schema.ResourceData, meta
 
 	collection, err := rc.GetCollection(ctx, workspace, name)
 	if err != nil {
-		return diag.FromErr(err)
+		return checkForNotFoundError(d, err)
 	}
 
 	// Gets all the fields any generic collection has

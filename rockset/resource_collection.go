@@ -420,7 +420,7 @@ func resourceCollectionRead(ctx context.Context, d *schema.ResourceData, meta in
 
 	collection, err := rc.GetCollection(ctx, workspace, name)
 	if err != nil {
-		return diag.FromErr(err)
+		return checkForNotFoundError(d, err)
 	}
 
 	err = parseBaseCollection(&collection, d)

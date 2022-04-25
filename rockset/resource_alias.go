@@ -119,7 +119,7 @@ func resourceAliasRead(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	alias, err := rc.GetAlias(ctx, workspace, name)
 	if err != nil {
-		return diag.FromErr(err)
+		return checkForNotFoundError(d, err)
 	}
 
 	err = d.Set("name", alias.GetName())

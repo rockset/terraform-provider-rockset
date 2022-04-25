@@ -68,7 +68,7 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, meta interfac
 
 	user, err := getUserByEmail(ctx, rc, email)
 	if err != nil {
-		return diag.FromErr(err)
+		return checkForNotFoundError(d, err)
 	}
 
 	err = d.Set("email", user.GetEmail())
