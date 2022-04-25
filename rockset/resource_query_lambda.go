@@ -158,7 +158,7 @@ func resourceQueryLambdaRead(ctx context.Context, d *schema.ResourceData, meta i
 	workspace, name := workspaceAndNameFromID(d.Id())
 	ql, err := getQueryLambda(ctx, rc, workspace, name)
 	if err != nil {
-		return diag.FromErr(err)
+		return checkForNotFoundError(d, err)
 	}
 
 	err = d.Set("workspace", ql.Workspace)

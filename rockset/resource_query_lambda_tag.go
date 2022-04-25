@@ -96,7 +96,7 @@ func resourceQueryLambdaTagRead(ctx context.Context, d *schema.ResourceData, met
 
 	queryLambdaTag, err := rc.GetQueryLambdaVersionByTag(ctx, workspace, queryLambdaName, tagName)
 	if err != nil {
-		return diag.Errorf("failed to read query lambda tag %s.%s:%s: %v", workspace, queryLambdaName, tagName, err)
+		return checkForNotFoundError(d, err)
 	}
 
 	err = parseQueryLambdaTag(&queryLambdaTag, d)

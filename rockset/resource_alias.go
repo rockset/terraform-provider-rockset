@@ -2,6 +2,7 @@ package rockset
 
 import (
 	"context"
+	"errors"
 	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -111,6 +112,25 @@ func resourceAliasCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	return diags
 }
 
+// checkForNotFoundError check is the error is a Rockset NotFoundError, and then clears the id which makes
+// terraform create the resource, but if it isn't a NotFoundError it will return the error wrapped in diag.Diagnostics
+func checkForNotFoundError(d *schema.ResourceData, err error) diag.Diagnostics {
+	var re rockset.Error
+	if !errors.As(err, &re) {
+		return diag.FromErr(err)
+	}
+
+	if !re.IsNotFoundError() {
+		return diag.FromErr(err)
+	}
+
+	if err = d.Set("id", ""); err != nil {
+		return diag.FromErr(err)
+	}
+
+	return diag.Diagnostics{}
+}
+
 func resourceAliasRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	rc := meta.(*rockset.RockClient)
 	var diags diag.Diagnostics
@@ -119,7 +139,7 @@ func resourceAliasRead(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	alias, err := rc.GetAlias(ctx, workspace, name)
 	if err != nil {
-		return diag.FromErr(err)
+		return checkForNotFoundError(d, err)
 	}
 
 	err = d.Set("name", alias.GetName())

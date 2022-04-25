@@ -161,7 +161,7 @@ func resourceMongoDBCollectionRead(ctx context.Context, d *schema.ResourceData, 
 
 	collection, err := rc.GetCollection(ctx, workspace, name)
 	if err != nil {
-		return diag.FromErr(err)
+		return checkForNotFoundError(d, err)
 	}
 
 	// Gets all the fields any generic collection has

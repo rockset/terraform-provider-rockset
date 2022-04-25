@@ -152,6 +152,9 @@ func resourceRoleRead(ctx context.Context, d *schema.ResourceData, meta interfac
 
 	name := d.Id()
 	role, err := rc.GetRole(ctx, name)
+	if err != nil {
+		return checkForNotFoundError(d, err)
+	}
 
 	err = d.Set("name", role.GetRoleName())
 	if err != nil {

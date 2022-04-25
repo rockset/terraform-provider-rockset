@@ -124,7 +124,7 @@ func resourceApiKeyRead(ctx context.Context, d *schema.ResourceData, meta interf
 	}
 	foundApiKey, err := rc.GetAPIKey(ctx, name, options...)
 	if err != nil {
-		return diag.FromErr(err)
+		return checkForNotFoundError(d, err)
 	}
 
 	if foundApiKey.GetName() == "" { // Failed to find
