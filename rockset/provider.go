@@ -170,9 +170,7 @@ func checkForNotFoundError(d *schema.ResourceData, err error) diag.Diagnostics {
 		return diag.FromErr(err)
 	}
 
-	if err = d.Set("id", ""); err != nil {
-		return diag.FromErr(err)
-	}
+	d.SetId("")
 
 	return diag.Diagnostics{}
 }
