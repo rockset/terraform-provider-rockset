@@ -10,11 +10,15 @@ import (
 	"github.com/rockset/rockset-go-client/openapi"
 )
 
-const testQueryLambdaNameTagTest = "terraform-provider-acceptance-tests-query-lambda-tag-test"
-const testQueryLambdaTagName = "terraform_latest"
+const testQueryLambdaNameTagTest = "tpat-ql-diff"
+const testQueryLambdaTagName = "test"
 
 func TestAccQueryLambdaTag_Basic(t *testing.T) {
 	var queryLambdaTag openapi.QueryLambdaTag
+
+	type values struct {
+		Query string
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -22,7 +26,22 @@ func TestAccQueryLambdaTag_Basic(t *testing.T) {
 		CheckDestroy:      testAccCheckRocksetQueryLambdaTagDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: getHCL("query_lambda_tag.tf"),
+				Config: getHCLTemplate("query_lambda_no_defaults.tf", values{"SELECT 1"}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRocksetQueryLambdaTagExists("rockset_query_lambda_tag.test", &queryLambdaTag),
+					resource.TestCheckResourceAttr("rockset_query_lambda.test", "name", testQueryLambdaNameTagTest),
+					resource.TestCheckResourceAttr("rockset_query_lambda.test", "description", "basic lambda"),
+					resource.TestCheckResourceAttrSet("rockset_query_lambda.test", "version"),
+					resource.TestCheckResourceAttrSet("rockset_query_lambda.test", "state"),
+					resource.TestCheckResourceAttr("rockset_query_lambda_tag.test", "name", testQueryLambdaTagName),
+					resource.TestCheckResourceAttr("rockset_query_lambda_tag.test", "workspace", "commons"),
+					resource.TestCheckResourceAttrSet("rockset_query_lambda_tag.test", "version"),
+				),
+				ExpectNonEmptyPlan: false,
+				Destroy:            false,
+			},
+			{
+				Config: getHCLTemplate("query_lambda_no_defaults.tf", values{"SELECT 2"}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetQueryLambdaTagExists("rockset_query_lambda_tag.test", &queryLambdaTag),
 					resource.TestCheckResourceAttr("rockset_query_lambda.test", "name", testQueryLambdaNameTagTest),
