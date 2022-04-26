@@ -13,7 +13,7 @@ func resourceGCSIntegration() *schema.Resource {
 	return &schema.Resource{
 		Description: "Manages a Rockset GCS Integration.",
 
-		// No updateable fields at this time, all fields require recreation.
+		// No updatable fields at this time, all fields require recreation.
 		CreateContext: resourceGCSIntegrationCreate,
 		ReadContext:   resourceGCSIntegrationRead,
 		DeleteContext: resourceIntegrationDelete, // common among <type>integrations

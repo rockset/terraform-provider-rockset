@@ -32,7 +32,7 @@ func resourceUser() *schema.Resource {
 			"roles": {
 				Description: "List of roles for the user. E.g. 'admin', 'member', 'read-only'.",
 				Type:        schema.TypeList,
-				MinItems:    1, // Api returns 500 error currnetly if no role is set
+				MinItems:    1, // Api returns 500 error currently if no role is set
 				ForceNew:    true,
 				Required:    true,
 				Elem: &schema.Schema{
@@ -114,7 +114,7 @@ func getUserByEmail(ctx context.Context, rc *rockset.RockClient, email string) (
 	}
 
 	if foundUser.GetEmail() == "" { // Failed to find
-		return nil, fmt.Errorf("User not found in user list.")
+		return nil, fmt.Errorf("user not found in user list")
 	}
 
 	return &foundUser, nil

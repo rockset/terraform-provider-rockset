@@ -26,7 +26,7 @@ func resourceVirtualInstanceProperties() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 			},
-			"last_updated": &schema.Schema{
+			"last_updated": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
@@ -45,21 +45,24 @@ func resourceVirtualInstancePropertiesCreate(ctx context.Context, d *schema.Reso
 	return diag.Errorf("not implemented")
 }
 
-func resourceVirtualInstancePropertiesRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVirtualInstancePropertiesRead(ctx context.Context, d *schema.ResourceData,
+	meta interface{}) diag.Diagnostics {
 	//rc := meta.(*rockset.RockClient)
 	//var diags diag.Diagnostics
 
 	return diag.Errorf("not implemented")
 }
 
-func resourceVirtualInstancePropertiesUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVirtualInstancePropertiesUpdate(ctx context.Context, d *schema.ResourceData,
+	meta interface{}) diag.Diagnostics {
 	//rc := meta.(*rockset.RockClient)
 	//var diags diag.Diagnostics
 
 	return diag.Errorf("not implemented")
 }
 
-func resourceVirtualInstancePropertiesDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVirtualInstancePropertiesDelete(ctx context.Context, d *schema.ResourceData,
+	meta interface{}) diag.Diagnostics {
 	//rc := meta.(*rockset.RockClient)
 	//var diags diag.Diagnostics
 

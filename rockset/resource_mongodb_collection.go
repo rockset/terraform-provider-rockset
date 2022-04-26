@@ -185,7 +185,6 @@ func resourceMongoDBCollectionRead(ctx context.Context, d *schema.ResourceData, 
 	puts them into the schema object.
 */
 func parseMongoDBCollection(collection *openapi.Collection, d *schema.ResourceData) error {
-
 	var err error
 
 	sourcesList := collection.Sources

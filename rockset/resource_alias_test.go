@@ -43,7 +43,8 @@ func TestAccAlias_Basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetAliasExists("rockset_alias.test", &alias),
 					resource.TestCheckResourceAttr("rockset_alias.test", "name", testAliasName),
-					resource.TestCheckResourceAttr("rockset_alias.test", "description", fmt.Sprintf("%s-updated", testAliasDescription)),
+					resource.TestCheckResourceAttr("rockset_alias.test", "description",
+						fmt.Sprintf("%s-updated", testAliasDescription)),
 					resource.TestCheckResourceAttr("rockset_alias.test", "workspace", testAliasWorkspace),
 					testAccAliasCollectionListMatches(&alias, []string{testCollection1}),
 				),
@@ -54,7 +55,8 @@ func TestAccAlias_Basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetAliasExists("rockset_alias.test", &alias),
 					resource.TestCheckResourceAttr("rockset_alias.test", "name", testAliasName),
-					resource.TestCheckResourceAttr("rockset_alias.test", "description", fmt.Sprintf("%s-updated", testAliasDescription)),
+					resource.TestCheckResourceAttr("rockset_alias.test", "description",
+						fmt.Sprintf("%s-updated", testAliasDescription)),
 					resource.TestCheckResourceAttr("rockset_alias.test", "workspace", testAliasWorkspace),
 					testAccAliasCollectionListMatches(&alias, []string{testCollection2}),
 				),
@@ -161,7 +163,7 @@ func testAccCheckRocksetAliasDestroy(s *terraform.State) error {
 		// Getting a 200 means we failed to delete, so terraform destroy failed.
 		if err == nil {
 			// We did not get a 404, delete must have failed.
-			return fmt.Errorf("Alias %s:%s still exists.", name, workspace)
+			return fmt.Errorf("alias %s:%s still exists", name, workspace)
 		}
 
 		var re rockset.Error
@@ -189,7 +191,7 @@ func testAccCheckRocksetAliasExists(resource string, alias *openapi.Alias) resou
 
 		resp, err := rc.GetAlias(testCtx, workspace, name)
 		if err != nil {
-			return fmt.Errorf("Failed to get alias %s:%s", workspace, name)
+			return fmt.Errorf("failed to get alias %s:%s", workspace, name)
 		}
 
 		*alias = resp
@@ -201,7 +203,7 @@ func testAccCheckRocksetAliasExists(resource string, alias *openapi.Alias) resou
 func testAccAliasCollectionListMatches(alias *openapi.Alias, expectedCollections []string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		if !reflect.DeepEqual(alias.GetCollections(), expectedCollections) {
-			return fmt.Errorf("Expected %s collections, got %s.", expectedCollections, alias.GetCollections())
+			return fmt.Errorf("expected %s collections, got %s", expectedCollections, alias.GetCollections())
 		}
 
 		return nil

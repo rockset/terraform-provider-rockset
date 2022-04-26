@@ -47,15 +47,18 @@ func kinesisCollectionSchema() map[string]*schema.Schema {
 						ForceNew: true,
 						Required: true,
 						ValidateFunc: validation.StringMatch(
-							regexp.MustCompile("^(json|mysql|postgres)$"), "only 'json', 'mysql', or 'postgres' is supported"),
-						Description: "Format of the data. One of: json, mysql, postgres. dms_primary_keys list can only be set for mysql or postgres. ",
+							regexp.MustCompile("^(json|mysql|postgres)$"), "only 'json', 'mysql', "+
+								"or 'postgres' is supported"),
+						Description: "Format of the data. One of: json, mysql, postgres. dms_primary_keys list can " +
+							"only be set for mysql or postgres. ",
 					},
 					"dms_primary_key": {
-						Description: "Set of fields that correspond to a DMS primary key. Can only be set if format is mysql or postgres.",
-						Type:        schema.TypeList,
-						ForceNew:    true,
-						Optional:    true,
-						MinItems:    1,
+						Description: "Set of fields that correspond to a DMS primary key. Can only be set if format " +
+							"is mysql or postgres.",
+						Type:     schema.TypeList,
+						ForceNew: true,
+						Optional: true,
+						MinItems: 1,
 						Elem: &schema.Schema{
 							Type: schema.TypeString,
 						},
@@ -151,7 +154,6 @@ func resourceKinesisCollectionRead(ctx context.Context, d *schema.ResourceData, 
 	puts them into the schema object.
 */
 func parseKinesisCollection(collection *openapi.Collection, d *schema.ResourceData) error {
-
 	var err error
 
 	sourcesList := collection.Sources

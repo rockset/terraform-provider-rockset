@@ -3,17 +3,17 @@ package rockset
 import (
 	"errors"
 	"fmt"
-	"github.com/rockset/rockset-go-client/option"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/rockset/rockset-go-client"
 	"github.com/rockset/rockset-go-client/openapi"
+	"github.com/rockset/rockset-go-client/option"
 )
 
-const testApiKeyName = "terraform-provider-acceptance-tests"
-const testApiKeyUser = "terraform-provider-tests-apikey-user@rockset.com"
+const testApiKeyName = "terraform-provider-acceptance-tests"              //gosec:nolint
+const testApiKeyUser = "terraform-provider-tests-apikey-user@rockset.com" // gosec:nolint
 
 func TestAccApiKey_Basic(t *testing.T) {
 	var apiKey openapi.ApiKey

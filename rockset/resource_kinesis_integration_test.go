@@ -24,10 +24,14 @@ func TestAccKinesisIntegration_Basic(t *testing.T) {
 			{
 				Config: getHCL("kinesis_integration.tf"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRocksetKinesisIntegrationExists("rockset_kinesis_integration.test", &kinesisIntegration),
-					resource.TestCheckResourceAttr("rockset_kinesis_integration.test", "name", testKinesisIntegrationName),
-					resource.TestCheckResourceAttr("rockset_kinesis_integration.test", "description", testKinesisIntegrationDescription),
-					resource.TestCheckResourceAttr("rockset_kinesis_integration.test", "aws_role_arn", testKinesisIntegrationRoleArn),
+					testAccCheckRocksetKinesisIntegrationExists("rockset_kinesis_integration.test",
+						&kinesisIntegration),
+					resource.TestCheckResourceAttr("rockset_kinesis_integration.test", "name",
+						testKinesisIntegrationName),
+					resource.TestCheckResourceAttr("rockset_kinesis_integration.test", "description",
+						testKinesisIntegrationDescription),
+					resource.TestCheckResourceAttr("rockset_kinesis_integration.test", "aws_role_arn",
+						testKinesisIntegrationRoleArn),
 				),
 				ExpectNonEmptyPlan: false,
 			},

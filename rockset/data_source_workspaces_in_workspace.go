@@ -20,7 +20,8 @@ func dataSourceRocksetWorkspacesInWorkspace() *schema.Resource {
 		}}
 }
 
-func dataSourceReadRocksetWorkspacesInWorkspace(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceReadRocksetWorkspacesInWorkspace(ctx context.Context, d *schema.ResourceData,
+	meta interface{}) diag.Diagnostics {
 	//rc := meta.(*rockset.RockClient)
 	//var diags diag.Diagnostics
 

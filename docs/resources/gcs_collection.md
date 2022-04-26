@@ -127,7 +127,7 @@ Optional:
 - `column_names` (List of String) The names of the columns.
 - `column_types` (List of String) The types of the columns.
 - `encoding` (String) Can be one of: UTF-8, ISO_8859_1, UTF-16.
-- `escape_char` (String) Escape character removes any special meaning from the character that follows it . Defaults to backslash.
+- `escape_char` (String) Escape character removes any special meaning from the character that follows it. Defaults to backslash.
 - `first_line_as_column_names` (Boolean) If the first line in every object specifies the column names.
 - `quote_char` (String) Character within which a cell value is enclosed. Defaults to double quote.
 - `separator` (String) A single character that is the column separator.

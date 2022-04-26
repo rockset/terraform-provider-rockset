@@ -26,7 +26,7 @@ func resourceDocument() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 			},
-			"last_updated": &schema.Schema{
+			"last_updated": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,

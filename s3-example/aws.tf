@@ -20,7 +20,7 @@ resource aws_s3_bucket_object cities {
 }
 
 resource aws_iam_policy rockset_s3_integration {
-  // Bucket is univerally unique, policy name will be too
+  // Bucket is universally unique, policy name will be too
   name   = "${local.bucket_string}-access" 
   policy = data.aws_iam_policy_document.s3_bucket_policy.json
 }
@@ -40,7 +40,7 @@ data aws_iam_policy_document s3_bucket_policy {
 }
 
 resource aws_iam_role rockset {
-  // Bucket is univerally unique, role name will be too
+  // Bucket is universally unique, role name will be too
   name               = "${local.bucket_string}-role" 
   assume_role_policy = data.aws_iam_policy_document.rockset-trust-policy.json
 }

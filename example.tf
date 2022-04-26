@@ -16,8 +16,8 @@ provider aws { region  = "us-west-2" }
 // Use env vars ROCKSET_APIKEY and ROCKSET_APISERVER to configure provider.
 provider rockset {}
 
-// Buckets are univerally unique. 
-// We generate univerally random name so anyone running this will succeed.
+// Buckets are universally unique.
+// We generate universally random name so anyone running this will succeed.
 resource random_uuid random_bucket_name {}
 
 // This contains everything needed on the AWS side (buckets, policies) 

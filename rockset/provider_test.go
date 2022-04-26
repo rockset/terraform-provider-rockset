@@ -60,10 +60,10 @@ func testAccPreCheck(t *testing.T) {
 func getResourceFromState(state *terraform.State, resource string) (*terraform.ResourceState, error) {
 	rs, ok := state.RootModule().Resources[resource]
 	if !ok {
-		return rs, fmt.Errorf("Not found: %s", resource)
+		return rs, fmt.Errorf("not found: %s", resource)
 	}
 	if rs.Primary.ID == "" {
-		return rs, fmt.Errorf("No Record ID is set")
+		return rs, fmt.Errorf("no Record ID is set")
 	}
 
 	return rs, nil
@@ -115,7 +115,7 @@ func getHCLTemplate(filename string, data any) string {
 */
 func createTestContext() context.Context {
 	console := zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339}
-	log := zerolog.New(console).Level(zerolog.TraceLevel).With().Timestamp().Logger()
+	l := zerolog.New(console).Level(zerolog.TraceLevel).With().Timestamp().Logger()
 
-	return log.WithContext(context.Background())
+	return l.WithContext(context.Background())
 }

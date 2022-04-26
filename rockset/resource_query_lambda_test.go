@@ -27,7 +27,8 @@ func TestAccQueryLambda_Basic(t *testing.T) {
 					testAccCheckRocksetQueryLambdaExists("rockset_query_lambda.test", &queryLambda),
 					resource.TestCheckResourceAttr("rockset_query_lambda.test", "name", testQueryLambdaName),
 					resource.TestCheckResourceAttr("rockset_query_lambda.test", "description", "basic lambda"),
-					testAccCheckSql(t, &queryLambda, "SELECT * FROM commons._events WHERE _events._event_time > :start AND _events._event_time < :end LIMIT 1"),
+					testAccCheckSql(t, &queryLambda, "SELECT * FROM commons._events WHERE "+
+						"_events._event_time > :start AND _events._event_time < :end LIMIT 1"),
 					resource.TestCheckResourceAttrSet("rockset_query_lambda.test", "version"),
 					resource.TestCheckResourceAttrSet("rockset_query_lambda.test", "state"),
 				),
@@ -39,7 +40,8 @@ func TestAccQueryLambda_Basic(t *testing.T) {
 					testAccCheckRocksetQueryLambdaExists("rockset_query_lambda.test", &queryLambda),
 					resource.TestCheckResourceAttr("rockset_query_lambda.test", "name", testQueryLambdaName),
 					resource.TestCheckResourceAttr("rockset_query_lambda.test", "description", "updated description"),
-					testAccCheckSql(t, &queryLambda, "SELECT * FROM commons._events WHERE _events._event_time > :start AND _events._event_time < :end LIMIT 2"),
+					testAccCheckSql(t, &queryLambda, "SELECT * FROM commons._events WHERE "+
+						"_events._event_time > :start AND _events._event_time < :end LIMIT 2"),
 					resource.TestCheckResourceAttrSet("rockset_query_lambda.test", "version"),
 					resource.TestCheckResourceAttrSet("rockset_query_lambda.test", "state"),
 				),
@@ -90,7 +92,7 @@ func testAccCheckRocksetQueryLambdaDestroy(s *terraform.State) error {
 		// An error would mean we didn't find the key, we expect an error
 		if err == nil {
 			// We did not get an error, so we failed to delete the key.
-			return fmt.Errorf("Query Lambda %s still exists.", name)
+			return fmt.Errorf("query Lambda %s still exists", name)
 		}
 	}
 

@@ -42,11 +42,9 @@ func TestAccMongoDBCollection_Basic(t *testing.T) {
 }
 
 func testAccCheckMongoDBSourcesExpected(t *testing.T, collection *openapi.Collection) resource.TestCheckFunc {
-	assert := assert.New(t)
-
 	return func(state *terraform.State) error {
 		sources := collection.GetSources()
-		assert.Equal(len(sources), 2)
+		assert.Equal(t, len(sources), 2)
 
 		// With a set, order isn't considered
 		var source1Index int
@@ -58,18 +56,18 @@ func testAccCheckMongoDBSourcesExpected(t *testing.T, collection *openapi.Collec
 			source1Index = 1
 			source2Index = 0
 		} else {
-			return fmt.Errorf("Unexpected table name on first source.")
+			return fmt.Errorf("unexpected table name on first source")
 		}
 
 		// Source 1
-		assert.Equal(sources[source1Index].GetIntegrationName(), "terraform-provider-acceptance-test-mongodb-collection")
-		assert.Equal(sources[source1Index].Mongodb.GetDatabaseName(), "sample_analytics")
-		assert.Equal(sources[source1Index].Mongodb.GetCollectionName(), "accounts")
+		assert.Equal(t, sources[source1Index].GetIntegrationName(), "terraform-provider-acceptance-test-mongodb-collection")
+		assert.Equal(t, sources[source1Index].Mongodb.GetDatabaseName(), "sample_analytics")
+		assert.Equal(t, sources[source1Index].Mongodb.GetCollectionName(), "accounts")
 
 		// Source 2
-		assert.Equal(sources[source2Index].GetIntegrationName(), "terraform-provider-acceptance-test-mongodb-collection")
-		assert.Equal(sources[source2Index].Mongodb.GetDatabaseName(), "sample_analytics")
-		assert.Equal(sources[source2Index].Mongodb.GetCollectionName(), "customers")
+		assert.Equal(t, sources[source2Index].GetIntegrationName(), "terraform-provider-acceptance-test-mongodb-collection")
+		assert.Equal(t, sources[source2Index].Mongodb.GetDatabaseName(), "sample_analytics")
+		assert.Equal(t, sources[source2Index].Mongodb.GetCollectionName(), "customers")
 
 		return nil
 	}

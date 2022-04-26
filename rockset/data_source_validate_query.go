@@ -20,7 +20,8 @@ func dataSourceRocksetValidateQuery() *schema.Resource {
 		}}
 }
 
-func dataSourceReadRocksetValidateQuery(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceReadRocksetValidateQuery(ctx context.Context, d *schema.ResourceData,
+	meta interface{}) diag.Diagnostics {
 	//rc := meta.(*rockset.RockClient)
 	//var diags diag.Diagnostics
 

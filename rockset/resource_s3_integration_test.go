@@ -54,7 +54,8 @@ func testAccCheckRocksetS3IntegrationDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckRocksetS3IntegrationExists(resource string, s3Integration *openapi.S3Integration) resource.TestCheckFunc {
+func testAccCheckRocksetS3IntegrationExists(resource string,
+	s3Integration *openapi.S3Integration) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		rc := testAccProvider.Meta().(*rockset.RockClient)
 

@@ -127,7 +127,6 @@ func resourceQueryLambdaTagDelete(ctx context.Context, d *schema.ResourceData, m
 	puts them into the schema object.
 */
 func parseQueryLambdaTag(queryLambdaTag *openapi.QueryLambdaTag, d *schema.ResourceData) error {
-
 	var err error
 
 	err = d.Set("name", queryLambdaTag.GetTagName())

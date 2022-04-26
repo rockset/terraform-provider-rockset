@@ -20,7 +20,8 @@ func dataSourceRocksetQueryLambdaVersion() *schema.Resource {
 		}}
 }
 
-func dataSourceReadRocksetQueryLambdaVersion(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceReadRocksetQueryLambdaVersion(ctx context.Context, d *schema.ResourceData,
+	meta interface{}) diag.Diagnostics {
 	//rc := meta.(*rockset.RockClient)
 	//var diags diag.Diagnostics
 

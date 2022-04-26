@@ -13,7 +13,7 @@ func resourceMongoDBIntegration() *schema.Resource {
 	return &schema.Resource{
 		Description: "Manages a Rockset MongoDB Integration.",
 
-		// No updateable fields at this time, all fields require recreation.
+		// No updatable fields at this time, all fields require recreation.
 		CreateContext: resourceMongoDBIntegrationCreate,
 		ReadContext:   resourceMongoDBIntegrationRead,
 		DeleteContext: resourceIntegrationDelete, // common among <type>integrations
@@ -23,26 +23,27 @@ func resourceMongoDBIntegration() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
 				Description:  "Unique identifier for the integration. Can contain alphanumeric or dash characters.",
 				Type:         schema.TypeString,
 				ForceNew:     true,
 				Required:     true,
 				ValidateFunc: rocksetNameValidator,
 			},
-			"description": &schema.Schema{
+			"description": {
 				Description: "Text describing the integration.",
 				Type:        schema.TypeString,
 				Default:     "created by Rockset terraform provider",
 				ForceNew:    true,
 				Optional:    true,
 			},
-			"connection_uri": &schema.Schema{
-				Description: "MongoDB connection URI string. The password is scrubbed from the URI when fetched by the API so this field is NOT set on imports and reads.",
-				Type:        schema.TypeString,
-				ForceNew:    true,
-				Required:    true,
-				Sensitive:   true,
+			"connection_uri": {
+				Description: "MongoDB connection URI string. The password is scrubbed from the URI when fetched " +
+					"by the API so this field is NOT set on imports and reads.",
+				Type:      schema.TypeString,
+				ForceNew:  true,
+				Required:  true,
+				Sensitive: true,
 			},
 		},
 	}

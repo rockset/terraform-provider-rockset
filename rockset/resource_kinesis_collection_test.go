@@ -38,12 +38,10 @@ func TestAccKinesisCollection_Basic(t *testing.T) {
 }
 
 func testAccCheckKinesisSourcesExpected(t *testing.T, collection *openapi.Collection) resource.TestCheckFunc {
-	assert := assert.New(t)
-
 	return func(state *terraform.State) error {
 		sources := collection.GetSources()
 
-		assert.Equal(len(sources), 3)
+		assert.Equal(t, len(sources), 3)
 
 		//With a set, order isn't considered
 		var jsonSource, pgSource, mysqlSource openapi.Source
@@ -61,19 +59,19 @@ func testAccCheckKinesisSourcesExpected(t *testing.T, collection *openapi.Collec
 		pgSource = sources[pgIdx]
 		mysqlSource = sources[mysqlIdx]
 
-		assert.Equal(jsonSource.GetIntegrationName(), "terraform-provider-acceptance-test-kinesis-collection")
-		assert.Equal(pgSource.GetIntegrationName(), "terraform-provider-acceptance-test-kinesis-collection")
-		assert.Equal(mysqlSource.GetIntegrationName(), "terraform-provider-acceptance-test-kinesis-collection")
+		assert.Equal(t, jsonSource.GetIntegrationName(), "terraform-provider-acceptance-test-kinesis-collection")
+		assert.Equal(t, pgSource.GetIntegrationName(), "terraform-provider-acceptance-test-kinesis-collection")
+		assert.Equal(t, mysqlSource.GetIntegrationName(), "terraform-provider-acceptance-test-kinesis-collection")
 
-		assert.Equal(jsonSource.Kinesis.GetStreamName(), "terraform-provider-rockset-tests-kinesis")
-		assert.Equal(pgSource.Kinesis.GetStreamName(), "terraform-provider-rockset-tests-kinesis")
-		assert.Equal(mysqlSource.Kinesis.GetStreamName(), "terraform-provider-rockset-tests-kinesis")
+		assert.Equal(t, jsonSource.Kinesis.GetStreamName(), "terraform-provider-rockset-tests-kinesis")
+		assert.Equal(t, pgSource.Kinesis.GetStreamName(), "terraform-provider-rockset-tests-kinesis")
+		assert.Equal(t, mysqlSource.Kinesis.GetStreamName(), "terraform-provider-rockset-tests-kinesis")
 
-		assert.Empty(jsonSource.Kinesis.GetDmsPrimaryKey())
-		assert.Equal(pgSource.Kinesis.GetDmsPrimaryKey()[0], "foo")
-		assert.Equal(pgSource.Kinesis.GetDmsPrimaryKey()[1], "bar")
-		assert.Equal(mysqlSource.Kinesis.GetDmsPrimaryKey()[0], "foo")
-		assert.Equal(mysqlSource.Kinesis.GetDmsPrimaryKey()[1], "bar")
+		assert.Empty(t, jsonSource.Kinesis.GetDmsPrimaryKey())
+		assert.Equal(t, pgSource.Kinesis.GetDmsPrimaryKey()[0], "foo")
+		assert.Equal(t, pgSource.Kinesis.GetDmsPrimaryKey()[1], "bar")
+		assert.Equal(t, mysqlSource.Kinesis.GetDmsPrimaryKey()[0], "foo")
+		assert.Equal(t, mysqlSource.Kinesis.GetDmsPrimaryKey()[1], "bar")
 
 		return nil
 	}
