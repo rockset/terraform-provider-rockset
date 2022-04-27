@@ -19,6 +19,7 @@ func resourceQueryLambdaTag() *schema.Resource {
 		CreateContext: resourceQueryLambdaTagCreate,
 		ReadContext:   resourceQueryLambdaTagRead,
 		DeleteContext: resourceQueryLambdaTagDelete,
+		UpdateContext: resourceQueryLambdaTagCreate,
 
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
@@ -49,7 +50,6 @@ func resourceQueryLambdaTag() *schema.Resource {
 				Description:  "Version of the query lambda this tag should point to.",
 				Type:         schema.TypeString,
 				Required:     true,
-				ForceNew:     true,
 				ValidateFunc: rocksetNameValidator,
 			},
 		},
