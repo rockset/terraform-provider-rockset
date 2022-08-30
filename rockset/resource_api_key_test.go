@@ -17,6 +17,7 @@ const testApiKeyUser = "terraform-provider-tests-apikey-user@rockset.com" // gos
 
 func TestAccApiKey_Basic(t *testing.T) {
 	var apiKey openapi.ApiKey
+	var keyValueOnCreation string
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -30,6 +31,29 @@ func TestAccApiKey_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr("rockset_api_key.test", "name", testApiKeyName),
 					resource.TestCheckNoResourceAttr("rockset_api_key.test", "user"),
 					resource.TestCheckResourceAttrSet("rockset_api_key.test", "key"),
+					// store the created key for comparison in another test later
+					resource.TestCheckResourceAttrWith("rockset_api_key.test", "key", func(value string) error {
+						keyValueOnCreation = value						
+						return nil
+					}),
+				),
+				ExpectNonEmptyPlan: false,
+			},
+			{
+				// Re-apply the same configuration, to verify that nothing changes.
+				Config: testAccCheckApiKeyBasic(),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("rockset_api_key.test", "key"),
+					// Wheck that key in the stored resource has not changed its value.
+					// We perfor this specific test because the GET api key endpoint returns the key
+					// value but it is obfuscated and storing that might lead to unexpected results
+					// if the user then writes that obfuscated value somewhere else like in a key vault.
+					resource.TestCheckResourceAttrWith("rockset_api_key.test", "key", func(value string) error {
+						if value != keyValueOnCreation {
+							return fmt.Errorf("key has changed since creation, that likely means it is being overriden in the state with the obfuscated value")
+						}
+						return nil
+					}),
 				),
 				ExpectNonEmptyPlan: false,
 			},

@@ -142,10 +142,7 @@ func resourceApiKeyRead(ctx context.Context, d *schema.ResourceData, meta interf
 		return diag.FromErr(err)
 	}
 
-	err = d.Set("key", foundApiKey.GetKey())
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	// We intentionally omit here the actual key, as it comes obfuscated from the API.
 
 	// The user field is exposed in no way by the api
 	// We can only use the field set from the id
