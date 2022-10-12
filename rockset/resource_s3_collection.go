@@ -2,6 +2,7 @@ package rockset
 
 import (
 	"context"
+	"github.com/rockset/rockset-go-client/option"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -65,35 +66,7 @@ func resourceS3Collection() *schema.Resource {
 	return &schema.Resource{
 		Description: "Manages a collection with on or more S3 sources attached. " +
 			"Uses an S3 integration to access the S3 bucket. If no integration is provided, " +
-			"only data in public buckets are accessible.\n\n" +
-			"```hcl\n" +
-			// TODO use go:generate to include this file
-			//   examples/resources/rockset_s3_collection/resource.tf
-			`resource rockset_workspace sample {
-  name = "sample"
-  description = "sample datasets"
-}
-
-resource rockset_s3_integration public {
-  name = "rockset-public-collections"
-  description = "Integration to access Rockset's public datasets"
-  aws_role_arn = "arn:aws:iam::469279130686:role/rockset-public-datasets"
-}
-
-resource rockset_s3_collection cities {
-  workspace = rockset_workspace.sample.name
-  name = "cities"
-  integration_name = rockset_s3_integration.public.name
-  source = {
-    bucket = "rockset-public-datasets"
-    prefix = "partial-cities"
-    format = "json"
-  }
-}
-
-
-` +
-			"```",
+			"only data in public buckets are accessible.\n\n",
 
 		CreateContext: resourceS3CollectionCreate,
 		ReadContext:   resourceS3CollectionRead,
@@ -126,13 +99,12 @@ func resourceS3CollectionCreate(ctx context.Context, d *schema.ResourceData, met
 	}
 	params.Sources = sources
 
-	_, err = rc.CreateCollection(ctx, workspace, name, params)
+	_, err = rc.CreateCollection(ctx, workspace, name, option.WithCollectionRequest(*params))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	err = rc.WaitUntilCollectionReady(ctx, workspace, name)
-	if err != nil {
+	if err = waitForCollectionAndDocuments(ctx, rc, d, workspace, name); err != nil {
 		return diag.FromErr(err)
 	}
 

@@ -2,7 +2,7 @@ terraform {
   required_providers {
     rockset = {
       source  = "rockset/rockset"
-      version = "~> 0.3.1"
+      version = "~> 0.6"
     }
     aws = {
       source  = "hashicorp/aws"

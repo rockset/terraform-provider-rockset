@@ -3,6 +3,7 @@ package rockset
 import (
 	"context"
 	"fmt"
+	"github.com/rockset/rockset-go-client/option"
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -63,12 +64,6 @@ func kinesisCollectionSchema() map[string]*schema.Schema {
 							Type: schema.TypeString,
 						},
 					},
-					"field_mapping_query": {
-						Type:        schema.TypeString,
-						ForceNew:    true,
-						Optional:    true,
-						Description: "Field mapping SQL query.",
-					},
 				},
 			},
 		},
@@ -106,13 +101,12 @@ func resourceKinesisCollectionCreate(ctx context.Context, d *schema.ResourceData
 	// Add fields for Kinesis
 	params.Sources = makeKinesisSourceParams(d.Get("source"))
 
-	_, err = rc.CreateCollection(ctx, workspace, name, params)
+	_, err = rc.CreateCollection(ctx, workspace, name, option.WithCollectionRequest(*params))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	err = rc.WaitUntilCollectionReady(ctx, workspace, name)
-	if err != nil {
+	if err = waitForCollectionAndDocuments(ctx, rc, d, workspace, name); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -218,7 +212,7 @@ func makeKinesisSourceParams(in interface{}) []openapi.Source {
 			for k, v := range val {
 				switch k {
 				case "integration_name":
-					source.IntegrationName = v.(string)
+					source.IntegrationName = toStringPtrNilIfEmpty(v.(string))
 				case "stream_name":
 					source.Kinesis.StreamName = v.(string)
 				case "aws_region":

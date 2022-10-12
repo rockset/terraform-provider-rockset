@@ -18,10 +18,7 @@ func TestAccGCSCollection_Basic(t *testing.T) {
 	var collection openapi.Collection
 
 	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccPreCheckGCS(t)
-		},
+		PreCheck:          func() { testAccPreCheck(t, "TF_VAR_GCS_SERVICE_ACCOUNT_KEY") },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckRocksetCollectionDestroy, // Reused from base collection
 		Steps: []resource.TestStep{

@@ -25,13 +25,21 @@ Manages a collection with an Kinesis source attached.
 - `clustering_key` (Block List) List of clustering fields. (see [below for nested schema](#nestedblock--clustering_key))
 - `description` (String) Text describing the collection.
 - `field_mapping` (Block List, Deprecated) List of field mappings. (see [below for nested schema](#nestedblock--field_mapping))
-- `field_mapping_query` (String) Field mapping SQL query.
+- `field_mapping_query` (String) Ingest transformation SQL query. Requires insert_only to be set to true.
+
+When inserting data into Rockset, you can transform the data by providing a single SQL query, 
+that contains all of the desired data transformations. 
+This is referred to as the collection’s ingest transformation or, historically, its field mapping query.
+
+For more information see https://rockset.com/docs/ingest-transformation/
 - `field_schemas` (Block List) List of field schemas. (see [below for nested schema](#nestedblock--field_schemas))
 - `id` (String) The ID of this resource.
 - `insert_only` (Boolean) If true disallows updates and deletes, but makes indexing more efficient
 - `inverted_index_group_encoding_options` (Block Set, Max: 1) Inverted index group encoding options. (see [below for nested schema](#nestedblock--inverted_index_group_encoding_options))
 - `retention_secs` (Number) Number of seconds after which data is purged. Based on event time.
 - `source` (Block Set) Defines a source for this collection. (see [below for nested schema](#nestedblock--source))
+- `wait_for_collection` (Boolean) Wait until the collection is ready.
+- `wait_for_documents` (Number) Wait until the collection has documents. The default is to wait for 0 documents, which means it doesn't wait.
 
 <a id="nestedblock--clustering_key"></a>
 ### Nested Schema for `clustering_key`
@@ -116,6 +124,5 @@ Optional:
 
 - `aws_region` (String) AWS region name for the Kinesis stream, by default us-west-2 is used
 - `dms_primary_key` (List of String) Set of fields that correspond to a DMS primary key. Can only be set if format is mysql or postgres.
-- `field_mapping_query` (String) Field mapping SQL query.
 
 

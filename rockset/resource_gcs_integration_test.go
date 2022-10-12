@@ -1,8 +1,6 @@
 package rockset
 
 import (
-	"errors"
-	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -18,12 +16,9 @@ func TestAccGCSIntegration_Basic(t *testing.T) {
 	var gcsIntegration openapi.GcsIntegration
 
 	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccPreCheckGCS(t)
-		},
+		PreCheck:          func() { testAccPreCheck(t, "TF_VAR_GCS_SERVICE_ACCOUNT_KEY") },
 		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckRocksetGCSIntegrationDestroy,
+		CheckDestroy:      testAccCheckRocksetIntegrationDestroy("rockset_gcs_integration"),
 		Steps: []resource.TestStep{
 			{
 				Config: getHCL("gcs_integration.tf"),
@@ -38,37 +33,6 @@ func TestAccGCSIntegration_Basic(t *testing.T) {
 			},
 		},
 	})
-}
-
-func testAccPreCheckGCS(t *testing.T) {
-	if v := os.Getenv("TF_VAR_GCS_SERVICE_ACCOUNT_KEY"); v == "" {
-		t.Fatal("TF_VAR_GCS_SERVICE_ACCOUNT_KEY must be set for GCS acceptance tests")
-	}
-}
-
-func testAccCheckRocksetGCSIntegrationDestroy(s *terraform.State) error {
-	rc := testAccProvider.Meta().(*rockset.RockClient)
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "rockset_gcs_integration" {
-			continue
-		}
-
-		name := rs.Primary.ID
-		_, err := rc.GetIntegration(testCtx, name)
-		// An error could mean we didn't find the it, which is what we expect
-		if err != nil {
-			var re rockset.Error
-			if errors.As(err, &re) {
-				if re.IsNotFoundError() {
-					return nil
-				}
-			}
-			return err
-		}
-	}
-
-	return nil
 }
 
 func testAccCheckRocksetGCSIntegrationExists(resource string,

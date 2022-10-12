@@ -19,7 +19,7 @@ func TestAccKinesisIntegration_Basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckRocksetKinesisIntegrationDestroy,
+		CheckDestroy:      testAccCheckRocksetIntegrationDestroy("rockset_kinesis_integration"),
 		Steps: []resource.TestStep{
 			{
 				Config: getHCL("kinesis_integration.tf"),
@@ -37,25 +37,6 @@ func TestAccKinesisIntegration_Basic(t *testing.T) {
 			},
 		},
 	})
-}
-
-func testAccCheckRocksetKinesisIntegrationDestroy(s *terraform.State) error {
-	rc := testAccProvider.Meta().(*rockset.RockClient)
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "rockset_kinesis_integration" {
-			continue
-		}
-
-		name := rs.Primary.ID
-		_, err := rc.GetIntegration(testCtx, name)
-		// An error would mean we didn't find the it, we expect an error
-		if err == nil {
-			return err
-		}
-	}
-
-	return nil
 }
 
 func testAccCheckRocksetKinesisIntegrationExists(resource string, kinesisIntegration *openapi.KinesisIntegration) resource.TestCheckFunc {

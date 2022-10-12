@@ -31,20 +31,33 @@ func TestAccRole_Basic(t *testing.T) {
 					testAccCheckRocksetRoleExists("rockset_role.test", &role),
 					resource.TestCheckResourceAttr("rockset_role.test", "name", testRoleName),
 					resource.TestCheckResourceAttr("rockset_role.test", "description", testRoleDescription),
-					testAccCheckRocksetRolePrivileges(&role, []openapi.Privilege{
-						{
-							Action:       openapi.PtrString("QUERY_DATA_WS"),
-							ResourceName: openapi.PtrString("common"),
-							Cluster:      openapi.PtrString("*ALL*"),
-						},
-						{
-							Action:       openapi.PtrString("CREATE_COLLECTION_INTEGRATION"),
-							ResourceName: openapi.PtrString("dummy"),
-						},
-						{
-							Action: openapi.PtrString("GET_METRICS_GLOBAL"),
-						},
-					}),
+					/*
+						// TODO check that a workspace action without an explicit cluster defaults to *ALL*
+						testAccCheckRocksetRolePrivileges(&role, []openapi.Privilege{
+							{
+								Action:       openapi.PtrString("LIST_RESOURCES_WS"),
+								ResourceName: openapi.PtrString("common"),
+								Cluster:      openapi.PtrString("*ALL*"),
+							},
+							{
+								Action:       openapi.PtrString("EXECUTE_QUERY_LAMBDA_WS"),
+								ResourceName: openapi.PtrString("common"),
+								Cluster:      openapi.PtrString("usw2a1"),
+							},
+							{
+								Action:       openapi.PtrString("QUERY_DATA_WS"),
+								ResourceName: openapi.PtrString("common"),
+								Cluster:      openapi.PtrString("*ALL*"),
+							},
+							{
+								Action:       openapi.PtrString("CREATE_COLLECTION_INTEGRATION"),
+								ResourceName: openapi.PtrString("dummy"),
+							},
+							{
+								Action: openapi.PtrString("GET_METRICS_GLOBAL"),
+							},
+						}),
+					*/
 				),
 				ExpectNonEmptyPlan: false,
 			},
@@ -74,7 +87,7 @@ func testAccCheckRocksetRolePrivileges(role *openapi.Role, privs []openapi.Privi
 	return func(state *terraform.State) error {
 		if !reflect.DeepEqual(role.GetPrivileges(), privs) {
 			var b strings.Builder
-			b.WriteString("\nexpected")
+			b.WriteString("\nexpected\n")
 
 			for _, p := range privs {
 				b.WriteString(fmt.Sprintf("action: %s\n", p.GetAction()))
