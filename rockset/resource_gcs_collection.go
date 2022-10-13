@@ -2,6 +2,7 @@ package rockset
 
 import (
 	"context"
+	"github.com/rockset/rockset-go-client/option"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -88,13 +89,12 @@ func resourceGCSCollectionCreate(ctx context.Context, d *schema.ResourceData, me
 	}
 	params.Sources = sources
 
-	_, err = rc.CreateCollection(ctx, workspace, name, params)
+	_, err = rc.CreateCollection(ctx, workspace, name, option.WithCollectionRequest(*params))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	err = rc.WaitUntilCollectionReady(ctx, workspace, name)
-	if err != nil {
+	if err = waitForCollectionAndDocuments(ctx, rc, d, workspace, name); err != nil {
 		return diag.FromErr(err)
 	}
 

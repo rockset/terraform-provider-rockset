@@ -3,6 +3,7 @@ package rockset
 import (
 	"context"
 	"fmt"
+	"github.com/rockset/rockset-go-client/option"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -135,15 +136,14 @@ func resourceMongoDBCollectionCreate(ctx context.Context, d *schema.ResourceData
 	// Add all base schema fields
 	params := createBaseCollectionRequest(d)
 	// Add fields for MongoDB
-	addMongoDBParams(d, params)
+	params.Sources = makeMongoDBSourceParams(d.Get("source"))
 
-	_, err = rc.CreateCollection(ctx, workspace, name, params)
+	_, err = rc.CreateCollection(ctx, workspace, name, option.WithCollectionRequest(*params))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	err = rc.WaitUntilCollectionReady(ctx, workspace, name)
-	if err != nil {
+	if err = waitForCollectionAndDocuments(ctx, rc, d, workspace, name); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -201,13 +201,6 @@ func parseMongoDBCollection(collection *openapi.Collection, d *schema.ResourceDa
 	return nil // No errors
 }
 
-/*
-	Adds the MongoDB sources data to the create collection request
-*/
-func addMongoDBParams(d *schema.ResourceData, params *openapi.CreateCollectionRequest) {
-	params.Sources = makeMongoDBSourceParams(d.Get("source"))
-}
-
 func flattenMongoDBSourceParams(sources *[]openapi.Source) []interface{} {
 	convertedList := make([]interface{}, 0, len(*sources))
 	for _, source := range *sources {
@@ -243,7 +236,7 @@ func makeMongoDBSourceParams(in interface{}) []openapi.Source {
 			for k, v := range val {
 				switch k {
 				case "integration_name":
-					source.IntegrationName = v.(string)
+					source.IntegrationName = toStringPtrNilIfEmpty(v.(string))
 				case "database_name":
 					source.Mongodb.DatabaseName = v.(string)
 				case "collection_name":

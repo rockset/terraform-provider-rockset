@@ -4,58 +4,11 @@ page_title: "rockset_s3_collection Resource - terraform-provider-rockset"
 subcategory: ""
 description: |-
   Manages a collection with on or more S3 sources attached. Uses an S3 integration to access the S3 bucket. If no integration is provided, only data in public buckets are accessible.
-  ```hcl
-  resource rockset_workspace sample {
-    name = "sample"
-    description = "sample datasets"
-  }
-  resource rocksets3integration public {
-    name = "rockset-public-collections"
-    description = "Integration to access Rockset's public datasets"
-    awsrolearn = "arn:aws:iam::469279130686:role/rockset-public-datasets"
-  }
-  resource rocksets3collection cities {
-    workspace = rocksetworkspace.sample.name
-    name = "cities"
-    integrationname = rocksets3integration.public.name
-    source = {
-      bucket = "rockset-public-datasets"
-      prefix = "partial-cities"
-      format = "json"
-    }
-  }
-  ```
 ---
 
 # rockset_s3_collection (Resource)
 
 Manages a collection with on or more S3 sources attached. Uses an S3 integration to access the S3 bucket. If no integration is provided, only data in public buckets are accessible.
-
-```hcl
-resource rockset_workspace sample {
-  name = "sample"
-  description = "sample datasets"
-}
-
-resource rockset_s3_integration public {
-  name = "rockset-public-collections"
-  description = "Integration to access Rockset's public datasets"
-  aws_role_arn = "arn:aws:iam::469279130686:role/rockset-public-datasets"
-}
-
-resource rockset_s3_collection cities {
-  workspace = rockset_workspace.sample.name
-  name = "cities"
-  integration_name = rockset_s3_integration.public.name
-  source = {
-    bucket = "rockset-public-datasets"
-    prefix = "partial-cities"
-    format = "json"
-  }
-}
-
-
-```
 
 ## Example Usage
 
@@ -96,13 +49,21 @@ resource rockset_s3_collection cities {
 - `clustering_key` (Block List) List of clustering fields. (see [below for nested schema](#nestedblock--clustering_key))
 - `description` (String) Text describing the collection.
 - `field_mapping` (Block List, Deprecated) List of field mappings. (see [below for nested schema](#nestedblock--field_mapping))
-- `field_mapping_query` (String) Field mapping SQL query.
+- `field_mapping_query` (String) Ingest transformation SQL query. Requires insert_only to be set to true.
+
+When inserting data into Rockset, you can transform the data by providing a single SQL query, 
+that contains all of the desired data transformations. 
+This is referred to as the collection’s ingest transformation or, historically, its field mapping query.
+
+For more information see https://rockset.com/docs/ingest-transformation/
 - `field_schemas` (Block List) List of field schemas. (see [below for nested schema](#nestedblock--field_schemas))
 - `id` (String) The ID of this resource.
 - `insert_only` (Boolean) If true disallows updates and deletes, but makes indexing more efficient
 - `inverted_index_group_encoding_options` (Block Set, Max: 1) Inverted index group encoding options. (see [below for nested schema](#nestedblock--inverted_index_group_encoding_options))
 - `retention_secs` (Number) Number of seconds after which data is purged. Based on event time.
 - `source` (Block Set) Defines a source for this collection. (see [below for nested schema](#nestedblock--source))
+- `wait_for_collection` (Boolean) Wait until the collection is ready.
+- `wait_for_documents` (Number) Wait until the collection has documents. The default is to wait for 0 documents, which means it doesn't wait.
 
 <a id="nestedblock--clustering_key"></a>
 ### Nested Schema for `clustering_key`

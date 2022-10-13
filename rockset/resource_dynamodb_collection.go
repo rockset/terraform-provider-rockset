@@ -3,6 +3,7 @@ package rockset
 import (
 	"context"
 	"fmt"
+	"github.com/rockset/rockset-go-client/option"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -116,15 +117,14 @@ func resourceDynamoDBCollectionCreate(ctx context.Context, d *schema.ResourceDat
 	// Add all base schema fields
 	params := createBaseCollectionRequest(d)
 	// Add fields for DynamoDB
-	addDynamoDBParams(d, params)
+	params.Sources = makeSourceParams(d.Get("source"))
 
-	_, err = rc.CreateCollection(ctx, workspace, name, params)
+	_, err = rc.CreateCollection(ctx, workspace, name, option.WithCollectionRequest(*params))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	err = rc.WaitUntilCollectionReady(ctx, workspace, name)
-	if err != nil {
+	if err = waitForCollectionAndDocuments(ctx, rc, d, workspace, name); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -183,13 +183,6 @@ func parseDynamoDBCollection(collection *openapi.Collection, d *schema.ResourceD
 	return nil // No errors
 }
 
-/*
-	Adds the DynamoDB sources data to the create collection request
-*/
-func addDynamoDBParams(d *schema.ResourceData, params *openapi.CreateCollectionRequest) {
-	params.Sources = makeSourceParams(d.Get("source"))
-}
-
 func flattenSourceParams(sources *[]openapi.Source) []interface{} {
 	convertedList := make([]interface{}, 0, len(*sources))
 	for _, source := range *sources {
@@ -221,7 +214,7 @@ func makeSourceParams(in interface{}) []openapi.Source {
 			for k, v := range val {
 				switch k {
 				case "integration_name":
-					source.IntegrationName = v.(string)
+					source.IntegrationName = toStringPtrNilIfEmpty(v.(string))
 				case "table_name":
 					source.Dynamodb.TableName = v.(string)
 				case "aws_region":

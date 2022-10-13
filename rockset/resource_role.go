@@ -3,6 +3,8 @@ package rockset
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -69,10 +71,10 @@ func resourceRole() *schema.Resource {
 							Type:        schema.TypeString,
 						},
 						"cluster": {
-							Description: "Rockset cluster ID for which this action is allowed. " +
-								"Only applies to Workspace actions. Defaults to '*ALL*' if not specified.",
-							Optional: true,
 							Type:     schema.TypeString,
+							Optional: true,
+							Description: "Rockset cluster ID for which this action is allowed. " +
+								"Only valid for Workspace actions. Use '*ALL*' for actions which apply to all clusters.",
 						},
 					},
 				},
@@ -97,6 +99,15 @@ func resourceRoleCreate(ctx context.Context, d *schema.ResourceData, meta interf
 		privs, err := expandRolePrivileges(in)
 		if err != nil {
 			return diag.FromErr(err)
+		}
+
+		for _, p := range privs {
+			log.Printf("privs: %s %s %s", p.GetAction(), p.GetResourceName(), p.GetCluster())
+			tflog.Info(ctx, "privs", map[string]interface{}{
+				"action":   p.GetAction(),
+				"resource": p.GetResourceName(),
+				"cluster":  p.GetCluster(),
+			})
 		}
 
 		opts, err := rolePrivsToOptions(privs)
@@ -220,7 +231,9 @@ func flattenRolePrivileges(privs []openapi.Privilege) []interface{} {
 			m["cluster"] = c
 		}
 
+		// if
 		if m["cluster"] == "" && option.GetWorkspaceAction(p.GetAction()) != option.UnknownWorkspaceAction {
+			log.Printf("setting cluster for: %s", p.GetAction())
 			m["cluster"] = option.AllClusters
 		}
 
@@ -263,6 +276,11 @@ func expandRolePrivileges(in interface{}) ([]openapi.Privilege, error) {
 				return nil, fmt.Errorf("can't specify cluster for %s action", priv.GetAction())
 			}
 
+			if option.IsWorkspaceAction(priv.GetAction()) && priv.Cluster == nil {
+				all := option.AllClusters
+				priv.Cluster = &all
+			}
+
 			privs = append(privs, priv)
 		}
 	}
@@ -303,7 +321,11 @@ func rolePrivsToOptions(privs []openapi.Privilege) ([]option.RoleOption, error) 
 		if a := option.GetWorkspaceAction(p.GetAction()); a != option.UnknownWorkspaceAction {
 			var c []option.ClusterPrivileges
 			if p.GetCluster() != "" {
+				log.Printf("cluster: %s", p.GetCluster())
 				c = append(c, option.WithCluster(p.GetCluster()))
+				//} else {
+				//	log.Printf("cluster: %s", option.AllClusters)
+				//	c = append(c, option.WithCluster(option.AllClusters))
 			}
 			opts = append(opts, option.WithWorkspacePrivilege(a, p.GetResourceName(), c...))
 			continue

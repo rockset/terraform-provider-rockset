@@ -29,6 +29,8 @@ func Provider() *schema.Provider {
 			"rockset_dynamodb_integration": resourceDynamoDBIntegration(),
 			"rockset_gcs_collection":       resourceGCSCollection(),
 			"rockset_gcs_integration":      resourceGCSIntegration(),
+			"rockset_kafka_collection":     resourceKafkaCollection(),
+			"rockset_kafka_integration":    resourceKafkaIntegration(),
 			"rockset_kinesis_collection":   resourceKinesisCollection(),
 			"rockset_kinesis_integration":  resourceKinesisIntegration(),
 			"rockset_mongodb_collection":   resourceMongoDBCollection(),

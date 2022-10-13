@@ -90,7 +90,6 @@ func resourceUserDelete(ctx context.Context, d *schema.ResourceData, meta interf
 
 	email := d.Id()
 	err := rc.DeleteUser(ctx, email)
-
 	if err != nil {
 		return diag.FromErr(err)
 	}

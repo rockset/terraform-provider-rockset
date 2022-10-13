@@ -18,10 +18,7 @@ func TestAccMongoDBCollection_Basic(t *testing.T) {
 	var collection openapi.Collection
 
 	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccPreCheckMongo(t)
-		},
+		PreCheck:          func() { testAccPreCheck(t, "TF_VAR_MONGODB_CONNECTION_URI") },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckRocksetCollectionDestroy, // Reused from base collection
 		Steps: []resource.TestStep{

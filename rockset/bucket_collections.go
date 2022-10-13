@@ -81,7 +81,7 @@ func makeBucketSourceParams(sourceType string, in interface{}) ([]openapi.Source
 			source := openapi.Source{}
 			format := openapi.FormatParams{}
 			source.FormatParams = &format
-			source.IntegrationName = val["integration_name"].(string)
+			source.IntegrationName = toStringPtrNilIfEmpty(val["integration_name"].(string))
 
 			switch sourceType {
 			case "gcs":

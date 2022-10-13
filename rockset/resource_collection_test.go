@@ -19,12 +19,6 @@ const testCollectionNameFieldMappings = "terraform-provider-acceptance-tests-fie
 const testCollectionNameFieldMappingQuery = "terraform-provider-acceptance-tests-fieldmappingquery"
 const testCollectionNameClustering = "terraform-provider-acceptance-tests-clustering"
 
-/*
-	NOTES:
-		clustering_key requires field partioning to be enabled for the org.
-			otherwise, a 400 bad request is returned.
-*/
-
 func TestAccCollection_Basic(t *testing.T) {
 	var collection openapi.Collection
 
@@ -98,7 +92,7 @@ func TestAccCollection_FieldMappingQuery(t *testing.T) {
 					resource.TestCheckResourceAttr("rockset_collection.test", "name", testCollectionNameFieldMappingQuery),
 					resource.TestCheckResourceAttr("rockset_collection.test", "workspace", testCollectionWorkspace),
 					resource.TestCheckResourceAttr("rockset_collection.test", "description", testCollectionDescription),
-					resource.TestCheckResourceAttr("rockset_collection.test", "field_mapping_query", "SELECT * FROM _input"),
+					resource.TestCheckResourceAttr("rockset_collection.test", "field_mapping_query", "SELECT COUNT(*) AS cnt FROM _input"),
 					testAccCheckRetentionSecsMatches(&collection, 65),
 				),
 				ExpectNonEmptyPlan: false,
@@ -210,14 +204,14 @@ resource rockset_collection test {
 }
 
 func testAccCheckCollectionFieldMappingQuery() string {
-	return fmt.Sprintf(`
-resource rockset_collection test {
+	return fmt.Sprintf(`resource rockset_collection test {
 	name        = "%s"
 	workspace   = "%s"
 	description = "%s"
 	retention_secs 	= 65
+    insert_only = true
 
-	field_mapping_query = "SELECT * FROM _input"
+	field_mapping_query = "SELECT COUNT(*) AS cnt FROM _input"
 }
 `, testCollectionNameFieldMappingQuery, testCollectionWorkspace, testCollectionDescription)
 }

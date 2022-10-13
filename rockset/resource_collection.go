@@ -2,6 +2,8 @@ package rockset
 
 import (
 	"context"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/rockset/rockset-go-client/option"
 	"regexp"
 	"time"
 
@@ -154,10 +156,18 @@ func baseCollectionSchema() map[string]*schema.Schema { //nolint:funlen
 			},
 		}, // End field_mapping
 		"field_mapping_query": {
-			Type:        schema.TypeString,
-			ForceNew:    true,
-			Optional:    true,
-			Description: "Field mapping SQL query.",
+			Description: `Ingest transformation SQL query. Requires insert_only to be set to true.
+
+When inserting data into Rockset, you can transform the data by providing a single SQL query, 
+that contains all of the desired data transformations. 
+This is referred to as the collection’s ingest transformation or, historically, its field mapping query.
+
+For more information see https://rockset.com/docs/ingest-transformation/`,
+			Type:     schema.TypeString,
+			ForceNew: true,
+			Optional: true,
+			// TODO deprecate in favor of ingest_transformation
+			// TODO validate that insert_only is set to true
 		},
 		"field_schemas": {
 			Description: "List of field schemas.",
@@ -266,13 +276,30 @@ func baseCollectionSchema() map[string]*schema.Schema { //nolint:funlen
 			Type:         schema.TypeInt,
 			ForceNew:     true,
 			Optional:     true,
-			ValidateFunc: validation.IntAtLeast(1),
+			ValidateFunc: validation.IntAtLeast(0),
+		},
+		"wait_for_collection": {
+			Description:  "Wait until the collection is ready.",
+			Type:         schema.TypeBool,
+			Optional:     true,
+			Default:      true,
+			ForceNew:     true,
+			RequiredWith: []string{"wait_for_documents"},
+		},
+		"wait_for_documents": {
+			Description:  "Wait until the collection has documents. The default is to wait for 0 documents, which means it doesn't wait.",
+			Type:         schema.TypeInt,
+			Optional:     true,
+			Default:      0,
+			ForceNew:     true,
+			ValidateFunc: validation.IntAtLeast(0),
 		},
 		"workspace": {
-			Description: "The name of the workspace.",
-			Type:        schema.TypeString,
-			ForceNew:    true,
-			Required:    true,
+			Description:  "The name of the workspace.",
+			Type:         schema.TypeString,
+			ForceNew:     true,
+			Required:     true,
+			ValidateFunc: rocksetNameValidator,
 		},
 	} // End schema return
 } // End func
@@ -396,13 +423,12 @@ func resourceCollectionCreate(ctx context.Context, d *schema.ResourceData, meta 
 	workspace := d.Get("workspace").(string)
 
 	params := createBaseCollectionRequest(d)
-	_, err := rc.CreateCollection(ctx, workspace, name, params)
+	_, err := rc.CreateCollection(ctx, workspace, name, option.WithCollectionRequest(*params))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	err = rc.WaitUntilCollectionReady(ctx, workspace, name)
-	if err != nil {
+	if err = waitForCollectionAndDocuments(ctx, rc, d, workspace, name); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -624,4 +650,28 @@ func flattenClusteringKeys(clusteringKeys []openapi.FieldPartition) []interface{
 	}
 
 	return out
+}
+
+func waitForCollectionAndDocuments(ctx context.Context, rc *rockset.RockClient, d *schema.ResourceData, workspace, name string) error {
+	if wait := d.Get("wait_for_collection").(bool); wait {
+		tflog.Debug(ctx, "waiting for collection", map[string]interface{}{
+			"workspace": workspace,
+			"name":      name,
+		})
+		if err := rc.WaitUntilCollectionReady(ctx, workspace, name); err != nil {
+			return err
+		}
+	}
+
+	if nDocs := d.Get("wait_for_documents").(int); nDocs > 0 {
+		tflog.Debug(ctx, "waiting for collection documents", map[string]interface{}{
+			"workspace": workspace,
+			"name":      name,
+		})
+		if err := rc.WaitUntilCollectionDocuments(ctx, workspace, name, int64(nDocs)); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

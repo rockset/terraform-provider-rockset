@@ -33,6 +33,7 @@ func TestAccS3Collection_Basic(t *testing.T) {
 					testAccCheckRetentionSecsMatches(&collection, 3600),
 					testAccCheckS3SourceExpected(t, &collection),
 				),
+				Destroy:            false,
 				ExpectNonEmptyPlan: false,
 			},
 		},

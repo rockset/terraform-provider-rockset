@@ -1,8 +1,6 @@
 package rockset
 
 import (
-	"errors"
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -22,7 +20,7 @@ func TestAccDynamoDBIntegration_Basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckRocksetDynamoDBIntegrationDestroy,
+		CheckDestroy:      testAccCheckRocksetIntegrationDestroy("rockset_dynamodb_integration"),
 		Steps: []resource.TestStep{
 			{
 				Config: getHCL("dynamodb_integration.tf"),
@@ -42,34 +40,6 @@ func TestAccDynamoDBIntegration_Basic(t *testing.T) {
 			},
 		},
 	})
-}
-
-func testAccCheckRocksetDynamoDBIntegrationDestroy(s *terraform.State) error {
-	rc := testAccProvider.Meta().(*rockset.RockClient)
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "rockset_dynamodb_integration" {
-			continue
-		}
-
-		name := rs.Primary.ID
-		_, err := rc.GetIntegration(testCtx, name)
-		// An error would mean we didn't find the it, we expect an error
-		if err == nil {
-			return fmt.Errorf("integration found")
-		}
-
-		var re rockset.Error
-		if errors.As(err, &re) {
-			if re.IsNotFoundError() {
-				continue
-			}
-		}
-
-		return err
-	}
-
-	return nil
 }
 
 func testAccCheckRocksetDynamoDBIntegrationExists(resource string, dynamoDBIntegration *openapi.DynamodbIntegration) resource.TestCheckFunc {
