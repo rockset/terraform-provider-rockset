@@ -40,12 +40,6 @@ func mongoDBCollectionSchema() map[string]*schema.Schema {
 						ForceNew:    true,
 						Required:    true,
 					},
-					"field_mapping_query": {
-						Type:        schema.TypeString,
-						ForceNew:    true,
-						Optional:    true,
-						Description: "Field mapping SQL query.",
-					},
 					"scan_start_time": {
 						Description: "MongoDB scan start time.",
 						Type:        schema.TypeString,

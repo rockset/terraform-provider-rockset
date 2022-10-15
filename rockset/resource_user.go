@@ -2,12 +2,9 @@ package rockset
 
 import (
 	"context"
-	"fmt"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rockset/rockset-go-client"
-	"github.com/rockset/rockset-go-client/openapi"
 )
 
 func resourceUser() *schema.Resource {
@@ -66,7 +63,7 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, meta interfac
 
 	email := d.Id()
 
-	user, err := getUserByEmail(ctx, rc, email)
+	user, err := rc.GetUser(ctx, email)
 	if err != nil {
 		return checkForNotFoundError(d, err)
 	}
@@ -95,26 +92,4 @@ func resourceUserDelete(ctx context.Context, d *schema.ResourceData, meta interf
 	}
 
 	return diags
-}
-
-func getUserByEmail(ctx context.Context, rc *rockset.RockClient, email string) (*openapi.User, error) {
-	// The api currently has no get user method
-	users, err := rc.ListUsers(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	var foundUser openapi.User
-	for _, currentUser := range users {
-		if currentUser.Email == email {
-			foundUser = currentUser
-			break
-		}
-	}
-
-	if foundUser.GetEmail() == "" { // Failed to find
-		return nil, fmt.Errorf("user not found in user list")
-	}
-
-	return &foundUser, nil
 }
