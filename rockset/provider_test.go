@@ -97,6 +97,10 @@ func getHCL(filename string) string {
 
 // getHCLTemplate returns a rendered HCL config
 func getHCLTemplate(filename string, data any) string {
+	return getHCLTemplateWithFn(filename, data, nil)
+}
+
+func getHCLTemplateWithFn(filename string, data any, funcMap template.FuncMap) string {
 	hclPath := filepath.Join("..", "testdata", filename)
 	hcl, err := getFileContents(hclPath)
 	if err != nil {
@@ -105,7 +109,12 @@ func getHCLTemplate(filename string, data any) string {
 
 	var buf []byte
 	rendered := bytes.NewBuffer(buf)
-	t := template.Must(template.New("hcl").Parse(hcl))
+	t := template.New("hcl")
+	if funcMap != nil {
+		t = t.Funcs(funcMap)
+	}
+	t = template.Must(t.Parse(hcl))
+
 	if err = t.Execute(rendered, data); err != nil {
 		log.Fatalf("failed to render %s: %v", filename, err)
 	}

@@ -2,21 +2,21 @@ package rockset
 
 import (
 	"fmt"
-	"reflect"
-	"testing"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/rockset/rockset-go-client"
 	"github.com/rockset/rockset-go-client/openapi"
+	"reflect"
+	"testing"
 )
-
-const testUserEmail = "terraform-provider-acceptance-tests@rockset.com"
-const testUserRole1 = "read-only"
-const testUserRole2 = "member"
 
 func TestAccUser_Basic(t *testing.T) {
 	var user openapi.User
+
+	type values struct {
+		Email string
+		Roles []string
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -24,43 +24,25 @@ func TestAccUser_Basic(t *testing.T) {
 		CheckDestroy:      testAccCheckRocksetUserDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckUserBasic(),
+				Config: getHCLTemplate("user_basic.tftpl", values{"acc@rockset.com", []string{"read-only"}}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetUserExists("rockset_user.test", &user),
-					resource.TestCheckResourceAttr("rockset_user.test", "email", testUserEmail),
-					testAccUserRoleListMatches(&user, []string{testUserRole1}),
+					resource.TestCheckResourceAttr("rockset_user.test", "email", "acc@rockset.com"),
+					testAccUserRoleListMatches(&user, []string{"read-only"}),
 				),
 				ExpectNonEmptyPlan: false,
 			},
 			{
-				Config: testAccCheckUserTwoRoles(),
+				Config: getHCLTemplate("user_basic.tftpl", values{"acc@rockset.com", []string{"read-only", "member"}}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetUserExists("rockset_user.test", &user),
-					resource.TestCheckResourceAttr("rockset_user.test", "email", testUserEmail),
-					testAccUserRoleListMatches(&user, []string{testUserRole1, testUserRole2}),
+					resource.TestCheckResourceAttr("rockset_user.test", "email", "acc@rockset.com"),
+					testAccUserRoleListMatches(&user, []string{"read-only", "member"}),
 				),
 				ExpectNonEmptyPlan: false,
 			},
 		},
 	})
-}
-
-func testAccCheckUserBasic() string {
-	return fmt.Sprintf(`
-resource rockset_user test {
-	email        = "%s"
-	roles				 = ["%s"]
-}
-`, testUserEmail, testUserRole1)
-}
-
-func testAccCheckUserTwoRoles() string {
-	return fmt.Sprintf(`
-resource rockset_user test {
-	email        = "%s"
-	roles				 = ["%s", "%s"]
-}
-`, testUserEmail, testUserRole1, testUserRole2)
 }
 
 func testAccCheckRocksetUserDestroy(s *terraform.State) error {

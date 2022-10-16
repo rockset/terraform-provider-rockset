@@ -2,7 +2,16 @@ version: 2.1
 workflows:
   main:
     jobs:
-      - test
+      - validate
+      - docs
+      - test:
+          filters:
+            branches:
+              ignore: master
+      - acceptance:
+          filters:
+            branches:
+              ignore: master
       - release:
           # Only run this job on git tag pushes
           filters:
@@ -11,9 +20,16 @@ workflows:
             tags:
               only: /v[0-9]+(\.[0-9]+)*(-.*)*/
 jobs:
-  check:
+  validate:
     docker:
-      - image: cimg/go:1.18
+      - image: cimg/go:1.19
+    steps:
+      - checkout
+      - run: go vet ./...
+      - run: 'echo "TODO: add unit tests"'
+  docs:
+    docker:
+      - image: cimg/go:1.19
     steps:
       - checkout
       - run: wget -q -O tfplugindocs.zip https://github.com/hashicorp/terraform-plugin-docs/releases/download/v0.7.0/tfplugindocs_0.7.0_linux_amd64.zip
@@ -26,7 +42,7 @@ jobs:
           command: git diff --exit-code ./docs || echo "must run tfplugindocs before committing" && exit 1
   release:
     docker:
-      - image: cimg/go:1.18
+      - image: cimg/go:1.19
     steps:
       - checkout
       - run:
@@ -44,11 +60,25 @@ jobs:
             curl -sL https://git.io/goreleaser | bash
   test:
     docker:
-      - image: cimg/go:1.18
+      - image: cimg/go:1.19
     steps:
       - checkout
       - run: 
+          name: Terraform Unit Tests
+          command: go test -v ./rockset/*
+  acceptance:
+    docker:
+      - image: cimg/go:1.19
+    steps:
+      - checkout
+      - run:
           name: Terraform Acceptance Tests
-          command: go test -timeout 40m -v ./rockset/*
+          command: go test -cover -coverprofile=cover.out -timeout 40m -v ./rockset/*
           environment:
             TF_ACC: true
+      - run:
+          name: Install goveralls
+          command: go install github.com/mattn/goveralls@latest
+      - run:
+          name: Upload to coveralls
+          command: goveralls -coverprofile=cover.out -service=circle-ci
