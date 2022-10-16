@@ -72,7 +72,7 @@ func testAccCheckRocksetUserDestroy(s *terraform.State) error {
 		}
 
 		email := rs.Primary.ID
-		_, err := getUserByEmail(testCtx, rc, email)
+		_, err := rc.GetUser(testCtx, email)
 
 		// An error would mean we didn't find the key, we expect an error
 		if err == nil {
@@ -94,12 +94,12 @@ func testAccCheckRocksetUserExists(resource string, user *openapi.User) resource
 		}
 
 		email := rs.Primary.ID
-		resp, err := getUserByEmail(testCtx, rc, email)
+		resp, err := rc.GetUser(testCtx, email)
 		if err != nil {
 			return err
 		}
 
-		*user = *resp
+		*user = resp
 
 		return nil
 	}
@@ -108,7 +108,7 @@ func testAccCheckRocksetUserExists(resource string, user *openapi.User) resource
 func testAccUserRoleListMatches(user *openapi.User, expectedRoles []string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		if !reflect.DeepEqual(user.GetRoles(), expectedRoles) {
-			return fmt.Errorf("expected %s collections, got %s", expectedRoles, user.GetRoles())
+			return fmt.Errorf("expected %s roles, got %s", expectedRoles, user.GetRoles())
 		}
 
 		return nil
