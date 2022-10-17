@@ -69,7 +69,7 @@ jobs:
       - image: cimg/go:1.19
     steps:
       - checkout
-      - run: 
+      - run:
           name: Terraform Unit Tests
           command: go test -v ./rockset/*
   acceptance:
