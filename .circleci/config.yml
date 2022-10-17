@@ -28,7 +28,7 @@ jobs:
       - image: cimg/go:1.19
     steps:
       - checkout
-      - run: sudo apt install python3
+      - run: sudo apt install python3 pipenv
       - run:
           name: Install python
           command: sudo apt update && sudo apt install python3 python3-pip
