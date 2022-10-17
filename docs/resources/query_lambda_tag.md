@@ -22,7 +22,7 @@ Manages a Rockset Query Lambda Tag.
 - `version` (String) Version of the query lambda this tag should point to.
 - `workspace` (String) The name of the workspace the query lambda is in.
 
-### Optional
+### Read-Only
 
 - `id` (String) The ID of this resource.
 

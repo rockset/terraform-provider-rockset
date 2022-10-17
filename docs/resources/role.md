@@ -22,13 +22,13 @@ Manages a Rockset Role.
 ### Optional
 
 - `description` (String) Role description.
-- `id` (String) The ID of this resource.
 - `privilege` (Block Set) Privileges associated with the role. (see [below for nested schema](#nestedblock--privilege))
 
 ### Read-Only
 
 - `created_at` (String) When the role was created.
 - `created_by` (String) Who created the role.
+- `id` (String) The ID of this resource.
 - `owner_email` (String) The email of the user who currently owns the role.
 
 <a id="nestedblock--privilege"></a>

@@ -20,7 +20,7 @@ Manages a Rockset User.
 - `email` (String) Email address of the user. Also used to identify the user.
 - `roles` (List of String) List of roles for the user. E.g. 'admin', 'member', 'read-only'.
 
-### Optional
+### Read-Only
 
 - `id` (String) The ID of this resource.
 

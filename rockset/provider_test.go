@@ -57,8 +57,8 @@ func testAccPreCheck(t *testing.T, env ...string) {
 }
 
 /*
-	Finds a specific resource by identifier (e.g. rockset_collection.test) from terraform state
-	and returns the resource state.
+Finds a specific resource by identifier (e.g. rockset_collection.test) from terraform state
+and returns the resource state.
 */
 func getResourceFromState(state *terraform.State, resource string) (*terraform.ResourceState, error) {
 	rs, ok := state.RootModule().Resources[resource]
@@ -73,8 +73,8 @@ func getResourceFromState(state *terraform.State, resource string) (*terraform.R
 }
 
 /*
-	Gets a file's contents and returns them as a string.
-	Intended to be used for test data.
+Gets a file's contents and returns them as a string.
+Intended to be used for test data.
 */
 func getFileContents(path string) (string, error) {
 	content, err := ioutil.ReadFile(path)
@@ -123,7 +123,7 @@ func getHCLTemplateWithFn(filename string, data any, funcMap template.FuncMap) s
 }
 
 /*
-	Creates a context with debug logging for use in tests.
+Creates a context with debug logging for use in tests.
 */
 func createTestContext() context.Context {
 	console := zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339}
