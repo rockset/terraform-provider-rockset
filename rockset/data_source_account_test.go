@@ -14,7 +14,7 @@ func TestAccAccount_Basic(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckRocksetDataSourceConfig(),
+				Config: getHCL("rockset_account.tf"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "account_id", "318212636800"),
 					resource.TestCheckResourceAttr(resourceName, "organization", "Rockset Circleci"),
@@ -23,8 +23,4 @@ func TestAccAccount_Basic(t *testing.T) {
 			},
 		},
 	})
-}
-
-func testAccCheckRocksetDataSourceConfig() string {
-	return `data "rockset_account" "test" {}`
 }

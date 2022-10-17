@@ -47,7 +47,7 @@ jobs:
       - image: cimg/go:1.18
     steps:
       - checkout
-      - run: 
+      - run:
           name: Terraform Acceptance Tests
           command: go test -timeout 40m -v ./rockset/*
           environment:

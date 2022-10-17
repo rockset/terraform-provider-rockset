@@ -19,8 +19,26 @@ const testCollectionNameFieldMappings = "terraform-provider-acceptance-tests-fie
 const testCollectionNameFieldMappingQuery = "terraform-provider-acceptance-tests-fieldmappingquery"
 const testCollectionNameClustering = "terraform-provider-acceptance-tests-clustering"
 
+type collectionTemplateValues struct {
+	Name                 string
+	Description          string
+	Workspace            string
+	Retention            int
+	InsertOnly           bool
+	IngestTransformation string
+}
+
 func TestAccCollection_Basic(t *testing.T) {
 	var collection openapi.Collection
+
+	values := collectionTemplateValues{
+		Name:        "acc-collection",
+		Description: "acceptance test",
+		Workspace:   "acc",
+		Retention:   60,
+	}
+	updated := values
+	updated.Retention = 61
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -28,23 +46,23 @@ func TestAccCollection_Basic(t *testing.T) {
 		CheckDestroy:      testAccCheckRocksetCollectionDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckCollectionBasic(),
+				Config: getHCLTemplate("collection_basic.tf", values),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetCollectionExists("rockset_collection.test", &collection),
-					resource.TestCheckResourceAttr("rockset_collection.test", "name", testCollectionName),
-					resource.TestCheckResourceAttr("rockset_collection.test", "workspace", testCollectionWorkspace),
-					resource.TestCheckResourceAttr("rockset_collection.test", "description", testCollectionDescription),
+					resource.TestCheckResourceAttr("rockset_collection.test", "name", values.Name),
+					resource.TestCheckResourceAttr("rockset_collection.test", "workspace", values.Workspace),
+					resource.TestCheckResourceAttr("rockset_collection.test", "description", values.Description),
 					testAccCheckRetentionSecsMatches(&collection, 60),
 				),
 				ExpectNonEmptyPlan: false,
 			},
 			{
-				Config: testAccCheckCollectionUpdateForceRecreate(),
+				Config: getHCLTemplate("collection_basic.tf", updated),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetCollectionExists("rockset_collection.test", &collection),
-					resource.TestCheckResourceAttr("rockset_collection.test", "name", fmt.Sprintf("%s-updated", testCollectionName)),
-					resource.TestCheckResourceAttr("rockset_collection.test", "workspace", testCollectionWorkspace),
-					resource.TestCheckResourceAttr("rockset_collection.test", "description", testCollectionDescription),
+					resource.TestCheckResourceAttr("rockset_collection.test", "name", values.Name),
+					resource.TestCheckResourceAttr("rockset_collection.test", "workspace", values.Workspace),
+					resource.TestCheckResourceAttr("rockset_collection.test", "description", values.Description),
 					testAccCheckRetentionSecsMatches(&collection, 61),
 				),
 				ExpectNonEmptyPlan: false,
@@ -77,8 +95,17 @@ func TestAccCollection_FieldMapping(t *testing.T) {
 	})
 }
 
-func TestAccCollection_FieldMappingQuery(t *testing.T) {
+func TestAccCollection_IngestTransformation(t *testing.T) {
 	var collection openapi.Collection
+
+	values := collectionTemplateValues{
+		Name:                 "acc-collection",
+		Description:          "acceptance test",
+		Workspace:            "acc",
+		Retention:            65,
+		IngestTransformation: "SELECT COUNT(*) AS cnt FROM _input",
+		InsertOnly:           true,
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -86,13 +113,13 @@ func TestAccCollection_FieldMappingQuery(t *testing.T) {
 		CheckDestroy:      testAccCheckRocksetCollectionDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckCollectionFieldMappingQuery(),
+				Config: getHCLTemplate("collection_basic.tf", values),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetCollectionExists("rockset_collection.test", &collection),
-					resource.TestCheckResourceAttr("rockset_collection.test", "name", testCollectionNameFieldMappingQuery),
-					resource.TestCheckResourceAttr("rockset_collection.test", "workspace", testCollectionWorkspace),
-					resource.TestCheckResourceAttr("rockset_collection.test", "description", testCollectionDescription),
-					resource.TestCheckResourceAttr("rockset_collection.test", "field_mapping_query", "SELECT COUNT(*) AS cnt FROM _input"),
+					resource.TestCheckResourceAttr("rockset_collection.test", "name", values.Name),
+					resource.TestCheckResourceAttr("rockset_collection.test", "workspace", values.Workspace),
+					resource.TestCheckResourceAttr("rockset_collection.test", "description", values.Description),
+					resource.TestCheckResourceAttr("rockset_collection.test", "field_mapping_query", values.IngestTransformation),
 					testAccCheckRetentionSecsMatches(&collection, 65),
 				),
 				ExpectNonEmptyPlan: false,
@@ -134,12 +161,14 @@ func TestAccCollection_InsertOnly(t *testing.T) {
 		CheckDestroy:      testAccCheckRocksetCollectionDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckCollectionInsertOnly(),
+				Config: getHCLTemplate("collection_basic.tf", collectionTemplateValues{
+					Name: "acc-collection", Description: "acceptance test", Workspace: "acc", Retention: 60, InsertOnly: true,
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetCollectionExists("rockset_collection.test", &collection),
-					resource.TestCheckResourceAttr("rockset_collection.test", "name", testCollectionName),
-					resource.TestCheckResourceAttr("rockset_collection.test", "workspace", testCollectionWorkspace),
-					resource.TestCheckResourceAttr("rockset_collection.test", "description", testCollectionDescription),
+					resource.TestCheckResourceAttr("rockset_collection.test", "name", "acc-collection"),
+					resource.TestCheckResourceAttr("rockset_collection.test", "workspace", "acc"),
+					resource.TestCheckResourceAttr("rockset_collection.test", "description", "acceptance test"),
 					resource.TestCheckResourceAttr("rockset_collection.test", "insert_only", "true"),
 					testAccCheckRetentionSecsMatches(&collection, 60),
 				),
@@ -162,18 +191,6 @@ resource rockset_collection test {
 	}
 }
 `, testCollectionNameClustering, testCollectionWorkspace, testCollectionDescription)
-}
-
-func testAccCheckCollectionInsertOnly() string {
-	return fmt.Sprintf(`
-resource rockset_collection test {
-	name						= "%s"
-	workspace				= "%s"
-	description			= "%s"
-	retention_secs	= 60
-	insert_only     = "true"
-}
-`, testCollectionName, testCollectionWorkspace, testCollectionDescription)
 }
 
 func testAccCheckCollectionFieldMapping() string {
@@ -214,27 +231,6 @@ func testAccCheckCollectionFieldMappingQuery() string {
 	field_mapping_query = "SELECT COUNT(*) AS cnt FROM _input"
 }
 `, testCollectionNameFieldMappingQuery, testCollectionWorkspace, testCollectionDescription)
-}
-
-func testAccCheckCollectionBasic() string {
-	return fmt.Sprintf(`
-resource rockset_collection test {
-	name        		= "%s"
-	workspace   		= "%s"
-	description 		= "%s"
-	retention_secs 	= 60
-}
-`, testCollectionName, testCollectionWorkspace, testCollectionDescription)
-}
-
-func testAccCheckCollectionUpdateForceRecreate() string {
-	return fmt.Sprintf(`
-resource rockset_collection test {
-	name        = "%s-updated"
-	workspace   = "%s"
-	description = "%s"
-	retention_secs 	= 61
-}`, testCollectionName, testCollectionWorkspace, testCollectionDescription)
 }
 
 /*

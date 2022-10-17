@@ -12,12 +12,13 @@ import (
 	"github.com/rockset/rockset-go-client/option"
 )
 
-const testApiKeyName = "terraform-provider-acceptance-tests"              //gosec:nolint
-const testApiKeyUser = "terraform-provider-tests-apikey-user@rockset.com" // gosec:nolint
-
 func TestAccApiKey_Basic(t *testing.T) {
 	var apiKey openapi.ApiKey
 	var keyValueOnCreation string
+
+	type values struct {
+		Name string
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -25,15 +26,15 @@ func TestAccApiKey_Basic(t *testing.T) {
 		CheckDestroy:      testAccCheckRocksetApiKeyDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckApiKeyBasic(),
+				Config: getHCLTemplate("apikey_basic.tf", values{"acc-key"}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetApiKeyExists("rockset_api_key.test", &apiKey),
-					resource.TestCheckResourceAttr("rockset_api_key.test", "name", testApiKeyName),
+					resource.TestCheckResourceAttr("rockset_api_key.test", "name", "acc-key"),
 					resource.TestCheckNoResourceAttr("rockset_api_key.test", "user"),
 					resource.TestCheckResourceAttrSet("rockset_api_key.test", "key"),
 					// store the created key for comparison in another test later
 					resource.TestCheckResourceAttrWith("rockset_api_key.test", "key", func(value string) error {
-						keyValueOnCreation = value						
+						keyValueOnCreation = value
 						return nil
 					}),
 				),
@@ -41,12 +42,12 @@ func TestAccApiKey_Basic(t *testing.T) {
 			},
 			{
 				// Re-apply the same configuration, to verify that nothing changes.
-				Config: testAccCheckApiKeyBasic(),
+				Config: getHCLTemplate("apikey_basic.tf", values{"acc-key"}),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("rockset_api_key.test", "key"),
-					// Wheck that key in the stored resource has not changed its value.
-					// We perfor this specific test because the GET api key endpoint returns the key
-					// value but it is obfuscated and storing that might lead to unexpected results
+					// Check that key in the stored resource has not changed its value.
+					// We perform this specific test because the GET api key endpoint returns the key
+					// value, but it is obfuscated and storing that might lead to unexpected results
 					// if the user then writes that obfuscated value somewhere else like in a key vault.
 					resource.TestCheckResourceAttrWith("rockset_api_key.test", "key", func(value string) error {
 						if value != keyValueOnCreation {
@@ -58,10 +59,10 @@ func TestAccApiKey_Basic(t *testing.T) {
 				ExpectNonEmptyPlan: false,
 			},
 			{
-				Config: testAccCheckApiKeyUpdateName(),
+				Config: getHCLTemplate("apikey_basic.tf", values{"acc-key-updated"}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetApiKeyExists("rockset_api_key.test", &apiKey),
-					resource.TestCheckResourceAttr("rockset_api_key.test", "name", fmt.Sprintf("%s-updated", testApiKeyName)),
+					resource.TestCheckResourceAttr("rockset_api_key.test", "name", "acc-key-updated"),
 					resource.TestCheckNoResourceAttr("rockset_api_key.test", "user"),
 					resource.TestCheckResourceAttrSet("rockset_api_key.test", "key"),
 				),
@@ -69,10 +70,10 @@ func TestAccApiKey_Basic(t *testing.T) {
 			},
 			{
 				// Back to basic, will change name AND api key
-				Config: testAccCheckApiKeyBasic(),
+				Config: getHCLTemplate("apikey_basic.tf", values{"acc-key"}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetApiKeyExists("rockset_api_key.test", &apiKey),
-					resource.TestCheckResourceAttr("rockset_api_key.test", "name", testApiKeyName),
+					resource.TestCheckResourceAttr("rockset_api_key.test", "name", "acc-key"),
 					resource.TestCheckNoResourceAttr("rockset_api_key.test", "user"),
 					resource.TestCheckResourceAttrSet("rockset_api_key.test", "key"),
 				),
@@ -80,34 +81,6 @@ func TestAccApiKey_Basic(t *testing.T) {
 			},
 		},
 	})
-}
-
-func testAccCheckApiKeyBasic() string {
-	return fmt.Sprintf(`
-resource rockset_api_key test {
-	name        = "%s"
-}
-`, testApiKeyName)
-}
-
-func testAccCheckApiKeyUpdateName() string {
-	return fmt.Sprintf(`
-resource rockset_api_key test {
-	name        = "%s-updated"
-}
-`, testApiKeyName)
-}
-
-func testAccCheckApiKeyUpdateUser() string {
-	return fmt.Sprintf(`
-resource rockset_user test {
-	email        = "%s"
-	roles				 = ["read-only"]
-}
-resource rockset_api_key test {
-	name        = "%s-updated"
-}
-`, testApiKeyUser, testApiKeyName)
 }
 
 func testAccCheckRocksetApiKeyDestroy(s *terraform.State) error {

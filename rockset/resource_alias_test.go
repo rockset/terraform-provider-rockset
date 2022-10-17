@@ -13,63 +13,61 @@ import (
 	"github.com/rockset/rockset-go-client/openapi"
 )
 
-const testAliasName = "terraform-provider-acceptance-tests"
-const testAliasDescription = "terraform provider acceptance tests"
-const testAliasWorkspace = "commons"
-const testCollection1 = "commons._events"
-const testCollection2 = "commons.test-alias"
-
 func TestAccAlias_Basic(t *testing.T) {
 	var alias openapi.Alias
 
+	type values struct {
+		Name        string
+		Description string
+		Alias       string
+	}
+
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t); testAccRemoveAlias(t, testAliasWorkspace, testAliasName) },
+		PreCheck:          func() { testAccPreCheck(t); testAccRemoveAlias(t, "acc", "name") },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckRocksetAliasDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckAliasBasic(),
+				Config: getHCLTemplate("alias_basic.tf", values{"name", "description", "commons._events"}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetAliasExists("rockset_alias.test", &alias),
-					resource.TestCheckResourceAttr("rockset_alias.test", "name", testAliasName),
-					resource.TestCheckResourceAttr("rockset_alias.test", "description", testAliasDescription),
-					resource.TestCheckResourceAttr("rockset_alias.test", "workspace", testAliasWorkspace),
-					testAccAliasCollectionListMatches(&alias, []string{testCollection1}),
+					resource.TestCheckResourceAttr("rockset_alias.test", "name", "name"),
+					resource.TestCheckResourceAttr("rockset_alias.test", "description", "description"),
+					resource.TestCheckResourceAttr("rockset_alias.test", "workspace", "acc"),
+					testAccAliasCollectionListMatches(&alias, []string{"commons._events"}),
 				),
 				ExpectNonEmptyPlan: false,
 			},
 			{
-				Config: testAccCheckAliasUpdateDescription(),
+				Config: getHCLTemplate("alias_basic.tf", values{"name", "updated description", "commons._events"}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetAliasExists("rockset_alias.test", &alias),
-					resource.TestCheckResourceAttr("rockset_alias.test", "name", testAliasName),
-					resource.TestCheckResourceAttr("rockset_alias.test", "description",
-						fmt.Sprintf("%s-updated", testAliasDescription)),
-					resource.TestCheckResourceAttr("rockset_alias.test", "workspace", testAliasWorkspace),
-					testAccAliasCollectionListMatches(&alias, []string{testCollection1}),
+					resource.TestCheckResourceAttr("rockset_alias.test", "name", "name"),
+					resource.TestCheckResourceAttr("rockset_alias.test", "description", "updated description"),
+					resource.TestCheckResourceAttr("rockset_alias.test", "workspace", "acc"),
+					testAccAliasCollectionListMatches(&alias, []string{"commons._events"}),
 				),
 				ExpectNonEmptyPlan: false,
 			},
 			{
-				Config: testAccCheckAliasUpdateCollections(),
+				Config: getHCLTemplate("alias_basic.tf", values{"name", "updated description", "commons.test-alias"}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetAliasExists("rockset_alias.test", &alias),
-					resource.TestCheckResourceAttr("rockset_alias.test", "name", testAliasName),
-					resource.TestCheckResourceAttr("rockset_alias.test", "description",
-						fmt.Sprintf("%s-updated", testAliasDescription)),
-					resource.TestCheckResourceAttr("rockset_alias.test", "workspace", testAliasWorkspace),
-					testAccAliasCollectionListMatches(&alias, []string{testCollection2}),
+					resource.TestCheckResourceAttr("rockset_alias.test", "name", "name"),
+					resource.TestCheckResourceAttr("rockset_alias.test", "description", "updated description"),
+					resource.TestCheckResourceAttr("rockset_alias.test", "workspace", "acc"),
+					testAccAliasCollectionListMatches(&alias, []string{"commons.test-alias"}),
 				),
 				ExpectNonEmptyPlan: false,
 			},
 			{
-				Config: testAccCheckAliasUpdateMultipleFields(),
+				Config: getHCLTemplate("alias_basic.tf", values{"name", "description", "commons._events"}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetAliasExists("rockset_alias.test", &alias),
-					resource.TestCheckResourceAttr("rockset_alias.test", "name", testAliasName),
-					resource.TestCheckResourceAttr("rockset_alias.test", "description", testAliasDescription),
-					resource.TestCheckResourceAttr("rockset_alias.test", "workspace", testAliasWorkspace),
-					testAccAliasCollectionListMatches(&alias, []string{testCollection1}),
+					resource.TestCheckResourceAttr("rockset_alias.test", "name", "name"),
+					resource.TestCheckResourceAttr("rockset_alias.test", "description", "description"),
+					resource.TestCheckResourceAttr("rockset_alias.test", "workspace", "acc"),
+					testAccAliasCollectionListMatches(&alias, []string{"commons._events"}),
 				),
 				ExpectNonEmptyPlan: false,
 			},
@@ -79,73 +77,12 @@ func TestAccAlias_Basic(t *testing.T) {
 
 // clean up any lingering test alias from a previous run
 func testAccRemoveAlias(t *testing.T, workspace, alias string) {
-	rc, err := rockset.NewClient()
-	if err != nil {
-		t.Fatal("could not create rockset client")
-	}
-	err = rc.DeleteAlias(context.TODO(), workspace, alias)
+	rc := testAccProvider.Meta().(*rockset.RockClient)
+
+	err := rc.DeleteAlias(context.TODO(), workspace, alias)
 	if err != nil {
 		t.Logf("could not delete alias %s.%s: %v", workspace, alias, err)
 	}
-}
-
-func testAccCheckAliasBasic() string {
-	return fmt.Sprintf(`
-resource rockset_alias test {
-	name        = "%s"
-	description	= "%s"
-	workspace		= "%s"
-	collections = ["%s"]
-}
-`, testAliasName, testAliasDescription, testAliasWorkspace, testCollection1)
-}
-
-func testAccCheckAliasUpdateDescription() string {
-	return fmt.Sprintf(`
-resource rockset_alias test {
-	name        = "%s"
-	description	= "%s-updated"
-	workspace		= "%s"
-	collections = ["%s"]
-}
-`, testAliasName, testAliasDescription, testAliasWorkspace, testCollection1)
-}
-
-func testAccCheckAliasUpdateCollections() string {
-	return fmt.Sprintf(`
-resource rockset_collection test {
-	name = "test-alias"
-	workspace = "commons"
-}
-resource rockset_alias test {
-	name        = "%s"
-	description	= "%s-updated"
-	workspace		= "%s"
-	collections = ["%s"] 
-}
-`, testAliasName, testAliasDescription, testAliasWorkspace, testCollection2)
-}
-
-func testAccCheckAliasUpdateMultipleFields() string {
-	return fmt.Sprintf(`
-resource rockset_alias test {
-	name        = "%s"
-	description	= "%s"
-	workspace		= "%s"
-	collections = ["%s"] 
-}
-`, testAliasName, testAliasDescription, testAliasWorkspace, testCollection1)
-}
-
-func testAccCheckAliasUpdateNameForceRecreate() string {
-	return fmt.Sprintf(`
-resource rockset_alias test {
-	name        = "%s-updated"
-	description	= "%s"
-	workspace		= "%s"
-	collections = ["%s.%s"] 
-}
-`, testAliasName, testAliasDescription, testAliasWorkspace, testAliasWorkspace, testCollection1)
 }
 
 func testAccCheckRocksetAliasDestroy(s *terraform.State) error {

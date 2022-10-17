@@ -10,11 +10,13 @@ import (
 	"github.com/rockset/rockset-go-client/openapi"
 )
 
-const testWorkspaceName = "terraform-provider-acceptance-tests"
-const testWorkspaceDescription = "Terraform provider acceptance tests"
-
 func TestAccWorkspace_Basic(t *testing.T) {
 	var workspace openapi.Workspace
+
+	type values struct {
+		Name        string
+		Description string
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -22,45 +24,27 @@ func TestAccWorkspace_Basic(t *testing.T) {
 		CheckDestroy:      testAccCheckRocksetWorkspaceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckWorkspaceBasic(),
+				Config: getHCLTemplate("workspace_basic.tf", values{"acc-ws", "Terraform provider acceptance tests"}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetWorkspaceExists("rockset_workspace.test", &workspace),
-					resource.TestCheckResourceAttr("rockset_workspace.test", "name", testWorkspaceName),
-					resource.TestCheckResourceAttr("rockset_workspace.test", "description", testWorkspaceDescription),
+					resource.TestCheckResourceAttr("rockset_workspace.test", "name", "acc-ws"),
+					resource.TestCheckResourceAttr("rockset_workspace.test", "description", "Terraform provider acceptance tests"),
 					resource.TestCheckResourceAttrSet("rockset_workspace.test", "created_by"),
 				),
 				ExpectNonEmptyPlan: false,
 			},
 			{
-				Config: testAccCheckWorkspaceUpdateName(),
+				Config: getHCLTemplate("workspace_basic.tf", values{"acc-ws-updated", "Terraform provider acceptance tests"}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetWorkspaceExists("rockset_workspace.test", &workspace),
-					resource.TestCheckResourceAttr("rockset_workspace.test", "name", fmt.Sprintf("%s-updated", testWorkspaceName)),
-					resource.TestCheckResourceAttr("rockset_workspace.test", "description", testWorkspaceDescription),
+					resource.TestCheckResourceAttr("rockset_workspace.test", "name", "acc-ws-updated"),
+					resource.TestCheckResourceAttr("rockset_workspace.test", "description", "Terraform provider acceptance tests"),
 					resource.TestCheckResourceAttrSet("rockset_workspace.test", "created_by"),
 				),
 				ExpectNonEmptyPlan: false,
 			},
 		},
 	})
-}
-
-func testAccCheckWorkspaceBasic() string {
-	return fmt.Sprintf(`
-resource rockset_workspace test {
-	name        = "%s"
-	description	= "%s"
-}
-`, testWorkspaceName, testWorkspaceDescription)
-}
-
-func testAccCheckWorkspaceUpdateName() string {
-	return fmt.Sprintf(`
-resource rockset_workspace test {
-	name        = "%s-updated"
-	description	= "%s"
-}
-`, testWorkspaceName, testWorkspaceDescription)
 }
 
 func testAccCheckRocksetWorkspaceDestroy(s *terraform.State) error {

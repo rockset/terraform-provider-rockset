@@ -11,13 +11,15 @@ import (
 	"github.com/rockset/rockset-go-client/openapi"
 )
 
-const testViewName = "terraform-provider-acceptance-tests"
-const testViewWorkspace = "commons"
-const testViewQuery = "select * from commons._events where _events.kind = 'COLLECTION'"
-const testViewDescription = "Terraform provider acceptance tests"
-
 func TestAccView_Basic(t *testing.T) {
 	var view openapi.View
+
+	const query = "select * from commons._events where _events.kind = 'COLLECTION'"
+	type values struct {
+		Name        string
+		Description string
+		Query       string
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -25,51 +27,29 @@ func TestAccView_Basic(t *testing.T) {
 		CheckDestroy:      testAccCheckRocksetViewDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckViewBasic(),
+				Config: getHCLTemplate("view_basic.tf", values{"view", "description", query}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetViewExists("rockset_view.test", &view),
-					resource.TestCheckResourceAttr("rockset_view.test", "name", testViewName),
-					resource.TestCheckResourceAttr("rockset_view.test", "query", testViewQuery),
-					resource.TestCheckResourceAttr("rockset_view.test", "description", testViewDescription),
+					resource.TestCheckResourceAttr("rockset_view.test", "name", "view"),
+					resource.TestCheckResourceAttr("rockset_view.test", "query", query),
+					resource.TestCheckResourceAttr("rockset_view.test", "description", "description"),
 					resource.TestCheckResourceAttrSet("rockset_view.test", "created_by"),
 				),
 				ExpectNonEmptyPlan: false,
 			},
 			{
-				Config: testAccCheckViewUpdateName(),
+				Config: getHCLTemplate("view_basic.tf", values{"view-updated", "description", query}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetViewExists("rockset_view.test", &view),
-					resource.TestCheckResourceAttr("rockset_view.test", "name", fmt.Sprintf("%s-updated", testViewName)),
-					resource.TestCheckResourceAttr("rockset_view.test", "query", testViewQuery),
-					resource.TestCheckResourceAttr("rockset_view.test", "description", testViewDescription),
+					resource.TestCheckResourceAttr("rockset_view.test", "name", "view-updated"),
+					resource.TestCheckResourceAttr("rockset_view.test", "query", query),
+					resource.TestCheckResourceAttr("rockset_view.test", "description", "description"),
 					resource.TestCheckResourceAttrSet("rockset_view.test", "created_by"),
 				),
 				ExpectNonEmptyPlan: false,
 			},
 		},
 	})
-}
-
-func testAccCheckViewBasic() string {
-	return fmt.Sprintf(`
-resource rockset_view test {
-	workspace   = "%s"
-	name        = "%s"
-	query       = "%s"
-	description	= "%s"
-}
-`, testViewWorkspace, testViewName, testViewQuery, testViewDescription)
-}
-
-func testAccCheckViewUpdateName() string {
-	return fmt.Sprintf(`
-resource rockset_view test {
-	workspace   = "%s"
-	name        = "%s-updated"
-	query       = "%s"
-	description	= "%s"
-}
-`, testViewWorkspace, testViewName, testViewQuery, testViewDescription)
 }
 
 func testAccCheckRocksetViewDestroy(s *terraform.State) error {

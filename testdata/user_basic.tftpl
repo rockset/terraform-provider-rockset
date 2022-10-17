@@ -1,0 +1,4 @@
+resource rockset_user test {
+  email = "{{ .Email }}"
+  roles	= [{{range $i, $v := .Roles}}{{if $i}} ,{{end}}"{{ $v }}"{{end}}]
+}
