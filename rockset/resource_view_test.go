@@ -27,7 +27,7 @@ func TestAccView_Basic(t *testing.T) {
 		CheckDestroy:      testAccCheckRocksetViewDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: getHCLTemplate("alias_basic.tf", values{"view", "description", query}),
+				Config: getHCLTemplate("view_basic.tf", values{"view", "description", query}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetViewExists("rockset_view.test", &view),
 					resource.TestCheckResourceAttr("rockset_view.test", "name", "view"),
@@ -38,7 +38,7 @@ func TestAccView_Basic(t *testing.T) {
 				ExpectNonEmptyPlan: false,
 			},
 			{
-				Config: getHCLTemplate("alias_basic.tf", values{"view-updated", "description", query}),
+				Config: getHCLTemplate("view_basic.tf", values{"view-updated", "description", query}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetViewExists("rockset_view.test", &view),
 					resource.TestCheckResourceAttr("rockset_view.test", "name", "view-updated"),
