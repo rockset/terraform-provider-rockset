@@ -20,10 +20,3 @@ repos:
         pass_filenames: false
         additional_dependencies: []
         minimum_pre_commit_version: 2.9.2
-      - id: tfplugindocs
-        name: "terraform plugin docs"
-        entry: tfplugindocs
-        args: ["generate"]
-        pass_filenames: false
-        language: system
-        'types_or': [go]
