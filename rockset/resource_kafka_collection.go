@@ -232,9 +232,18 @@ func flattenKafkaSourceParams(sources *[]openapi.Source) []interface{} {
 func flattenKafkaSourceStatus(status *openapi.StatusKafka) []interface{} {
 	m := make(map[string]interface{})
 
-	m["state"] = status.State
-	m["last_consumed_time"] = status.LastConsumedTime
-	m["documents_processed"] = status.NumDocumentsProcessed
+	if v, ok := status.GetStateOk(); ok {
+		m["state"] = v
+	}
+
+	if v, ok := status.GetLastConsumedTimeOk(); ok {
+		m["last_consumed_time"] = v
+	}
+
+	if v, ok := status.GetNumDocumentsProcessedOk(); ok {
+		m["documents_processed"] = v
+	}
+
 	m["partitions"] = flattenKafkaSourcePartitions(status.KafkaPartitions)
 
 	return []interface{}{m}
