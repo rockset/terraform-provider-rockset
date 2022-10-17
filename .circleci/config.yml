@@ -51,7 +51,7 @@ jobs:
           command: tfplugindocs generate
       - run:
           name: Check if there are uncommitted document changes
-          command: git diff --exit-code ./docs || echo "must run tfplugindocs before committing" && exit 1
+          command: git diff --exit-code ./docs || echo "must run tfplugindocs before committing"
       - run:
           name: 'TODO: add unit tests'
           command: 'echo "TODO: add unit tests"'
