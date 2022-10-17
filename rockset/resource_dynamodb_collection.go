@@ -46,12 +46,6 @@ func dynamoDBCollectionSchema() map[string]*schema.Schema {
 						ForceNew:    true,
 						Optional:    true,
 					},
-					"field_mapping_query": {
-						Type:        schema.TypeString,
-						ForceNew:    true,
-						Optional:    true,
-						Description: "Field mapping SQL query.",
-					},
 					"scan_start_time": {
 						Description: "DynamoDB scan start time.",
 						Type:        schema.TypeString,

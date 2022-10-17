@@ -22,10 +22,12 @@ import (
 func baseCollectionSchema() map[string]*schema.Schema { //nolint:funlen
 	return map[string]*schema.Schema{
 		"clustering_key": {
-			Description: "List of clustering fields.",
-			Type:        schema.TypeList,
-			ForceNew:    true,
-			Optional:    true,
+			Description:   "List of clustering fields.",
+			Type:          schema.TypeList,
+			ForceNew:      true,
+			Optional:      true,
+			Deprecated:    "Use a `field_mapping_query` instead",
+			ConflictsWith: []string{"field_mapping_query"},
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
 					"field_name": {
@@ -61,11 +63,12 @@ func baseCollectionSchema() map[string]*schema.Schema { //nolint:funlen
 			Optional:    true,
 		},
 		"field_mapping": {
-			Description: "List of field mappings.",
-			Type:        schema.TypeList,
-			ForceNew:    true,
-			Optional:    true,
-			Deprecated:  "Use a `field_mapping_query` instead",
+			Description:   "List of field mappings.",
+			Type:          schema.TypeList,
+			ForceNew:      true,
+			Optional:      true,
+			Deprecated:    "Use a `field_mapping_query` instead",
+			ConflictsWith: []string{"field_mapping_query"},
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
 					"name": {
@@ -167,59 +170,7 @@ For more information see https://rockset.com/docs/ingest-transformation/`,
 			ForceNew: true,
 			Optional: true,
 			// TODO deprecate in favor of ingest_transformation
-			// TODO validate that insert_only is set to true
-		},
-		"field_schemas": {
-			Description: "List of field schemas.",
-			Type:        schema.TypeList,
-			ForceNew:    true,
-			Optional:    true,
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"field_name": {
-						Description: "The name of a field. Parsed as a SQL qualified name.",
-						Type:        schema.TypeString,
-						ForceNew:    true,
-						Required:    true,
-					},
-					"index_mode": {
-						Description: "Whether to have index or no_index.",
-						Type:        schema.TypeString,
-						ForceNew:    true,
-						Required:    true,
-						ValidateFunc: validation.StringInSlice(
-							[]string{"index", "no_index"},
-							false), // Ignore case false, must do exact match
-					},
-					"range_index_mode": {
-						Description: "Whether to have v1_index or no_index.",
-						Type:        schema.TypeString,
-						ForceNew:    true,
-						Required:    true,
-						ValidateFunc: validation.StringInSlice(
-							[]string{"v1_index", "no_index"},
-							false), // Ignore case false, must do exact match
-					},
-					"type_index_mode": {
-						Description: "Whether to have index or no_index.",
-						Type:        schema.TypeString,
-						ForceNew:    true,
-						Required:    true,
-						ValidateFunc: validation.StringInSlice(
-							[]string{"index", "no_index"},
-							false), // Ignore case false, must do exact match
-					},
-					"column_index_mode": {
-						Description: "Whether to have store or no_store.",
-						Type:        schema.TypeString,
-						ForceNew:    true,
-						Required:    true,
-						ValidateFunc: validation.StringInSlice(
-							[]string{"store", "no_store"},
-							false), // Ignore case false, must do exact match
-					},
-				},
-			},
+			// TODO validate that insert_only is set to true and that neither field_mapping nor clustering_key is set
 		},
 		"insert_only": {
 			Type:        schema.TypeBool,
@@ -228,42 +179,6 @@ For more information see https://rockset.com/docs/ingest-transformation/`,
 			Default:     false,
 			Description: "If true disallows updates and deletes, but makes indexing more efficient",
 		},
-		"inverted_index_group_encoding_options": {
-			Description: "Inverted index group encoding options.",
-			Type:        schema.TypeSet,
-			ForceNew:    true,
-			Optional:    true,
-			MinItems:    0,
-			MaxItems:    1,
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"group_size": {
-						Description: "Group size.",
-						Type:        schema.TypeInt,
-						ForceNew:    true,
-						Required:    true,
-					},
-					"restart_length": {
-						Description: "Restart length.",
-						Type:        schema.TypeInt,
-						ForceNew:    true,
-						Required:    true,
-					},
-					"event_time_codec": {
-						Description: "Event time codec.",
-						Type:        schema.TypeString,
-						ForceNew:    true,
-						Required:    true,
-					},
-					"doc_id_codec": {
-						Description: "Doc id codec.",
-						Type:        schema.TypeString,
-						ForceNew:    true,
-						Required:    true,
-					},
-				},
-			},
-		}, // End inverted_index_group_encoding_options
 		"name": {
 			Description:  "Unique identifier for the collection. Can contain alphanumeric or dash characters.",
 			Type:         schema.TypeString,
