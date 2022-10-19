@@ -93,7 +93,9 @@ jobs:
             TF_ACC: true
       - run:
           name: Install goveralls
-          command: go install github.com/mattn/goveralls@latest
+          command: go install github.com/mattn/goveralls@v0.0.11
+      - run: pwd
+      - run: ls -al
       - run:
           name: Upload to coveralls
-          command: goveralls -covermode=atomic -coverprofile=$HOME/cover.out -service=circle-ci
+          command: echo goveralls -covermode=atomic -coverprofile=$HOME/cover.out -service=circle-ci
