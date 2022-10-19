@@ -15,7 +15,7 @@ resource rockset_s3_collection cities {
   integration_name = rockset_s3_integration.public.name
   source = {
     bucket = "rockset-public-datasets"
-    prefix = "partial-cities"
+    pattern = "cities/*.json"
     format = "json"
   }
 }
