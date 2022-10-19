@@ -24,10 +24,10 @@ Manages a Rockset Query Lambda.
 ### Optional
 
 - `description` (String) Text describing the query lambda.
-- `id` (String) The ID of this resource.
 
 ### Read-Only
 
+- `id` (String) The ID of this resource.
 - `state` (String) The latest state of this query lambda.
 - `version` (String) The latest version string of this query lambda.
 

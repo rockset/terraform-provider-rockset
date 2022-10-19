@@ -33,12 +33,15 @@ This is referred to as the collection’s ingest transformation or, historically
 
 For more information see https://rockset.com/docs/ingest-transformation/
 - `field_schemas` (Block List) List of field schemas. (see [below for nested schema](#nestedblock--field_schemas))
-- `id` (String) The ID of this resource.
 - `insert_only` (Boolean) If true disallows updates and deletes, but makes indexing more efficient
 - `inverted_index_group_encoding_options` (Block Set, Max: 1) Inverted index group encoding options. (see [below for nested schema](#nestedblock--inverted_index_group_encoding_options))
 - `retention_secs` (Number) Number of seconds after which data is purged. Based on event time.
 - `wait_for_collection` (Boolean) Wait until the collection is ready.
 - `wait_for_documents` (Number) Wait until the collection has documents. The default is to wait for 0 documents, which means it doesn't wait.
+
+### Read-Only
+
+- `id` (String) The ID of this resource.
 
 <a id="nestedblock--clustering_key"></a>
 ### Nested Schema for `clustering_key`

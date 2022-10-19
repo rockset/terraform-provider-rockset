@@ -220,9 +220,9 @@ For more information see https://rockset.com/docs/ingest-transformation/`,
 } // End func
 
 /*
-	Takes in a collection returned from the api.
-	Parses the base fields any collection has and
-	puts them into the schema object.
+Takes in a collection returned from the api.
+Parses the base fields any collection has and
+puts them into the schema object.
 */
 func parseBaseCollection(collection *openapi.Collection, d *schema.ResourceData) error {
 	var err error

@@ -110,8 +110,8 @@ func rocksetNameValidator(val interface{}, key string) ([]string, []error) {
 }
 
 /*
-	Returns an id of format <workspace>.<collection>.
-	This is how collections are referenced in Rockset.
+Returns an id of format <workspace>.<collection>.
+This is how collections are referenced in Rockset.
 */
 func toID(workspace, name string) string {
 	// The provider will be configured for 1 account.
@@ -138,7 +138,6 @@ func toStringArray(a []interface{}) []string {
 }
 
 /*
-
  */
 func toStringPtrNilIfEmpty(v string) *string {
 	if v == "" {

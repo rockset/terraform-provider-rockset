@@ -24,10 +24,10 @@ Manages a Rockset view.
 ### Optional
 
 - `description` (String) Text describing the collection.
-- `id` (String) The ID of this resource.
 
 ### Read-Only
 
 - `created_by` (String) The user who created the view.
+- `id` (String) The ID of this resource.
 
 

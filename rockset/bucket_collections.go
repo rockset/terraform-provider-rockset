@@ -10,9 +10,9 @@ import (
 )
 
 /*
-	Takes in a collection returned from the api.
-	Parses the fields relevant to an s3 source and
-	puts them into the schema object.
+Takes in a collection returned from the api.
+Parses the fields relevant to an s3 source and
+puts them into the schema object.
 */
 func parseBucketCollection(sourceType string, collection *openapi.Collection, d *schema.ResourceData) error {
 	var err error

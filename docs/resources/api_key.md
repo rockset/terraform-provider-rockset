@@ -24,11 +24,11 @@ Can be used together with roles to scope the actions the api key can take.
 
 ### Optional
 
-- `id` (String) The ID of this resource.
 - `role` (String) The role the api key will use. If not specified, "All User Assigned Roles" will be used.
 
 ### Read-Only
 
+- `id` (String) The ID of this resource.
 - `key` (String, Sensitive) The resulting Rockset api key.
 - `user` (String) The user the key is created for.
 

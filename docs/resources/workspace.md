@@ -22,10 +22,10 @@ Manages a Rockset workspace.
 ### Optional
 
 - `description` (String) Text describing the collection.
-- `id` (String) The ID of this resource.
 
 ### Read-Only
 
 - `created_by` (String) The user who created the workspace.
+- `id` (String) The ID of this resource.
 
 

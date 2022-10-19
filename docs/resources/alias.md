@@ -24,6 +24,9 @@ Manages an alias for a set of collections.
 ### Optional
 
 - `description` (String) Text describing the alias.
+
+### Read-Only
+
 - `id` (String) The ID of this resource.
 
 

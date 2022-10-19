@@ -81,6 +81,14 @@ To run a specific test:
 TF_ACC=true go test -timeout 40m -v ./rockset/* -run TestAccS3Collection_Basic
 ```
 
+### Pre-commit hooks
+
+The repo comes with a `.pre-commit-config.yaml` file which can be enabled using `pre-commit install`,
+which also runs through Circle-CI before any tests are run. 
+It relies on having [`tfplugindocs`](https://github.com/hashicorp/terraform-plugin-docs) installed.
+
+See [pre-commit](https://pre-commit.com/) for more details.
+
 ## Manual Installation
 
 To manually install this provider from a build or release 

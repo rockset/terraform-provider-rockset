@@ -24,6 +24,9 @@ Manages a Rockset DynamoDB Integration.
 ### Optional
 
 - `description` (String) Text describing the integration.
+
+### Read-Only
+
 - `id` (String) The ID of this resource.
 
 

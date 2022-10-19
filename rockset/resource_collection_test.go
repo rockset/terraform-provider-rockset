@@ -234,7 +234,7 @@ func testAccCheckCollectionFieldMappingQuery() string {
 }
 
 /*
-	Check if any type of collection was successfully destroyed
+Check if any type of collection was successfully destroyed
 */
 func testAccCheckRocksetCollectionDestroy(s *terraform.State) error {
 	rc := testAccProvider.Meta().(*rockset.RockClient)

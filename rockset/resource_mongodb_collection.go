@@ -174,9 +174,9 @@ func resourceMongoDBCollectionRead(ctx context.Context, d *schema.ResourceData, 
 }
 
 /*
-	Takes in a collection returned from the api.
-	Parses the fields relevant to an MongoDB source and
-	puts them into the schema object.
+Takes in a collection returned from the api.
+Parses the fields relevant to an MongoDB source and
+puts them into the schema object.
 */
 func parseMongoDBCollection(collection *openapi.Collection, d *schema.ResourceData) error {
 	var err error

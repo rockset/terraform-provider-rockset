@@ -80,12 +80,15 @@ EOT
 - `bootstrap_servers` (String) The Kafka bootstrap server url(s). Required only for V3 integration.
 - `connection_string` (String) Kafka connection string.
 - `description` (String) Text describing the integration.
-- `id` (String) The ID of this resource.
 - `kafka_data_format` (String) The format of the Kafka topics being tailed. Possible values: JSON, AVRO.
 - `kafka_topic_names` (Set of String) Kafka topics to tail.
 - `schema_registry_config` (Map of String) Kafka configuration for schema registry. Required only for V3 integration.
 - `security_config` (Map of String) Kafka security configurations. Required only for V3 integration.
 - `use_v3` (Boolean) Use v3 for Confluent Cloud.
 - `wait_for_integration` (Boolean) Wait until the integration is active.
+
+### Read-Only
+
+- `id` (String) The ID of this resource.
 
 

@@ -155,9 +155,9 @@ func resourceDynamoDBCollectionRead(ctx context.Context, d *schema.ResourceData,
 }
 
 /*
-	Takes in a collection returned from the api.
-	Parses the fields relevant to an DynamoDB source and
-	puts them into the schema object.
+Takes in a collection returned from the api.
+Parses the fields relevant to an DynamoDB source and
+puts them into the schema object.
 */
 func parseDynamoDBCollection(collection *openapi.Collection, d *schema.ResourceData) error {
 
