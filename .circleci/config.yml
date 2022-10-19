@@ -88,7 +88,7 @@ jobs:
       - checkout
       - run:
           name: Terraform Acceptance Tests
-          command: go test -cover -coverprofile=cover.out -timeout 40m -v ./rockset/*
+          command: go test -cover -coverprofile=$HOME/cover.out -timeout 40m -v ./rockset/*
           environment:
             TF_ACC: true
       - run:
@@ -96,4 +96,4 @@ jobs:
           command: go install github.com/mattn/goveralls@latest
       - run:
           name: Upload to coveralls
-          command: goveralls -coverprofile=cover.out -service=circle-ci
+          command: goveralls -coverprofile=$HOME/cover.out -service=circle-ci
