@@ -75,7 +75,7 @@ func resourceWorkspaceRead(ctx context.Context, d *schema.ResourceData, meta int
 
 	workspace, err := rc.GetWorkspace(ctx, name)
 	if err != nil {
-		return diag.FromErr(err)
+		return checkForNotFoundError(d, err)
 	}
 
 	err = d.Set("name", workspace.GetName())
