@@ -159,7 +159,7 @@ func mergeSchemas(mergeOnto map[string]*schema.Schema, toMerge map[string]*schem
 	return mergeOnto
 }
 
-// checkForNotFoundError check is the error is a Rockset NotFoundError, and then clears the id which makes
+// checkForNotFoundError checks if err is a Rockset NotFoundError, and then clears the id which makes
 // terraform create the resource, but if it isn't a NotFoundError it will return the error wrapped in diag.Diagnostics
 func checkForNotFoundError(d *schema.ResourceData, err error) diag.Diagnostics {
 	var re rockset.Error
