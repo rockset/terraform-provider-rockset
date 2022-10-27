@@ -17,8 +17,8 @@ func TestAccSampleCollection_Basic(t *testing.T) {
 			{
 				Config: getHCL("sample_collection.tf"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRocksetCollectionExists("rockset_s3_collection.sample", &collection),
-					resource.TestCheckResourceAttr("rockset_sample_collection.sample", "dataset", "cities"),
+					testAccCheckRocksetCollectionExists("rockset_sample_collection.test", &collection),
+					resource.TestCheckResourceAttr("rockset_sample_collection.test", "dataset", "cities"),
 				),
 				ExpectNonEmptyPlan: false,
 			},
