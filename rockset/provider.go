@@ -40,6 +40,7 @@ func Provider() *schema.Provider {
 			"rockset_role":                 resourceRole(),
 			"rockset_s3_collection":        resourceS3Collection(),
 			"rockset_s3_integration":       resourceS3Integration(),
+			"rockset_sample_collection":    resourceSampleCollection(),
 			"rockset_user":                 resourceUser(),
 			"rockset_view":                 resourceView(),
 			"rockset_workspace":            resourceWorkspace(),
