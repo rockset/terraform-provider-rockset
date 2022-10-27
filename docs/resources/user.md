@@ -4,11 +4,16 @@ page_title: "rockset_user Resource - terraform-provider-rockset"
 subcategory: ""
 description: |-
   Manages a Rockset User.
+  First and last name can only be managed for users who have accepted the invite,
+  i.e. when the state is ACCEPTED.
 ---
 
 # rockset_user (Resource)
 
 Manages a Rockset User.
+
+First and last name can only be managed for users who have accepted the invite,
+i.e. when the state is ACCEPTED.
 
 
 
@@ -20,8 +25,15 @@ Manages a Rockset User.
 - `email` (String) Email address of the user. Also used to identify the user.
 - `roles` (List of String) List of roles for the user. E.g. 'admin', 'member', 'read-only'.
 
+### Optional
+
+- `first_name` (String) User's first name. This can only be set once the state is ACTIVE, i.e after the user has accepted the invite.
+- `last_name` (String) User's last name. This can only be set once the state is ACTIVE, i.e after the user has accepted the invite.
+
 ### Read-Only
 
+- `created_at` (String) The ISO-8601 time of when the user was created.
 - `id` (String) The ID of this resource.
+- `state` (String) State of the user, either NEW or ACTIVE.
 
 

@@ -170,7 +170,6 @@ For more information see https://rockset.com/docs/ingest-transformation/`,
 			ForceNew: true,
 			Optional: true,
 			// TODO deprecate in favor of ingest_transformation
-			// TODO validate that insert_only is set to true and that neither field_mapping nor clustering_key is set
 		},
 		"name": {
 			Description:  "Unique identifier for the collection. Can contain alphanumeric or dash characters.",

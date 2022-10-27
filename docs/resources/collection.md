@@ -22,19 +22,16 @@ Manages a basic collection with no sources. Usually used for the write api.
 
 ### Optional
 
-- `clustering_key` (Block List) List of clustering fields. (see [below for nested schema](#nestedblock--clustering_key))
+- `clustering_key` (Block List, Deprecated) List of clustering fields. (see [below for nested schema](#nestedblock--clustering_key))
 - `description` (String) Text describing the collection.
 - `field_mapping` (Block List, Deprecated) List of field mappings. (see [below for nested schema](#nestedblock--field_mapping))
-- `field_mapping_query` (String) Ingest transformation SQL query. Requires insert_only to be set to true.
+- `field_mapping_query` (String) Ingest transformation SQL query. Turns the collection into insert_only mode.
 
 When inserting data into Rockset, you can transform the data by providing a single SQL query, 
 that contains all of the desired data transformations. 
 This is referred to as the collection’s ingest transformation or, historically, its field mapping query.
 
 For more information see https://rockset.com/docs/ingest-transformation/
-- `field_schemas` (Block List) List of field schemas. (see [below for nested schema](#nestedblock--field_schemas))
-- `insert_only` (Boolean) If true disallows updates and deletes, but makes indexing more efficient
-- `inverted_index_group_encoding_options` (Block Set, Max: 1) Inverted index group encoding options. (see [below for nested schema](#nestedblock--inverted_index_group_encoding_options))
 - `retention_secs` (Number) Number of seconds after which data is purged. Based on event time.
 - `wait_for_collection` (Boolean) Wait until the collection is ready.
 - `wait_for_documents` (Number) Wait until the collection has documents. The default is to wait for 0 documents, which means it doesn't wait.
@@ -87,29 +84,5 @@ Required:
 - `if_missing` (String) Specifies the behavior for when the field evaluates to either NULL or UNDEFINED. It accepts two valid strings as input: SKIP, which skips the update for this document entirely, or PASS, which will simply set this field to NULL.
 - `is_drop` (Boolean) Specifies whether or not to drop this field completely from the document as it is being inserted.
 - `param` (String) Name alias for this field which can be referred to in a SQL expression in the output_field attribute.
-
-
-
-<a id="nestedblock--field_schemas"></a>
-### Nested Schema for `field_schemas`
-
-Required:
-
-- `column_index_mode` (String) Whether to have store or no_store.
-- `field_name` (String) The name of a field. Parsed as a SQL qualified name.
-- `index_mode` (String) Whether to have index or no_index.
-- `range_index_mode` (String) Whether to have v1_index or no_index.
-- `type_index_mode` (String) Whether to have index or no_index.
-
-
-<a id="nestedblock--inverted_index_group_encoding_options"></a>
-### Nested Schema for `inverted_index_group_encoding_options`
-
-Required:
-
-- `doc_id_codec` (String) Doc id codec.
-- `event_time_codec` (String) Event time codec.
-- `group_size` (Number) Group size.
-- `restart_length` (Number) Restart length.
 
 

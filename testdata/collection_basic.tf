@@ -3,9 +3,6 @@ resource rockset_collection test {
   workspace   		= "{{ .Workspace }}"
   description 		= "{{ .Description }}"
   retention_secs 	= "{{ .Retention }}"
-{{ if .InsertOnly }}
-  insert_only = true
-{{ end }}
 {{ if (ne .IngestTransformation "") }}
 field_mapping_query = "{{ .IngestTransformation }}"
 {{ end }}
