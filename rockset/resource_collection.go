@@ -159,7 +159,7 @@ func baseCollectionSchema() map[string]*schema.Schema { //nolint:funlen
 			},
 		}, // End field_mapping
 		"field_mapping_query": {
-			Description: `Ingest transformation SQL query. Requires insert_only to be set to true.
+			Description: `Ingest transformation SQL query. Turns the collection into insert_only mode.
 
 When inserting data into Rockset, you can transform the data by providing a single SQL query, 
 that contains all of the desired data transformations. 
@@ -171,13 +171,6 @@ For more information see https://rockset.com/docs/ingest-transformation/`,
 			Optional: true,
 			// TODO deprecate in favor of ingest_transformation
 			// TODO validate that insert_only is set to true and that neither field_mapping nor clustering_key is set
-		},
-		"insert_only": {
-			Type:        schema.TypeBool,
-			ForceNew:    true,
-			Optional:    true,
-			Default:     false,
-			Description: "If true disallows updates and deletes, but makes indexing more efficient",
 		},
 		"name": {
 			Description:  "Unique identifier for the collection. Can contain alphanumeric or dash characters.",
@@ -262,11 +255,6 @@ func parseBaseCollection(collection *openapi.Collection, d *schema.ResourceData)
 		return err
 	}
 
-	err = d.Set("insert_only", collection.GetInsertOnly())
-	if err != nil {
-		return err
-	}
-
 	return nil // No errors
 }
 
@@ -280,7 +268,8 @@ func createBaseCollectionRequest(d *schema.ResourceData) *openapi.CreateCollecti
 	name := d.Get("name").(string)
 	description := d.Get("description").(string)
 
-	params := openapi.NewCreateCollectionRequest(name)
+	params := openapi.NewCreateCollectionRequest()
+	params.Name = &name
 	params.SetDescription(description)
 
 	if v, ok := d.GetOk("field_mapping"); ok && len(v.([]interface{})) > 0 {
@@ -304,11 +293,6 @@ func createBaseCollectionRequest(d *schema.ResourceData) *openapi.CreateCollecti
 	if v, ok := d.GetOk("field_mapping_query"); ok {
 		fmq := v.(string)
 		params.FieldMappingQuery = &openapi.FieldMappingQuery{Sql: &fmq}
-	}
-
-	if v, ok := d.GetOk("insert_only"); ok {
-		insertOnly := v.(bool)
-		params.InsertOnly = &insertOnly
 	}
 
 	return params
@@ -583,7 +567,7 @@ func waitForCollectionAndDocuments(ctx context.Context, rc *rockset.RockClient, 
 			"workspace": workspace,
 			"name":      name,
 		})
-		if err := rc.WaitUntilCollectionDocuments(ctx, workspace, name, int64(nDocs)); err != nil {
+		if err := rc.WaitUntilCollectionHasDocuments(ctx, workspace, name, int64(nDocs)); err != nil {
 			return err
 		}
 	}
