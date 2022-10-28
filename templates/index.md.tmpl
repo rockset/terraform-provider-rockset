@@ -13,7 +13,8 @@ The [Rockset](https://rockset.com/) provider is used to interact with the
 via the [Go client](https://github.com/rockset/rockset-go-client)
 in order to configure resources of a Rockset organization.
 
-Visit https://github.com/rockset/terraform-provider-rockset to file any issues for bugs or feedback related to the provider.
+Visit https://github.com/rockset/terraform-provider-rockset to file any issues for bugs or feedback related to the provider,
+or visit the [Rockset community site](https://community.rockset.com/).
 
 ## Example Usage
 
@@ -21,9 +22,34 @@ Visit https://github.com/rockset/terraform-provider-rockset to file any issues f
 
 ~> Hard-coding credentials into any Terraform configuration is not recommended, and risks secret leakage should this file ever be committed to a public version control system. See [Environment Variables](#environment-variables) for a better alternative.
 
-Creating an S3 integration and a collection from Rockset's sample datasets.
+Creating collections from Rockset's sample datasets, and adding a view that filters out only cities in Brazil.
 
 {{tffile "examples/resources/rockset_s3_collection/resource.tf"}}
+```
+resource rockset_workspace sample {
+  name = "sample"
+  description = "sample datasets"
+}
+
+resource rockset_sample_collection cities {
+  workspace = rockset_workspace.sample.name
+  name      = "cities"
+  dataset   = "cities"
+}
+
+resource rockset_view brazil {
+  name = 'cities-in-brazil'
+  workspace = rockset_workspace.sample.name
+  query = <<SQL
+SELECT
+  *
+FROM
+  commons.cities AS c
+WHERE
+c.fields.country = 'Brazil'
+SQL
+}
+```
 
 ## Argument Reference
 
@@ -35,5 +61,3 @@ The preferred configuration method is by environment variables, as it doesn't ex
 For a list of valid options for Rockset API server visit:
 
 https://rockset.com/docs/rest-api/
-
-If no API server is specified the default chosen will be `us-west-2`.
