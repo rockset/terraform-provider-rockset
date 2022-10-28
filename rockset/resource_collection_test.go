@@ -169,7 +169,6 @@ func TestAccCollection_InsertOnly(t *testing.T) {
 					resource.TestCheckResourceAttr("rockset_collection.test", "name", "acc-collection"),
 					resource.TestCheckResourceAttr("rockset_collection.test", "workspace", "acc"),
 					resource.TestCheckResourceAttr("rockset_collection.test", "description", "acceptance test"),
-					resource.TestCheckResourceAttr("rockset_collection.test", "insert_only", "true"),
 					testAccCheckRetentionSecsMatches(&collection, 60),
 				),
 				ExpectNonEmptyPlan: false,
@@ -226,7 +225,6 @@ func testAccCheckCollectionFieldMappingQuery() string {
 	workspace   = "%s"
 	description = "%s"
 	retention_secs 	= 65
-    insert_only = true
 
 	field_mapping_query = "SELECT COUNT(*) AS cnt FROM _input"
 }

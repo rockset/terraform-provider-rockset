@@ -14,8 +14,20 @@ func TestAccUser_Basic(t *testing.T) {
 	var user openapi.User
 
 	type values struct {
-		Email string
-		Roles []string
+		Email     string
+		FirstName string
+		LastName  string
+		Roles     []string
+	}
+	var first = values{
+		Email: "acc@rockset.com",
+		Roles: []string{"read-only"},
+	}
+	var second = values{
+		Email:     "acc@rockset.com",
+		Roles:     []string{"member"},
+		FirstName: "Acceptance",
+		LastName:  "Testing",
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -24,7 +36,7 @@ func TestAccUser_Basic(t *testing.T) {
 		CheckDestroy:      testAccCheckRocksetUserDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: getHCLTemplate("user_basic.tftpl", values{"acc@rockset.com", []string{"read-only"}}),
+				Config: getHCLTemplate("user_basic.tftpl", first),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetUserExists("rockset_user.test", &user),
 					resource.TestCheckResourceAttr("rockset_user.test", "email", "acc@rockset.com"),
@@ -33,11 +45,13 @@ func TestAccUser_Basic(t *testing.T) {
 				ExpectNonEmptyPlan: false,
 			},
 			{
-				Config: getHCLTemplate("user_basic.tftpl", values{"acc@rockset.com", []string{"read-only", "member"}}),
+				Config: getHCLTemplate("user_basic.tftpl", second),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetUserExists("rockset_user.test", &user),
 					resource.TestCheckResourceAttr("rockset_user.test", "email", "acc@rockset.com"),
-					testAccUserRoleListMatches(&user, []string{"read-only", "member"}),
+					resource.TestCheckResourceAttr("rockset_user.test", "first_name", second.FirstName),
+					resource.TestCheckResourceAttr("rockset_user.test", "last_name", second.LastName),
+					testAccUserRoleListMatches(&user, []string{"member"}),
 				),
 				ExpectNonEmptyPlan: false,
 			},
