@@ -109,8 +109,18 @@ func resourceSampleCollectionRead(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	// Gets all the fields relevant to an s3 collection
-	err = parseBucketCollection("XXX", &collection, d)
+	// since a sample collection just is an S3 collection, we don't track the dataset which it was created from,
+	// so we need to do a reverse lookup of the pattern to get the dataset
+	var ds string
+	pattern := collection.Sources[0].S3.GetPattern()
+	for _, datasetName := range dataset.All() {
+		p := dataset.Lookup(datasetName)
+		if p == pattern {
+			ds = string(datasetName)
+		}
+	}
+
+	err = d.Set("dataset", ds)
 	if err != nil {
 		return diag.FromErr(err)
 	}
