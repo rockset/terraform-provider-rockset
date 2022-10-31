@@ -54,6 +54,9 @@ func resourceS3IntegrationCreate(ctx context.Context, d *schema.ResourceData, me
 	r, err := rc.CreateS3Integration(ctx, d.Get("name").(string),
 		option.AWSRole(d.Get("aws_role_arn").(string)),
 		option.WithS3IntegrationDescription(d.Get("description").(string)))
+	// TODO: retry if we get an error from AWS
+	//   Authentication failed for AWS cross-account role integration with Role ARN
+	//   as it can be due to the role taking a few seconds to propagate
 	if err != nil {
 		return diag.FromErr(err)
 	}

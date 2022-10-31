@@ -120,7 +120,7 @@ E.g.
 terraform {
   required_providers {
     rockset = {
-      source  = "terraform.rockset.com/rockset/rockset"
+      source  = "rockset/rockset"
     }
   }
 }

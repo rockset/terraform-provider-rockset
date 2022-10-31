@@ -3,6 +3,7 @@ package rockset
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"log"
 
@@ -16,7 +17,7 @@ import (
 
 func resourceRole() *schema.Resource {
 	return &schema.Resource{
-		Description: "Manages a Rockset Role.",
+		Description: "Manages a Rockset [Role](https://rockset.com/docs/iam/).",
 
 		CreateContext: resourceRoleCreate,
 		ReadContext:   resourceRoleRead,
@@ -55,15 +56,24 @@ func resourceRole() *schema.Resource {
 				Computed:    true,
 			},
 			"privilege": {
-				Description: "Privileges associated with the role.",
-				Type:        schema.TypeSet,
-				Optional:    true,
+				Description: "Privileges associated with the role. " +
+					"For a full list see [API documentation](https://rockset.com/docs/iam/#supported-privileges)",
+				Type:     schema.TypeSet,
+				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"action": {
 							Description: "The action allowed by this privilege.",
 							Required:    true,
 							Type:        schema.TypeString,
+							ValidateDiagFunc: func(i interface{}, path cty.Path) diag.Diagnostics {
+								action := i.(string)
+								if option.IsGlobalAction(action) || option.IsIntegrationAction(action) ||
+									option.IsWorkspaceAction(action) || option.IsVirtualInstanceAction(action) {
+									return diag.Diagnostics{}
+								}
+								return diag.Errorf("%s is not a valid action", action) // TODO list all actions?
+							},
 						},
 						"resource_name": {
 							Description: "The resource on which this action is allowed. Defaults to 'All' if not specified.",
