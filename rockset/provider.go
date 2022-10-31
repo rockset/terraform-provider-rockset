@@ -20,6 +20,7 @@ type Config struct {
 }
 
 func Provider() *schema.Provider {
+	schema.DescriptionKind = schema.StringMarkdown
 	return &schema.Provider{
 		ResourcesMap: map[string]*schema.Resource{
 			"rockset_alias":                resourceAlias(),
@@ -90,6 +91,8 @@ func (c *Config) Client() (interface{}, diag.Diagnostics) {
 	if debug := os.Getenv("ROCKSET_DEBUG"); debug == "true" {
 		opts = append(opts, rockset.WithHTTPDebug())
 	}
+
+	// TODO pass rockset.WithUserAgent()
 
 	rc, err := rockset.NewClient(opts...)
 	if err != nil {
