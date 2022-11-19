@@ -9,7 +9,7 @@ import (
 func TestAccAccount_Basic(t *testing.T) {
 	resourceName := "data.rockset_account.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{

@@ -25,7 +25,7 @@ func TestAccView_Basic(t *testing.T) {
 	v2 := v1
 	v2.SQL = "select * from commons._events where _events.kind = 'COLLECTION'"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckRocksetViewDestroy,
