@@ -24,7 +24,7 @@ func TestAccQueryLambdaTag_Basic(t *testing.T) {
 	v2 := v1
 	v2.SQL = "SELECT 2"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckRocksetQueryLambdaTagDestroy,

@@ -20,7 +20,7 @@ func TestAccDynamoDBIntegration_Basic(t *testing.T) {
 		Bucket:      "terraform-provider-rockset-tests",
 	}
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckRocksetIntegrationDestroy("rockset_dynamodb_integration"),

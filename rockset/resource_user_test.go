@@ -28,7 +28,7 @@ func TestAccUser_Basic(t *testing.T) {
 		LastName:  "Testing",
 	}
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckRocksetUserDestroy,

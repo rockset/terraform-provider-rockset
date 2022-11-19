@@ -28,7 +28,7 @@ func TestAccAlias_Basic(t *testing.T) {
 	a3 := a2
 	a3.Alias = "persistent.snp"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) }, //; testAccRemoveAlias(t, "acc", "name") },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckRocksetAliasDestroy,

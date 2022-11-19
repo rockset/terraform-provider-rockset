@@ -19,7 +19,7 @@ func TestAccApiKey_Basic(t *testing.T) {
 	v1 := Values{Name: randomName("apikey")}
 	v2 := Values{Name: randomName("apikey")}
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckRocksetApiKeyDestroy,
