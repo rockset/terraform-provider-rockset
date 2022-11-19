@@ -15,7 +15,7 @@ const testMongoDBIntegrationDescription = "Terraform provider acceptance tests."
 func TestAccMongoDBIntegration_Basic(t *testing.T) {
 	var mongoDBIntegration openapi.MongoDbIntegration
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t, "TF_VAR_MONGODB_CONNECTION_URI") },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckRocksetIntegrationDestroy("rockset_mongodb_integration"),

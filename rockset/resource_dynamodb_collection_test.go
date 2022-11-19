@@ -22,7 +22,7 @@ func TestAccDynamoDBCollection_Basic(t *testing.T) {
 		Bucket:      "terraform-provider-rockset-tests",
 	}
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckRocksetCollectionDestroy, // Reused from base collection

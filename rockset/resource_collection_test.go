@@ -24,7 +24,7 @@ func TestAccCollection_Basic(t *testing.T) {
 	updated := values
 	updated.Retention = 61
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckRocksetCollectionDestroy,
@@ -65,7 +65,7 @@ func TestAccCollection_FieldMapping(t *testing.T) {
 		Retention:   70,
 	}
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckRocksetCollectionDestroy,
@@ -97,7 +97,7 @@ func TestAccCollection_IngestTransformation(t *testing.T) {
 		IngestTransformation: "SELECT COUNT(*) AS cnt FROM _input",
 	}
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckRocksetCollectionDestroy,
@@ -129,7 +129,7 @@ func TestAccCollection_ClusteringKey(t *testing.T) {
 		Retention:   50,
 	}
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckRocksetCollectionDestroy,

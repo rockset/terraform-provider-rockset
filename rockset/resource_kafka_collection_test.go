@@ -15,7 +15,7 @@ func TestAccKafkaCollection_BasicV2(t *testing.T) {
 
 	t.Skip("requires special setup")
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"null": {
 				VersionConstraint: "3.1.1",
@@ -45,7 +45,7 @@ func TestAccKafkaCollection_BasicV2(t *testing.T) {
 func TestAccKafkaCollection_BasicV3(t *testing.T) {
 	var collection openapi.Collection
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckRocksetCollectionDestroy,

@@ -16,7 +16,7 @@ const testKinesisCollectionDescription = "Terraform provider acceptance tests."
 func TestAccKinesisCollection_Basic(t *testing.T) {
 	var collection openapi.Collection
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckRocksetCollectionDestroy, // Reused from base collection
