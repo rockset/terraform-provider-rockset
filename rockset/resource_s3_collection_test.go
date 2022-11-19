@@ -18,7 +18,7 @@ func TestAccS3Collection_Basic(t *testing.T) {
 		Description: description(),
 	}
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckRocksetCollectionDestroy, // Reused from base collection
@@ -50,7 +50,7 @@ func TestAccS3Collection_Json(t *testing.T) {
 		Description: description(),
 	}
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckRocksetCollectionDestroy, // Reused from base collection

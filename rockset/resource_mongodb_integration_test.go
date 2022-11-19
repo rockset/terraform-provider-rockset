@@ -16,7 +16,7 @@ func TestAccMongoDBIntegration_Basic(t *testing.T) {
 	t.Skip("mongodb needs to be reconfigured")
 	var mongoDBIntegration openapi.MongoDbIntegration
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t, "TF_VAR_MONGODB_CONNECTION_URI") },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckRocksetIntegrationDestroy("rockset_mongodb_integration"),

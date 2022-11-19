@@ -15,7 +15,7 @@ const testGCSIntegrationDescription = "Terraform provider acceptance tests."
 func TestAccGCSIntegration_Basic(t *testing.T) {
 	var gcsIntegration openapi.GcsIntegration
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t, "TF_VAR_GCS_SERVICE_ACCOUNT_KEY") },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckRocksetIntegrationDestroy("rockset_gcs_integration"),

@@ -18,7 +18,7 @@ func TestAccWorkspace_Basic(t *testing.T) {
 		Description string
 	}
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckRocksetWorkspaceDestroy,

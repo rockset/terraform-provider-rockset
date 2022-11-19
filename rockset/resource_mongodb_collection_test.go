@@ -18,7 +18,7 @@ func TestAccMongoDBCollection_Basic(t *testing.T) {
 	t.Skip("mongo account needs to be reconfigured")
 	var collection openapi.Collection
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t, "TF_VAR_MONGODB_CONNECTION_URI") },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckRocksetCollectionDestroy, // Reused from base collection

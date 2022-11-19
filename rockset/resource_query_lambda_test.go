@@ -27,7 +27,7 @@ func TestAccQueryLambda_Basic(t *testing.T) {
 	v2.SQL = sql + "LIMIT 2"
 	v2.Description = description()
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckRocksetQueryLambdaDestroy,
@@ -70,7 +70,7 @@ func TestAccQueryLambda_NoDefaults(t *testing.T) {
 		Tag:         randomName("tag"),
 	}
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckRocksetQueryLambdaDestroy,
@@ -101,7 +101,7 @@ func TestAccQueryLambda_Recreate(t *testing.T) {
 		Tag:         randomName("tag"),
 	}
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckRocksetQueryLambdaDestroy,

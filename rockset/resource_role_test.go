@@ -20,7 +20,7 @@ const testRoleDescription = "Terraform provider acceptance tests"
 func TestAccRole_Basic(t *testing.T) {
 	var role openapi.Role
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckRocksetRoleDestroy,

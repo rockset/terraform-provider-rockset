@@ -17,7 +17,7 @@ func TestAccKinesisCollection_Basic(t *testing.T) {
 	t.Skip("kinesis needs to be reconfigured")
 	var collection openapi.Collection
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckRocksetCollectionDestroy, // Reused from base collection

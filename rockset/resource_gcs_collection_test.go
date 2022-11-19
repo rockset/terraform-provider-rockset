@@ -17,7 +17,7 @@ const testGCSCollectionDescription = "Terraform provider acceptance tests."
 func TestAccGCSCollection_Basic(t *testing.T) {
 	var collection openapi.Collection
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t, "TF_VAR_GCS_SERVICE_ACCOUNT_KEY") },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckRocksetCollectionDestroy, // Reused from base collection
