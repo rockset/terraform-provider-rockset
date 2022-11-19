@@ -16,7 +16,7 @@ const testKinesisIntegrationRoleArn = "arn:aws:iam::469279130686:role/terraform-
 func TestAccKinesisIntegration_Basic(t *testing.T) {
 	var kinesisIntegration openapi.KinesisIntegration
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckRocksetIntegrationDestroy("rockset_kinesis_integration"),

@@ -1,14 +1,14 @@
 resource rockset_query_lambda test {
-  workspace = "commons"
-  name      = "tpat-ql-diff"
-  description = "basic lambda"
+  workspace = "acc"
+  name      = "{{ .Name  }}"
+  description = "{{ .Description }}"
   sql {
-    query = "{{ .Query }}"
+    query = "{{ .SQL }}"
   }
 }
 
 resource rockset_query_lambda_tag test {
-  name = "test"
+  name = "{{ .Tag }}"
   workspace = rockset_query_lambda.test.workspace
   query_lambda = rockset_query_lambda.test.name
   version = rockset_query_lambda.test.version

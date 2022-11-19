@@ -76,9 +76,14 @@ func providerConfigure(_ context.Context, d *schema.ResourceData) (interface{}, 
 	return config.Client()
 }
 
+const providerUserAgent = "terraform-provider-rockset"
+
 func (c *Config) Client() (interface{}, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	var opts []rockset.RockOption
+	//var opts = []rockset.RockOption{
+	//	rockset.WithUserAgent(providerUserAgent),
+	//}
 
 	if c.APIKey != "" {
 		opts = append(opts, rockset.WithAPIKey(c.APIKey))

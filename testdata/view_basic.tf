@@ -1,6 +1,11 @@
+resource rockset_workspace test {
+  name        = "{{ .Workspace }}"
+  description = "{{ .Description }}"
+}
+
 resource rockset_view test {
-  workspace   = "acc"
+  workspace   = rockset_workspace.test.name
   name        = "{{ .Name }}"
-  query       = "select * from commons._events where _events.kind = 'COLLECTION'"
-  description	= "{{ .Description }}"
+  query       = "{{ .SQL }}"
+  description = "{{ .Description }}"
 }

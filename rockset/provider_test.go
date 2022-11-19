@@ -7,8 +7,10 @@ import (
 	"github.com/rockset/rockset-go-client"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"text/template"
 	"time"
@@ -122,12 +124,74 @@ func getHCLTemplateWithFn(filename string, data any, funcMap template.FuncMap) s
 	return rendered.String()
 }
 
-/*
-Creates a context with debug logging for use in tests.
-*/
+const buildNum = "CIRCLE_BUILD_NUM"
+const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+var seededRand = rand.New(rand.NewSource(time.Now().UnixNano()))
+
+// StringWithCharset creates a random string with length and charset
+func stringWithCharset(length int, charset string) string {
+	b := make([]byte, length)
+	for i := range b {
+		b[i] = charset[seededRand.Intn(len(charset))]
+	}
+	return string(b)
+}
+
+// String creates a random string with length
+func randomString(length int) string {
+	return stringWithCharset(length, charset)
+}
+
+func randomName(prefix string) string {
+	num, found := os.LookupEnv(buildNum)
+	if !found {
+		if user, found := os.LookupEnv("USER"); found {
+			num = strings.ToLower(user)
+		} else {
+			num = "dev"
+		}
+	}
+
+	return fmt.Sprintf("tf_%s_%s_%s", num, prefix, randomString(6))
+}
+
+func description() string {
+	num, found := os.LookupEnv(buildNum)
+	if !found {
+		num = "dev"
+	}
+	return fmt.Sprintf("created by terraform integration test run %s", num)
+}
+
+type Values struct {
+	Name                 string
+	Alias                string
+	Collection           string
+	Description          string
+	Workspace            string
+	SQL                  string
+	Email                string
+	FirstName            string
+	LastName             string
+	Roles                []string
+	Role                 string
+	Bucket               string
+	Tag                  string
+	Retention            int
+	IngestTransformation string
+}
+
+const S3IntegrationRoleArn = "arn:aws:iam::469279130686:role/terraform-provider-rockset-tests"
+
+// createTestContext creates a context with debug logging for use in tests.
 func createTestContext() context.Context {
+	lvl := zerolog.WarnLevel
+	if os.Getenv("ROCKSET_DEBUG") != "" {
+		lvl = zerolog.TraceLevel
+	}
 	console := zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339}
-	l := zerolog.New(console).Level(zerolog.TraceLevel).With().Timestamp().Logger()
+	l := zerolog.New(console).Level(lvl).With().Timestamp().Logger()
 
 	return l.WithContext(context.Background())
 }

@@ -9,25 +9,29 @@ import (
 	"github.com/rockset/rockset-go-client/openapi"
 )
 
-const testS3IntegrationName = "terraform-provider-acceptance-test-s3-integration"
-const testS3IntegrationDescription = "Terraform provider acceptance tests."
-const testS3IntegrationRoleArn = "arn:aws:iam::469279130686:role/terraform-provider-rockset-tests"
-
 func TestAccS3Integration_Basic(t *testing.T) {
 	var s3Integration openapi.S3Integration
 
-	resource.Test(t, resource.TestCase{
+	name := randomName("s3")
+	values := Values{
+		Name:        name,
+		Collection:  name,
+		Workspace:   name,
+		Description: description(),
+	}
+
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckRocksetIntegrationDestroy("rockset_s3_integration"),
 		Steps: []resource.TestStep{
 			{
-				Config: getHCL("s3_integration.tf"),
+				Config: getHCLTemplate("s3_integration.tf", values),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetS3IntegrationExists("rockset_s3_integration.test", &s3Integration),
-					resource.TestCheckResourceAttr("rockset_s3_integration.test", "name", testS3IntegrationName),
-					resource.TestCheckResourceAttr("rockset_s3_integration.test", "description", testS3IntegrationDescription),
-					resource.TestCheckResourceAttr("rockset_s3_integration.test", "aws_role_arn", testS3IntegrationRoleArn),
+					resource.TestCheckResourceAttr("rockset_s3_integration.test", "name", values.Name),
+					resource.TestCheckResourceAttr("rockset_s3_integration.test", "description", values.Description),
+					resource.TestCheckResourceAttr("rockset_s3_integration.test", "aws_role_arn", S3IntegrationRoleArn),
 				),
 				ExpectNonEmptyPlan: false,
 			},
