@@ -28,24 +28,25 @@ Creating an S3 integration and a collection from Rockset's sample datasets.
 
 ```terraform
 resource rockset_workspace sample {
-  name = "sample"
+  name        = "sample"
   description = "sample datasets"
 }
 
 resource rockset_s3_integration public {
-  name = "rockset-public-collections"
-  description = "Integration to access Rockset's public datasets"
+  name         = "rockset-public-collections"
+  description  = "Integration to access Rockset's public datasets"
   aws_role_arn = "arn:aws:iam::469279130686:role/rockset-public-datasets"
 }
 
 resource rockset_s3_collection cities {
   workspace = rockset_workspace.sample.name
-  name = "cities"
-  integration_name = rockset_s3_integration.public.name
-  source = {
-    bucket = "rockset-public-datasets"
-    pattern = "cities/*.json"
-    format = "json"
+  name      = "cities"
+
+  source {
+    bucket           = "rockset-public-datasets"
+    integration_name = rockset_s3_integration.public.name
+    pattern          = "cities/*.json"
+    format           = "json"
   }
 }
 ```
@@ -61,4 +62,37 @@ For a list of valid options for Rockset API server visit:
 
 https://rockset.com/docs/rest-api/
 
-If no API server is specified the default chosen will be `us-west-2`.
+## Known issues
+
+### Missing AWS IAM role
+
+If you create an AWS IAM role in terraform, which then is used to create an integration, you might an error like this:
+
+```terraform
+Error: Authentication failed for AWS cross-account role integration with Role ARN arn:aws:iam::000000000000:role/RocksetRole.
+Error: "User: arn:aws:sts::318212636800:assumed-role/apiserver.rs-use1a1-rockset-com/aws-sdk-java-1663200273577 is not authorized to perform: sts:AssumeRole on resource: arn:aws:iam::000000000000:role/RocksetRole"
+```
+
+which is due to the upstream AWS provider not waiting for the IAM role resource (`aws_iam_role`) to be ready to use.
+You can work around this using a
+[time_sleep](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep)
+resource, e.g.
+
+```
+resource "aws_iam_role" "rockset-integration" {
+  name               = "rockset-integration"
+  assume_role_policy = data.aws_iam_policy_document.rockset-trust-policy.json
+}
+
+resource "time_sleep" "wait_10_seconds" {
+  depends_on = [aws_iam_role.rockset-integration]
+  create_duration = "10s"
+}
+
+resource rockset_s3_integration public {
+  name = "rockset-public-datasets"
+  description = "Integration to access Rockset's public datasets"
+  aws_role_arn = aws_iam_role.rockset-integration.arn
+  depends_on = [time_sleep.wait_10_seconds]
+}
+```
