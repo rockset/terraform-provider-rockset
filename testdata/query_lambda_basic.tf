@@ -1,9 +1,9 @@
 resource rockset_query_lambda test {
-  workspace = "commons"
-  name      = "terraform-provider-acceptance-tests-query-lambda-basic"
-  description = "basic lambda"
+  workspace = "acc"
+  name      = "{{ .Name }}"
+  description = "{{ .Description }}"
   sql {
-    query = "SELECT * FROM commons._events WHERE _events._event_time > :start AND _events._event_time < :end LIMIT 1"
+    query = "{{ .SQL }}"
     default_parameter {
       name  = "start"
       type  = "start"

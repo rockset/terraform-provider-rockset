@@ -1,3 +1,4 @@
 resource rockset_api_key test {
-  name        = "{{ .Name }}"
+  name = "{{ .Name }}"
+  role = "read-only"
 }

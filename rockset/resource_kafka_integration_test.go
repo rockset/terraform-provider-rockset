@@ -20,7 +20,7 @@ func TestAccKafkaIntegration_BasicV2(t *testing.T) {
 
 	t.Skip("requires special setup")
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -53,7 +53,7 @@ func TestAccKafkaIntegration_BasicV2(t *testing.T) {
 func TestAccKafkaIntegration_BasicV3(t *testing.T) {
 	var kafkaIntegration openapi.KafkaIntegration
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t,
 				"TF_VAR_CC_BOOTSTRAP_SERVERS", "TF_VAR_CC_SECRET", "TF_VAR_CC_KEY")

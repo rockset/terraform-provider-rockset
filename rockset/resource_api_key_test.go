@@ -16,20 +16,19 @@ func TestAccApiKey_Basic(t *testing.T) {
 	var apiKey openapi.ApiKey
 	var keyValueOnCreation string
 
-	type values struct {
-		Name string
-	}
+	v1 := Values{Name: randomName("apikey")}
+	v2 := Values{Name: randomName("apikey")}
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckRocksetApiKeyDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: getHCLTemplate("apikey_basic.tf", values{"acc-key"}),
+				Config: getHCLTemplate("apikey_basic.tf", v1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetApiKeyExists("rockset_api_key.test", &apiKey),
-					resource.TestCheckResourceAttr("rockset_api_key.test", "name", "acc-key"),
+					resource.TestCheckResourceAttr("rockset_api_key.test", "name", v1.Name),
 					resource.TestCheckNoResourceAttr("rockset_api_key.test", "user"),
 					resource.TestCheckResourceAttrSet("rockset_api_key.test", "key"),
 					// store the created key for comparison in another test later
@@ -42,7 +41,7 @@ func TestAccApiKey_Basic(t *testing.T) {
 			},
 			{
 				// Re-apply the same configuration, to verify that nothing changes.
-				Config: getHCLTemplate("apikey_basic.tf", values{"acc-key"}),
+				Config: getHCLTemplate("apikey_basic.tf", v1),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("rockset_api_key.test", "key"),
 					// Check that key in the stored resource has not changed its value.
@@ -59,10 +58,10 @@ func TestAccApiKey_Basic(t *testing.T) {
 				ExpectNonEmptyPlan: false,
 			},
 			{
-				Config: getHCLTemplate("apikey_basic.tf", values{"acc-key-updated"}),
+				Config: getHCLTemplate("apikey_basic.tf", v2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetApiKeyExists("rockset_api_key.test", &apiKey),
-					resource.TestCheckResourceAttr("rockset_api_key.test", "name", "acc-key-updated"),
+					resource.TestCheckResourceAttr("rockset_api_key.test", "name", v2.Name),
 					resource.TestCheckNoResourceAttr("rockset_api_key.test", "user"),
 					resource.TestCheckResourceAttrSet("rockset_api_key.test", "key"),
 				),
@@ -70,10 +69,10 @@ func TestAccApiKey_Basic(t *testing.T) {
 			},
 			{
 				// Back to basic, will change name AND api key
-				Config: getHCLTemplate("apikey_basic.tf", values{"acc-key"}),
+				Config: getHCLTemplate("apikey_basic.tf", v1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetApiKeyExists("rockset_api_key.test", &apiKey),
-					resource.TestCheckResourceAttr("rockset_api_key.test", "name", "acc-key"),
+					resource.TestCheckResourceAttr("rockset_api_key.test", "name", v1.Name),
 					resource.TestCheckNoResourceAttr("rockset_api_key.test", "user"),
 					resource.TestCheckResourceAttrSet("rockset_api_key.test", "key"),
 				),

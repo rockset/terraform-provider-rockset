@@ -10,47 +10,52 @@ import (
 	"github.com/rockset/rockset-go-client/openapi"
 )
 
-const testQueryLambdaNameTagTest = "tpat-ql-diff"
-const testQueryLambdaTagName = "test"
-
 func TestAccQueryLambdaTag_Basic(t *testing.T) {
-	var queryLambdaTag openapi.QueryLambdaTag
+	var queryLambdaTag1, queryLambdaTag2 openapi.QueryLambdaTag
 
-	type values struct {
-		Query string
+	v1 := Values{
+		Name:        randomName("ql"),
+		Tag:         randomName("tag"),
+		Alias:       "commons._events",
+		Workspace:   randomName("ws"),
+		Description: description(),
+		SQL:         "SELECT 1",
 	}
+	v2 := v1
+	v2.SQL = "SELECT 2"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckRocksetQueryLambdaTagDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: getHCLTemplate("query_lambda_no_defaults.tf", values{"SELECT 1"}),
+				Config: getHCLTemplate("query_lambda_no_defaults.tf", v1),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRocksetQueryLambdaTagExists("rockset_query_lambda_tag.test", &queryLambdaTag),
-					resource.TestCheckResourceAttr("rockset_query_lambda.test", "name", testQueryLambdaNameTagTest),
-					resource.TestCheckResourceAttr("rockset_query_lambda.test", "description", "basic lambda"),
+					testAccCheckRocksetQueryLambdaTagExists("rockset_query_lambda_tag.test", &queryLambdaTag1),
+					resource.TestCheckResourceAttr("rockset_query_lambda.test", "name", v1.Name),
+					resource.TestCheckResourceAttr("rockset_query_lambda.test", "description", v1.Description),
 					resource.TestCheckResourceAttrSet("rockset_query_lambda.test", "version"),
 					resource.TestCheckResourceAttrSet("rockset_query_lambda.test", "state"),
-					resource.TestCheckResourceAttr("rockset_query_lambda_tag.test", "name", testQueryLambdaTagName),
-					resource.TestCheckResourceAttr("rockset_query_lambda_tag.test", "workspace", "commons"),
+					resource.TestCheckResourceAttr("rockset_query_lambda_tag.test", "name", v1.Tag),
+					resource.TestCheckResourceAttr("rockset_query_lambda_tag.test", "workspace", "acc"),
 					resource.TestCheckResourceAttrSet("rockset_query_lambda_tag.test", "version"),
 				),
 				ExpectNonEmptyPlan: false,
 				Destroy:            false,
 			},
 			{
-				Config: getHCLTemplate("query_lambda_no_defaults.tf", values{"SELECT 2"}),
+				Config: getHCLTemplate("query_lambda_no_defaults.tf", v2),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRocksetQueryLambdaTagExists("rockset_query_lambda_tag.test", &queryLambdaTag),
-					resource.TestCheckResourceAttr("rockset_query_lambda.test", "name", testQueryLambdaNameTagTest),
-					resource.TestCheckResourceAttr("rockset_query_lambda.test", "description", "basic lambda"),
+					testAccCheckRocksetQueryLambdaTagExists("rockset_query_lambda_tag.test", &queryLambdaTag2),
+					resource.TestCheckResourceAttr("rockset_query_lambda.test", "name", v2.Name),
+					resource.TestCheckResourceAttr("rockset_query_lambda.test", "description", v2.Description),
 					resource.TestCheckResourceAttrSet("rockset_query_lambda.test", "version"),
 					resource.TestCheckResourceAttrSet("rockset_query_lambda.test", "state"),
-					resource.TestCheckResourceAttr("rockset_query_lambda_tag.test", "name", testQueryLambdaTagName),
-					resource.TestCheckResourceAttr("rockset_query_lambda_tag.test", "workspace", "commons"),
+					resource.TestCheckResourceAttr("rockset_query_lambda_tag.test", "name", v2.Tag),
+					resource.TestCheckResourceAttr("rockset_query_lambda_tag.test", "workspace", "acc"),
 					resource.TestCheckResourceAttrSet("rockset_query_lambda_tag.test", "version"),
+					testAccCheckRocksetQueryLambdaTagDifferent(&queryLambdaTag1, &queryLambdaTag2),
 				),
 				ExpectNonEmptyPlan: false,
 			},
@@ -97,6 +102,18 @@ func testAccCheckRocksetQueryLambdaTagExists(resource string,
 		}
 
 		*queryLambdaTag = resp
+
+		return nil
+	}
+}
+
+func testAccCheckRocksetQueryLambdaTagDifferent(qlt1, qlt2 *openapi.QueryLambdaTag) resource.TestCheckFunc {
+	return func(state *terraform.State) error {
+		v1 := qlt1.GetVersion()
+		v2 := qlt2.GetVersion()
+		if v1.GetVersion() == v2.GetVersion() {
+			return fmt.Errorf("expected query lambda version (%s, %s) to have changed ", v1.GetVersion(), v2.GetVersion())
+		}
 
 		return nil
 	}

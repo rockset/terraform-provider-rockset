@@ -14,36 +14,40 @@ import (
 func TestAccView_Basic(t *testing.T) {
 	var view openapi.View
 
-	const query = "select * from commons._events where _events.kind = 'COLLECTION'"
-	type values struct {
-		Name        string
-		Description string
-		Query       string
+	name := randomName("view")
+	v1 := Values{
+		Name:        name,
+		Collection:  name,
+		Workspace:   name,
+		Description: description(),
+		SQL:         "select * from commons._events",
 	}
+	v2 := v1
+	v2.SQL = "select * from commons._events where _events.kind = 'COLLECTION'"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckRocksetViewDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: getHCLTemplate("view_basic.tf", values{"view", "description", query}),
+				Config: getHCLTemplate("view_basic.tf", v1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetViewExists("rockset_view.test", &view),
-					resource.TestCheckResourceAttr("rockset_view.test", "name", "view"),
-					resource.TestCheckResourceAttr("rockset_view.test", "query", query),
-					resource.TestCheckResourceAttr("rockset_view.test", "description", "description"),
+					resource.TestCheckResourceAttr("rockset_view.test", "name", v1.Name),
+					resource.TestCheckResourceAttr("rockset_view.test", "query", v1.SQL),
+					resource.TestCheckResourceAttr("rockset_view.test", "description", v1.Description),
 					resource.TestCheckResourceAttrSet("rockset_view.test", "created_by"),
 				),
 				ExpectNonEmptyPlan: false,
 			},
 			{
-				Config: getHCLTemplate("view_basic.tf", values{"view-updated", "description", query}),
+				Config: getHCLTemplate("view_basic.tf", v2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetViewExists("rockset_view.test", &view),
-					resource.TestCheckResourceAttr("rockset_view.test", "name", "view-updated"),
-					resource.TestCheckResourceAttr("rockset_view.test", "query", query),
-					resource.TestCheckResourceAttr("rockset_view.test", "description", "description"),
+					resource.TestCheckResourceAttr("rockset_view.test", "name", v2.Name),
+					resource.TestCheckResourceAttr("rockset_view.test", "query", v2.SQL),
+					resource.TestCheckResourceAttr("rockset_view.test", "description", v2.Description),
 					resource.TestCheckResourceAttrSet("rockset_view.test", "created_by"),
 				),
 				ExpectNonEmptyPlan: false,
