@@ -62,8 +62,12 @@ func TestAccQueryLambda_Basic(t *testing.T) {
 
 func TestAccQueryLambda_NoDefaults(t *testing.T) {
 	var queryLambda openapi.QueryLambda
-	type values struct {
-		Query string
+
+	v1 := Values{
+		Name:        randomName("ql"),
+		Description: description(),
+		SQL:         "SELECT 1",
+		Tag:         randomName("tag"),
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -72,12 +76,12 @@ func TestAccQueryLambda_NoDefaults(t *testing.T) {
 		CheckDestroy:      testAccCheckRocksetQueryLambdaDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: getHCLTemplate("query_lambda_no_defaults.tf", values{"SELECT 1"}),
+				Config: getHCLTemplate("query_lambda_no_defaults.tf", v1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetQueryLambdaExists("rockset_query_lambda.test", &queryLambda),
-					resource.TestCheckResourceAttr("rockset_query_lambda.test", "name", "tpat-ql-diff"),
-					resource.TestCheckResourceAttr("rockset_query_lambda.test", "description", "basic lambda"),
-					testAccCheckSql(t, &queryLambda, "SELECT 1"),
+					resource.TestCheckResourceAttr("rockset_query_lambda.test", "name", v1.Name),
+					resource.TestCheckResourceAttr("rockset_query_lambda.test", "description", v1.Description),
+					testAccCheckSql(t, &queryLambda, v1.SQL),
 					resource.TestCheckResourceAttrSet("rockset_query_lambda.test", "version"),
 					resource.TestCheckResourceAttrSet("rockset_query_lambda.test", "state"),
 				),
@@ -89,8 +93,12 @@ func TestAccQueryLambda_NoDefaults(t *testing.T) {
 
 func TestAccQueryLambda_Recreate(t *testing.T) {
 	var queryLambda openapi.QueryLambda
-	type values struct {
-		Query string
+
+	v1 := Values{
+		Name:        randomName("ql"),
+		Description: description(),
+		SQL:         "SELECT 1",
+		Tag:         randomName("tag"),
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -99,12 +107,12 @@ func TestAccQueryLambda_Recreate(t *testing.T) {
 		CheckDestroy:      testAccCheckRocksetQueryLambdaDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: getHCLTemplate("query_lambda_no_defaults.tf", values{"SELECT 1"}),
+				Config: getHCLTemplate("query_lambda_no_defaults.tf", v1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetQueryLambdaExists("rockset_query_lambda.test", &queryLambda),
-					resource.TestCheckResourceAttr("rockset_query_lambda.test", "name", "tpat-ql-diff"),
-					resource.TestCheckResourceAttr("rockset_query_lambda.test", "description", "basic lambda"),
-					testAccCheckSql(t, &queryLambda, "SELECT 1"),
+					resource.TestCheckResourceAttr("rockset_query_lambda.test", "name", v1.Name),
+					resource.TestCheckResourceAttr("rockset_query_lambda.test", "description", v1.Description),
+					testAccCheckSql(t, &queryLambda, v1.SQL),
 					resource.TestCheckResourceAttrSet("rockset_query_lambda.test", "version"),
 					resource.TestCheckResourceAttrSet("rockset_query_lambda.test", "state"),
 				),
