@@ -8,4 +8,9 @@ resource rockset_collection test {
 {{ if (ne .IngestTransformation "") }}
   field_mapping_query = "{{ .IngestTransformation }}"
 {{ end }}
+{{ if (ne .CreateTimeout "") }}
+  timeouts {
+        create = "{{.CreateTimeout}}"
+  }
+{{ end }}
 }

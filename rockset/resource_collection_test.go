@@ -3,6 +3,7 @@ package rockset
 import (
 	"fmt"
 	"reflect"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -50,6 +51,27 @@ func TestAccCollection_Basic(t *testing.T) {
 					testAccCheckRetentionSecsMatches(&collection, updated.Retention),
 				),
 				ExpectNonEmptyPlan: false,
+			},
+		},
+	})
+}
+func TestAccCollection_Timeout(t *testing.T) {
+
+	values := Values{
+		Name:          randomName("collection"),
+		Description:   description(),
+		Workspace:     "acc",
+		CreateTimeout: "5s",
+	}
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckRocksetCollectionDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config:      getHCLTemplate("collection_basic.tf", values),
+				ExpectError: regexp.MustCompile("Error: context deadline exceeded"),
 			},
 		},
 	})

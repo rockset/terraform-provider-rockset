@@ -3,6 +3,7 @@ package rockset
 import (
 	"context"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/rockset/rockset-go-client"
 	"github.com/rockset/rockset-go-client/option"
 	"regexp"
 	"time"
@@ -10,7 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/rockset/rockset-go-client"
 	"github.com/rockset/rockset-go-client/openapi"
 )
 
@@ -310,6 +310,9 @@ func resourceCollection() *schema.Resource {
 		},
 
 		Schema: baseCollectionSchema(),
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(20 * time.Minute),
+		},
 	}
 }
 
