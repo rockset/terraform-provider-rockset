@@ -180,6 +180,7 @@ type Values struct {
 	Tag                  string
 	Retention            int
 	IngestTransformation string
+	CreateTimeout        string
 }
 
 const S3IntegrationRoleArn = "arn:aws:iam::469279130686:role/terraform-provider-rockset-tests"
