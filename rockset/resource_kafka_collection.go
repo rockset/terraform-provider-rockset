@@ -244,7 +244,9 @@ func flattenKafkaSourceStatus(status *openapi.StatusKafka) []interface{} {
 		m["documents_processed"] = v
 	}
 
-	m["partitions"] = flattenKafkaSourcePartitions(status.KafkaPartitions)
+	if len(status.KafkaPartitions) > 0 {
+		m["partitions"] = flattenKafkaSourcePartitions(status.KafkaPartitions)
+	}
 
 	return []interface{}{m}
 }
