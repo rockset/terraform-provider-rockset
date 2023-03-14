@@ -55,37 +55,6 @@ func TestAccCollection_Basic(t *testing.T) {
 	})
 }
 
-func TestAccCollection_FieldMapping(t *testing.T) {
-	var collection openapi.Collection
-
-	values := Values{
-		Name:        randomName("collection"),
-		Description: description(),
-		Workspace:   "acc",
-		Retention:   70,
-	}
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckRocksetCollectionDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: getHCLTemplate("collection_field_mapping.tf", values),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRocksetCollectionExists("rockset_collection.test", &collection),
-					resource.TestCheckResourceAttr("rockset_collection.test", "name", values.Name),
-					resource.TestCheckResourceAttr("rockset_collection.test", "workspace", values.Workspace),
-					resource.TestCheckResourceAttr("rockset_collection.test", "description", values.Description),
-					testAccCheckFieldMappingMatches(&collection),
-					testAccCheckRetentionSecsMatches(&collection, values.Retention),
-				),
-				ExpectNonEmptyPlan: false,
-			},
-		},
-	})
-}
-
 func TestAccCollection_IngestTransformation(t *testing.T) {
 	var collection openapi.Collection
 

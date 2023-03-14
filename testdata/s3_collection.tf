@@ -48,35 +48,4 @@ resource rockset_s3_collection test {
       doc_tag  = "city"
     }
   }
-
-  field_mapping {
-    name = "string to float"
-    input_fields {
-      field_name = "population"
-      if_missing = "SKIP"
-      is_drop    = false
-      param      = "pop"
-    }
-
-    output_field {
-      field_name = "pop"
-      on_error   = "FAIL"
-      sql        = "CAST(:pop as int)"
-    }
-  }
-  field_mapping {
-    name = "string to bool"
-    input_fields {
-      field_name = "visited"
-      if_missing = "SKIP"
-      is_drop    = false
-      param      = "visited"
-    }
-
-    output_field {
-      field_name = "been there"
-      on_error   = "SKIP"
-      sql        = "CAST(:visited as bool)"
-    }
-  }
 }

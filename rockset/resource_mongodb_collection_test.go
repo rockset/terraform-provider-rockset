@@ -15,6 +15,7 @@ const testMongoDBCollectionWorkspace = "commons"
 const testMongoDBCollectionDescription = "Terraform provider acceptance tests."
 
 func TestAccMongoDBCollection_Basic(t *testing.T) {
+	t.Skip("mongo account needs to be reconfigured")
 	var collection openapi.Collection
 
 	resource.Test(t, resource.TestCase{

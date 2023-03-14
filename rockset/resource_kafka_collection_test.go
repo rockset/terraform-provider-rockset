@@ -43,6 +43,7 @@ func TestAccKafkaCollection_BasicV2(t *testing.T) {
 }
 
 func TestAccKafkaCollection_BasicV3(t *testing.T) {
+	t.Skip("kafka needs to be reconfigured")
 	var collection openapi.Collection
 
 	resource.Test(t, resource.TestCase{

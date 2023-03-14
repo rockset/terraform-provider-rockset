@@ -14,6 +14,7 @@ const testKinesisCollectionWorkspace = "commons"
 const testKinesisCollectionDescription = "Terraform provider acceptance tests."
 
 func TestAccKinesisCollection_Basic(t *testing.T) {
+	t.Skip("kinesis needs to be reconfigured")
 	var collection openapi.Collection
 
 	resource.Test(t, resource.TestCase{

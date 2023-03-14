@@ -27,7 +27,7 @@ func TestAccS3Collection_Basic(t *testing.T) {
 		CheckDestroy:      testAccCheckRocksetCollectionDestroy, // Reused from base collection
 		Steps: []resource.TestStep{
 			{
-				Config: getHCLTemplate("s3_collection.tf", values),
+				Config: getHCLTemplate("s3_collection.tf", values), // TODO
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetCollectionExists("rockset_s3_collection.test", &collection), // Reused from base collection
 					resource.TestCheckResourceAttr("rockset_s3_collection.test", "name", values.Collection),
