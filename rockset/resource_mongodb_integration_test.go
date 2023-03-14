@@ -13,6 +13,7 @@ const testMongoDBIntegrationName = "terraform-provider-acceptance-test-mongodb-i
 const testMongoDBIntegrationDescription = "Terraform provider acceptance tests."
 
 func TestAccMongoDBIntegration_Basic(t *testing.T) {
+	t.Skip("mongodb needs to be reconfigured")
 	var mongoDBIntegration openapi.MongoDbIntegration
 
 	resource.Test(t, resource.TestCase{
