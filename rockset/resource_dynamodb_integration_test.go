@@ -9,13 +9,16 @@ import (
 	"github.com/rockset/rockset-go-client/openapi"
 )
 
-const testDynamoDBIntegrationName = "terraform-provider-acceptance-test-dynamodb-integration"
-const testDynamoDBIntegrationDescription = "Terraform provider acceptance tests."
-const testDynamoDBIntegrationRoleArn = "arn:aws:iam::469279130686:role/terraform-provider-rockset-tests-dynamo"
-const testDynamoDBIntegrationS3Bucket = "terraform-provider-rockset-tests"
-
 func TestAccDynamoDBIntegration_Basic(t *testing.T) {
 	var dynamoDBIntegration openapi.DynamodbIntegration
+
+	values := Values{
+		Name:        randomName("integration"),
+		Description: description(),
+		Workspace:   "acc",
+		Role:        "arn:aws:iam::469279130686:role/terraform-provider-rockset-tests-dynamo",
+		Bucket:      "terraform-provider-rockset-tests",
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -23,18 +26,13 @@ func TestAccDynamoDBIntegration_Basic(t *testing.T) {
 		CheckDestroy:      testAccCheckRocksetIntegrationDestroy("rockset_dynamodb_integration"),
 		Steps: []resource.TestStep{
 			{
-				Config: getHCL("dynamodb_integration.tf"),
+				Config: getHCLTemplate("dynamodb_integration.tf", values),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRocksetDynamoDBIntegrationExists("rockset_dynamodb_integration.test",
-						&dynamoDBIntegration),
-					resource.TestCheckResourceAttr("rockset_dynamodb_integration.test", "name",
-						testDynamoDBIntegrationName),
-					resource.TestCheckResourceAttr("rockset_dynamodb_integration.test", "description",
-						testDynamoDBIntegrationDescription),
-					resource.TestCheckResourceAttr("rockset_dynamodb_integration.test", "aws_role_arn",
-						testDynamoDBIntegrationRoleArn),
-					resource.TestCheckResourceAttr("rockset_dynamodb_integration.test",
-						"s3_export_bucket_name", testDynamoDBIntegrationS3Bucket),
+					testAccCheckRocksetDynamoDBIntegrationExists("rockset_dynamodb_integration.test", &dynamoDBIntegration),
+					resource.TestCheckResourceAttr("rockset_dynamodb_integration.test", "name", values.Name),
+					resource.TestCheckResourceAttr("rockset_dynamodb_integration.test", "description", values.Description),
+					resource.TestCheckResourceAttr("rockset_dynamodb_integration.test", "aws_role_arn", values.Role),
+					resource.TestCheckResourceAttr("rockset_dynamodb_integration.test", "s3_export_bucket_name", values.Bucket),
 				),
 				ExpectNonEmptyPlan: false,
 			},

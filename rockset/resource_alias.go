@@ -47,7 +47,7 @@ func resourceAlias() *schema.Resource {
 			},
 			"collections": {
 				/*
-					NOTE: This is a list for forward compatibility
+					NOTE: This is a list for forward compatibility,
 					but it will fail for now if the list isn't exactly 1 item
 					Check in and update this when aliases that point to multiple
 					collections becomes a feature.
@@ -176,6 +176,11 @@ func resourceAliasDelete(ctx context.Context, d *schema.ResourceData, meta inter
 	workspace, name := workspaceAndNameFromID(d.Id())
 
 	err := rc.DeleteAlias(ctx, workspace, name)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = rc.WaitUntilAliasGone(ctx, workspace, name)
 	if err != nil {
 		return diag.FromErr(err)
 	}

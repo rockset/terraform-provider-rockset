@@ -11,10 +11,21 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const testQueryLambdaName = "terraform-provider-acceptance-tests-query-lambda-basic"
-
 func TestAccQueryLambda_Basic(t *testing.T) {
 	var queryLambda openapi.QueryLambda
+
+	sql := "SELECT * FROM commons._events WHERE _events._event_time > :start AND _events._event_time < :end "
+	v1 := Values{
+		Name:        randomName("ql"),
+		Tag:         randomName("tag"),
+		Alias:       "commons._events",
+		Workspace:   randomName("ws"),
+		Description: description(),
+		SQL:         sql + "LIMIT 1",
+	}
+	v2 := v1
+	v2.SQL = sql + "LIMIT 2"
+	v2.Description = description()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -22,26 +33,24 @@ func TestAccQueryLambda_Basic(t *testing.T) {
 		CheckDestroy:      testAccCheckRocksetQueryLambdaDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: getHCL("query_lambda_basic.tf"),
+				Config: getHCLTemplate("query_lambda_basic.tf", v1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetQueryLambdaExists("rockset_query_lambda.test", &queryLambda),
-					resource.TestCheckResourceAttr("rockset_query_lambda.test", "name", testQueryLambdaName),
-					resource.TestCheckResourceAttr("rockset_query_lambda.test", "description", "basic lambda"),
-					testAccCheckSql(t, &queryLambda, "SELECT * FROM commons._events WHERE "+
-						"_events._event_time > :start AND _events._event_time < :end LIMIT 1"),
+					resource.TestCheckResourceAttr("rockset_query_lambda.test", "name", v1.Name),
+					resource.TestCheckResourceAttr("rockset_query_lambda.test", "description", v1.Description),
+					testAccCheckSql(t, &queryLambda, v1.SQL),
 					resource.TestCheckResourceAttrSet("rockset_query_lambda.test", "version"),
 					resource.TestCheckResourceAttrSet("rockset_query_lambda.test", "state"),
 				),
 				ExpectNonEmptyPlan: false,
 			},
 			{
-				Config: getHCL("query_lambda_basic_updated.tf"),
+				Config: getHCLTemplate("query_lambda_basic.tf", v2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetQueryLambdaExists("rockset_query_lambda.test", &queryLambda),
-					resource.TestCheckResourceAttr("rockset_query_lambda.test", "name", testQueryLambdaName),
-					resource.TestCheckResourceAttr("rockset_query_lambda.test", "description", "updated description"),
-					testAccCheckSql(t, &queryLambda, "SELECT * FROM commons._events WHERE "+
-						"_events._event_time > :start AND _events._event_time < :end LIMIT 2"),
+					resource.TestCheckResourceAttr("rockset_query_lambda.test", "name", v2.Name),
+					resource.TestCheckResourceAttr("rockset_query_lambda.test", "description", v2.Description),
+					testAccCheckSql(t, &queryLambda, v2.SQL),
 					resource.TestCheckResourceAttrSet("rockset_query_lambda.test", "version"),
 					resource.TestCheckResourceAttrSet("rockset_query_lambda.test", "state"),
 				),
@@ -53,8 +62,12 @@ func TestAccQueryLambda_Basic(t *testing.T) {
 
 func TestAccQueryLambda_NoDefaults(t *testing.T) {
 	var queryLambda openapi.QueryLambda
-	type values struct {
-		Query string
+
+	v1 := Values{
+		Name:        randomName("ql"),
+		Description: description(),
+		SQL:         "SELECT 1",
+		Tag:         randomName("tag"),
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -63,12 +76,12 @@ func TestAccQueryLambda_NoDefaults(t *testing.T) {
 		CheckDestroy:      testAccCheckRocksetQueryLambdaDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: getHCLTemplate("query_lambda_no_defaults.tf", values{"SELECT 1"}),
+				Config: getHCLTemplate("query_lambda_no_defaults.tf", v1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetQueryLambdaExists("rockset_query_lambda.test", &queryLambda),
-					resource.TestCheckResourceAttr("rockset_query_lambda.test", "name", "tpat-ql-diff"),
-					resource.TestCheckResourceAttr("rockset_query_lambda.test", "description", "basic lambda"),
-					testAccCheckSql(t, &queryLambda, "SELECT 1"),
+					resource.TestCheckResourceAttr("rockset_query_lambda.test", "name", v1.Name),
+					resource.TestCheckResourceAttr("rockset_query_lambda.test", "description", v1.Description),
+					testAccCheckSql(t, &queryLambda, v1.SQL),
 					resource.TestCheckResourceAttrSet("rockset_query_lambda.test", "version"),
 					resource.TestCheckResourceAttrSet("rockset_query_lambda.test", "state"),
 				),
@@ -80,8 +93,12 @@ func TestAccQueryLambda_NoDefaults(t *testing.T) {
 
 func TestAccQueryLambda_Recreate(t *testing.T) {
 	var queryLambda openapi.QueryLambda
-	type values struct {
-		Query string
+
+	v1 := Values{
+		Name:        randomName("ql"),
+		Description: description(),
+		SQL:         "SELECT 1",
+		Tag:         randomName("tag"),
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -90,12 +107,12 @@ func TestAccQueryLambda_Recreate(t *testing.T) {
 		CheckDestroy:      testAccCheckRocksetQueryLambdaDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: getHCLTemplate("query_lambda_no_defaults.tf", values{"SELECT 1"}),
+				Config: getHCLTemplate("query_lambda_no_defaults.tf", v1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetQueryLambdaExists("rockset_query_lambda.test", &queryLambda),
-					resource.TestCheckResourceAttr("rockset_query_lambda.test", "name", "tpat-ql-diff"),
-					resource.TestCheckResourceAttr("rockset_query_lambda.test", "description", "basic lambda"),
-					testAccCheckSql(t, &queryLambda, "SELECT 1"),
+					resource.TestCheckResourceAttr("rockset_query_lambda.test", "name", v1.Name),
+					resource.TestCheckResourceAttr("rockset_query_lambda.test", "description", v1.Description),
+					testAccCheckSql(t, &queryLambda, v1.SQL),
 					resource.TestCheckResourceAttrSet("rockset_query_lambda.test", "version"),
 					resource.TestCheckResourceAttrSet("rockset_query_lambda.test", "state"),
 				),

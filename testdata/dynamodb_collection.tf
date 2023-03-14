@@ -1,14 +1,14 @@
 resource rockset_dynamodb_integration test {
-  name                  = "terraform-provider-acceptance-test-dynamodb-collection-1"
-  description           = "Terraform provider acceptance tests."
-  aws_role_arn          = "arn:aws:iam::469279130686:role/terraform-provider-rockset-tests-dynamo"
-  s3_export_bucket_name = "terraform-provider-rockset-tests"
+  name                  = "{{ .Name }}"
+  description           = "{{ .Description }}"
+  aws_role_arn          = "{{ .Role }}"
+  s3_export_bucket_name = "{{ .Bucket }}"
 }
 
 resource rockset_dynamodb_collection test {
-  name           = "terraform-provider-acceptance-tests-dynamodb"
-  workspace      = "commons"
-  description    = "Terraform provider acceptance tests."
+  name           = "{{ .Collection }}"
+  workspace      = "{{ .Workspace }}"
+  description    = "{{ .Description }}"
   retention_secs = 3600
 
   source {

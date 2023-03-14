@@ -10,12 +10,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const testDynamoDBCollectionName = "terraform-provider-acceptance-tests-dynamodb"
-const testDynamoDBCollectionWorkspace = "commons"
-const testDynamoDBCollectionDescription = "Terraform provider acceptance tests."
-
 func TestAccDynamoDBCollection_Basic(t *testing.T) {
 	var collection openapi.Collection
+
+	values := Values{
+		Name:        randomName("collection"),
+		Collection:  randomName("collection"),
+		Description: description(),
+		Workspace:   "acc",
+		Role:        "arn:aws:iam::469279130686:role/terraform-provider-rockset-tests-dynamo",
+		Bucket:      "terraform-provider-rockset-tests",
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -23,18 +28,15 @@ func TestAccDynamoDBCollection_Basic(t *testing.T) {
 		CheckDestroy:      testAccCheckRocksetCollectionDestroy, // Reused from base collection
 		Steps: []resource.TestStep{
 			{
-				Config: getHCL("dynamodb_collection.tf"),
+				Config: getHCLTemplate("dynamodb_collection.tf", values),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetCollectionExists("rockset_dynamodb_collection.test",
 						&collection), // Reused from base collection
-					resource.TestCheckResourceAttr("rockset_dynamodb_collection.test", "name",
-						testDynamoDBCollectionName),
-					resource.TestCheckResourceAttr("rockset_dynamodb_collection.test", "workspace",
-						testDynamoDBCollectionWorkspace),
-					resource.TestCheckResourceAttr("rockset_dynamodb_collection.test", "description",
-						testDynamoDBCollectionDescription),
+					resource.TestCheckResourceAttr("rockset_dynamodb_collection.test", "name", values.Collection),
+					resource.TestCheckResourceAttr("rockset_dynamodb_collection.test", "workspace", values.Workspace),
+					resource.TestCheckResourceAttr("rockset_dynamodb_collection.test", "description", values.Description),
 					testAccCheckRetentionSecsMatches(&collection, 3600),
-					testAccCheckDynamoDBSourcesExpected(t, &collection),
+					testAccCheckDynamoDBSourcesExpected(t, &collection, values.Name),
 				),
 				ExpectNonEmptyPlan: false,
 			},
@@ -42,7 +44,7 @@ func TestAccDynamoDBCollection_Basic(t *testing.T) {
 	})
 }
 
-func testAccCheckDynamoDBSourcesExpected(t *testing.T, collection *openapi.Collection) resource.TestCheckFunc {
+func testAccCheckDynamoDBSourcesExpected(t *testing.T, collection *openapi.Collection, name string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		sources := collection.GetSources()
 		assert.Equal(t, len(sources), 2)
@@ -61,14 +63,14 @@ func testAccCheckDynamoDBSourcesExpected(t *testing.T, collection *openapi.Colle
 		}
 
 		// Source 1
-		assert.Equal(t, sources[source1Index].GetIntegrationName(), "terraform-provider-acceptance-test-dynamodb-collection-1")
+		assert.Equal(t, sources[source1Index].GetIntegrationName(), name)
 		assert.Equal(t, sources[source1Index].Dynamodb.GetRcu(), int64(5))
 		assert.Equal(t, sources[source1Index].Dynamodb.GetAwsRegion(), "us-west-2")
 		assert.Equal(t, sources[source1Index].Dynamodb.GetTableName(), "terraform-provider-rockset-tests-1")
 		// assert.Equal(sources[source1Index].Dynamodb.Status.GetScanRecordsProcessed(), int64(1))
 
 		// Source 2
-		assert.Equal(t, sources[source2Index].GetIntegrationName(), "terraform-provider-acceptance-test-dynamodb-collection-1")
+		assert.Equal(t, sources[source2Index].GetIntegrationName(), name)
 		assert.Equal(t, sources[source2Index].Dynamodb.GetRcu(), int64(5))
 		assert.Equal(t, sources[source2Index].Dynamodb.GetAwsRegion(), "us-west-2")
 		assert.Equal(t, sources[source2Index].Dynamodb.GetTableName(), "terraform-provider-rockset-tests-2")

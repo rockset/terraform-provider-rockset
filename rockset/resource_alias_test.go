@@ -16,58 +16,64 @@ import (
 func TestAccAlias_Basic(t *testing.T) {
 	var alias openapi.Alias
 
-	type values struct {
-		Name        string
-		Description string
-		Alias       string
+	name := randomName("alias")
+	a1 := Values{
+		Name:        name,
+		Alias:       "commons._events",
+		Workspace:   randomName("ws"),
+		Description: description(),
 	}
+	a2 := a1
+	a2.Description = a1.Description + " update"
+	a3 := a2
+	a3.Alias = "persistent.snp"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t); testAccRemoveAlias(t, "acc", "name") },
+		PreCheck:          func() { testAccPreCheck(t) }, //; testAccRemoveAlias(t, "acc", "name") },
 		ProviderFactories: testAccProviderFactories,
 		CheckDestroy:      testAccCheckRocksetAliasDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: getHCLTemplate("alias_basic.tf", values{"name", "description", "commons._events"}),
+				Config: getHCLTemplate("alias_basic.tf", a1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetAliasExists("rockset_alias.test", &alias),
-					resource.TestCheckResourceAttr("rockset_alias.test", "name", "name"),
-					resource.TestCheckResourceAttr("rockset_alias.test", "description", "description"),
-					resource.TestCheckResourceAttr("rockset_alias.test", "workspace", "acc"),
-					testAccAliasCollectionListMatches(&alias, []string{"commons._events"}),
+					resource.TestCheckResourceAttr("rockset_alias.test", "name", a1.Name),
+					resource.TestCheckResourceAttr("rockset_alias.test", "description", a1.Description),
+					resource.TestCheckResourceAttr("rockset_alias.test", "workspace", a1.Workspace),
+					testAccAliasCollectionListMatches(&alias, []string{a1.Alias}),
 				),
 				ExpectNonEmptyPlan: false,
 			},
-			{
-				Config: getHCLTemplate("alias_basic.tf", values{"name", "updated description", "commons._events"}),
+			{ // change description
+				Config: getHCLTemplate("alias_basic.tf", a2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetAliasExists("rockset_alias.test", &alias),
-					resource.TestCheckResourceAttr("rockset_alias.test", "name", "name"),
-					resource.TestCheckResourceAttr("rockset_alias.test", "description", "updated description"),
-					resource.TestCheckResourceAttr("rockset_alias.test", "workspace", "acc"),
-					testAccAliasCollectionListMatches(&alias, []string{"commons._events"}),
+					resource.TestCheckResourceAttr("rockset_alias.test", "name", a2.Name),
+					resource.TestCheckResourceAttr("rockset_alias.test", "description", a2.Description),
+					resource.TestCheckResourceAttr("rockset_alias.test", "workspace", a2.Workspace),
+					testAccAliasCollectionListMatches(&alias, []string{a2.Alias}),
 				),
 				ExpectNonEmptyPlan: false,
 			},
-			{
-				Config: getHCLTemplate("alias_basic.tf", values{"name", "updated description", "commons.test-alias"}),
+			{ // change collection
+				Config: getHCLTemplate("alias_basic.tf", a3),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetAliasExists("rockset_alias.test", &alias),
-					resource.TestCheckResourceAttr("rockset_alias.test", "name", "name"),
-					resource.TestCheckResourceAttr("rockset_alias.test", "description", "updated description"),
-					resource.TestCheckResourceAttr("rockset_alias.test", "workspace", "acc"),
-					testAccAliasCollectionListMatches(&alias, []string{"commons.test-alias"}),
+					resource.TestCheckResourceAttr("rockset_alias.test", "name", a3.Name),
+					resource.TestCheckResourceAttr("rockset_alias.test", "description", a3.Description),
+					resource.TestCheckResourceAttr("rockset_alias.test", "workspace", a3.Workspace),
+					testAccAliasCollectionListMatches(&alias, []string{a3.Alias}),
 				),
 				ExpectNonEmptyPlan: false,
 			},
-			{
-				Config: getHCLTemplate("alias_basic.tf", values{"name", "description", "commons._events"}),
+			{ // back to the beginning
+				Config: getHCLTemplate("alias_basic.tf", a1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetAliasExists("rockset_alias.test", &alias),
-					resource.TestCheckResourceAttr("rockset_alias.test", "name", "name"),
-					resource.TestCheckResourceAttr("rockset_alias.test", "description", "description"),
-					resource.TestCheckResourceAttr("rockset_alias.test", "workspace", "acc"),
-					testAccAliasCollectionListMatches(&alias, []string{"commons._events"}),
+					resource.TestCheckResourceAttr("rockset_alias.test", "name", a1.Name),
+					resource.TestCheckResourceAttr("rockset_alias.test", "description", a1.Description),
+					resource.TestCheckResourceAttr("rockset_alias.test", "workspace", a1.Workspace),
+					testAccAliasCollectionListMatches(&alias, []string{a1.Alias}),
 				),
 				ExpectNonEmptyPlan: false,
 			},
