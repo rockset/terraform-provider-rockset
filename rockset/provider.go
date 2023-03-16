@@ -155,6 +155,17 @@ func toStringPtrNilIfEmpty(v string) *string {
 	return &v
 }
 
+func toBoolPtrNilIfEmpty(v interface{}) *bool {
+	var res *bool
+	if v == nil {
+		return res
+	} else {
+		vB := v.(bool)
+		res = &vB
+	}
+	return res
+}
+
 func toStringArrayPtr(v []string) *[]string {
 	return &v
 }

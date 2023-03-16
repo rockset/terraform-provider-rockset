@@ -181,6 +181,8 @@ type Values struct {
 	Retention            int
 	IngestTransformation string
 	CreateTimeout        string
+	UseScanApi           *bool
+	RCU                  *int
 }
 
 const S3IntegrationRoleArn = "arn:aws:iam::469279130686:role/terraform-provider-rockset-tests"
