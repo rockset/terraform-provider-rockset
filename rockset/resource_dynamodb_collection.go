@@ -76,6 +76,12 @@ func dynamoDBCollectionSchema() map[string]*schema.Schema {
 						Type:        schema.TypeString,
 						Computed:    true,
 					},
+					"use_scan_api": {
+						Description: "Whether the initial table scan should use the DynamoDB scan API. If false, export will be performed using an S3 bucket.",
+						Type:        schema.TypeBool,
+						Optional:    true,
+						Default:     true,
+					},
 				},
 			},
 		},
@@ -191,6 +197,7 @@ func flattenSourceParams(sources *[]openapi.Source) []interface{} {
 		m["scan_total_records"] = source.Dynamodb.Status.GetScanTotalRecords()
 		m["state"] = source.Dynamodb.Status.GetState()
 		m["stream_last_processed_at"] = source.Dynamodb.Status.GetStreamLastProcessedAt()
+		m["use_scan_api"] = source.Dynamodb.UseScanApi
 
 		convertedList = append(convertedList, m)
 	}
@@ -215,6 +222,8 @@ func makeSourceParams(in interface{}) []openapi.Source {
 					source.Dynamodb.AwsRegion = toStringPtrNilIfEmpty(v.(string))
 				case "rcu":
 					source.Dynamodb.Rcu = openapi.PtrInt64(int64(v.(int)))
+				case "use_scan_api":
+					source.Dynamodb.UseScanApi = toBoolPtrNilIfEmpty(v)
 				}
 			}
 
