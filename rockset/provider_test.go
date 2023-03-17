@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/rockset/rockset-go-client"
+	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -44,6 +45,37 @@ func TestProvider(t *testing.T) {
 	if err := Provider().InternalValidate(); err != nil {
 		t.Fatalf("err: %s", err)
 	}
+}
+
+func TestToBoolPtrNilIfEmpty_Nil(t *testing.T) {
+	var v interface{}
+	var expected *bool
+	actual := toBoolPtrNilIfEmpty(v)
+	assert.Equal(t, expected, actual)
+}
+
+func TestToBoolPtrNilIfEmpty_True(t *testing.T) {
+	var v interface{}
+	v = true
+	expected := true
+	actual := toBoolPtrNilIfEmpty(v)
+	assert.Equal(t, &expected, actual)
+}
+
+func TestToBoolPtrNilIfEmpty_False(t *testing.T) {
+	var v interface{}
+	v = false
+	expected := false
+	actual := toBoolPtrNilIfEmpty(v)
+	assert.Equal(t, &expected, actual)
+}
+
+func TestToBoolPtrNilIfEmpty_Error(t *testing.T) {
+	var v interface{}
+	v = "string"
+	assert.Panics(t, assert.PanicTestFunc(func() {
+		toBoolPtrNilIfEmpty(v)
+	}))
 }
 
 // testAccPreCheck verifies required environment variables are set before running tests.
