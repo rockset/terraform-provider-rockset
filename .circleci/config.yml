@@ -71,6 +71,7 @@ jobs:
             rm temp.txt
       - run:
           name: "Publish Release on GitHub"
+          no_output_timeout: 30m
           command: |
             curl -sL https://git.io/goreleaser | bash
   test:
