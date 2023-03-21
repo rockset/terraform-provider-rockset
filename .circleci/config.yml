@@ -63,6 +63,7 @@ jobs:
       - run:
           name: "Import GPG Key and Test Signing"
           command: |
+            echo GPG_TTY=$(tty)
             echo "$GPG_PRIVATE_KEY" | base64 -d > key.pem
             echo "$PASSPHRASE" | gpg --batch --import ./key.pem
             rm key.pem
