@@ -138,3 +138,9 @@ Since this is the rockset provider, the provider is also named `rockset`.
 If the above is all done correctly you are now able to run `terraform init`.
 
 It will see the provider in the folder and treat it as if it's already downloaded.
+
+## Release Steps
+- Merge branch to master
+- On master branch create new tag: `git tag v{version_number}`
+- Push tag: `git push origin v{version_number}`
+Pushing the tag should trigger circle ci to create a draft release and build all necesary assets. Then you can navigate to github and publish the release. 
