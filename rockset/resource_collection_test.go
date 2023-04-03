@@ -2,7 +2,6 @@ package rockset
 
 import (
 	"fmt"
-	"reflect"
 	"regexp"
 	"strings"
 	"testing"
@@ -56,7 +55,6 @@ func TestAccCollection_Basic(t *testing.T) {
 	})
 }
 func TestAccCollection_Timeout(t *testing.T) {
-
 	values := Values{
 		Name:          randomName("collection"),
 		Description:   description(),
@@ -100,8 +98,7 @@ func TestAccCollection_IngestTransformation(t *testing.T) {
 					resource.TestCheckResourceAttr("rockset_collection.test", "name", values.Name),
 					resource.TestCheckResourceAttr("rockset_collection.test", "workspace", values.Workspace),
 					resource.TestCheckResourceAttr("rockset_collection.test", "description", values.Description),
-					resource.TestCheckResourceAttr("rockset_collection.test", "field_mapping_query", values.IngestTransformation),
-					resource.TestCheckResourceAttr("rockset_collection.test", "clustering_key.#", "0"),
+					resource.TestCheckResourceAttr("rockset_collection.test", "ingest_transformation", values.IngestTransformation),
 					testAccCheckRetentionSecsMatches(&collection, values.Retention),
 				),
 				ExpectNonEmptyPlan: false,
@@ -110,14 +107,17 @@ func TestAccCollection_IngestTransformation(t *testing.T) {
 	})
 }
 
-func TestAccCollection_ClusteringKey(t *testing.T) {
+// TestAccCollection_Deprecated_FieldMappingQuery is used to make sure the field_mapping_query attribute can be used
+// until we finally remove it.
+func TestAccCollection_Deprecated_FieldMappingQuery(t *testing.T) {
 	var collection openapi.Collection
 
 	values := Values{
-		Name:        randomName("collection"),
-		Description: description(),
-		Workspace:   "acc",
-		Retention:   50,
+		Name:                 randomName("collection"),
+		Description:          description(),
+		Workspace:            "acc",
+		Retention:            60,
+		IngestTransformation: "SELECT COUNT(*) AS cnt FROM _input",
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -126,16 +126,15 @@ func TestAccCollection_ClusteringKey(t *testing.T) {
 		CheckDestroy:      testAccCheckRocksetCollectionDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: getHCLTemplate("collection_clustering_key.tf", values),
+				Config: getHCLTemplate("collection_basic_fmq.tf", values),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRocksetCollectionExists("rockset_collection.test", &collection),
 					resource.TestCheckResourceAttr("rockset_collection.test", "name", values.Name),
 					resource.TestCheckResourceAttr("rockset_collection.test", "workspace", values.Workspace),
 					resource.TestCheckResourceAttr("rockset_collection.test", "description", values.Description),
-					testAccCheckClusteringKeyMatches(&collection, "population", "AUTO", []string{}),
+					resource.TestCheckResourceAttr("rockset_collection.test", "field_mapping_query", values.IngestTransformation),
 					testAccCheckRetentionSecsMatches(&collection, values.Retention),
 				),
-				ExpectNonEmptyPlan: false,
 			},
 		},
 	})
@@ -187,92 +186,11 @@ func testAccCheckRocksetCollectionExists(resource string, collection *openapi.Co
 	}
 }
 
-func testAccCheckFieldMappingMatches(collection *openapi.Collection) resource.TestCheckFunc {
-	return func(state *terraform.State) error {
-		foundFieldMappings := collection.GetFieldMappings()
-		numMappings := len(foundFieldMappings)
-		if numMappings != 1 {
-			return fmt.Errorf("expected one field mapping, found %d", numMappings)
-		}
-
-		fieldMapping := foundFieldMappings[0]
-		if fieldMapping.GetName() != "string to float" {
-			return fmt.Errorf("field mapping name expected 'string to float' got %s", fieldMapping.GetName())
-		}
-
-		inputFields := fieldMapping.GetInputFields()
-		numFields := len(inputFields)
-		if numFields != 1 {
-			return fmt.Errorf("expected one input field, found %d", numFields)
-		}
-
-		inputField := inputFields[0]
-		if inputField.GetFieldName() != "population" {
-			return fmt.Errorf("expected first input FieldName to be 'population', found %s", inputField.GetFieldName())
-		}
-
-		if inputField.GetIfMissing() != "SKIP" {
-			return fmt.Errorf("expected first input IfMissing to be 'SKIP', found %s", inputField.GetIfMissing())
-		}
-
-		if inputField.GetIsDrop() != false {
-			return fmt.Errorf("expected first input IsDrop to be false, found %t", inputField.GetIsDrop())
-		}
-
-		if inputField.GetParam() != "pop" {
-			return fmt.Errorf("expected first input Param to be 'pop', found %s", inputField.GetParam())
-		}
-
-		outputField := fieldMapping.GetOutputField()
-		if outputField.GetFieldName() != "pop" {
-			return fmt.Errorf("expected output FieldName to be 'pop', found %s", outputField.GetFieldName())
-		}
-
-		outputValue := outputField.GetValue()
-		outputSql := outputValue.GetSql()
-		if outputSql != "CAST(:pop as int)" {
-			return fmt.Errorf("expected output Value.Sql to be 'CAST(:pop as int)', found %s", outputSql)
-		}
-
-		if outputField.GetOnError() != "FAIL" {
-			return fmt.Errorf("expected output FieldName to be 'FAIL', found %s", outputField.GetOnError())
-		}
-
-		return nil
-	}
-}
-
 func testAccCheckRetentionSecsMatches(collection *openapi.Collection, expectedValue int) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		retentionSecs := collection.GetRetentionSecs()
 		if retentionSecs != int64(expectedValue) {
 			return fmt.Errorf("RetentionSeconds was expected to be %d got %d", expectedValue, retentionSecs)
-		}
-
-		return nil
-	}
-}
-
-func testAccCheckClusteringKeyMatches(collection *openapi.Collection,
-	fieldName string, partitionType string, partitionKeys []string) resource.TestCheckFunc {
-	return func(state *terraform.State) error {
-		// Check just the first partition key, assume one is set
-		numKeys := len(collection.GetClusteringKey())
-		if numKeys != 1 {
-			return fmt.Errorf("expected 1 clustering key, got %d", numKeys)
-		}
-		clusteringKey := collection.GetClusteringKey()[0]
-
-		if *clusteringKey.FieldName != fieldName {
-			return fmt.Errorf("expected field name %s got %s", fieldName, *clusteringKey.FieldName)
-		}
-
-		if *clusteringKey.Type != partitionType {
-			return fmt.Errorf("expected type %s got %s", partitionType, *clusteringKey.Type)
-		}
-
-		if !reflect.DeepEqual(clusteringKey.Keys, partitionKeys) {
-			return fmt.Errorf("expected keys %s got %s", partitionKeys, clusteringKey.Keys)
 		}
 
 		return nil
