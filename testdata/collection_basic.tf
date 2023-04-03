@@ -6,7 +6,7 @@ resource rockset_collection test {
   retention_secs 	= "{{ .Retention }}"
 {{ end }}
 {{ if (ne .IngestTransformation "") }}
-  field_mapping_query = "{{ .IngestTransformation }}"
+  ingest_transformation = "{{ .IngestTransformation }}"
 {{ end }}
 {{ if (ne .CreateTimeout "") }}
   timeouts {

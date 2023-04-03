@@ -5,7 +5,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/rockset/rockset-go-client"
 	"github.com/rockset/rockset-go-client/option"
-	"regexp"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -21,40 +20,6 @@ import (
 // for just a write api collection.
 func baseCollectionSchema() map[string]*schema.Schema { //nolint:funlen
 	return map[string]*schema.Schema{
-		"clustering_key": {
-			Description:   "List of clustering fields.",
-			Type:          schema.TypeList,
-			ForceNew:      true,
-			Optional:      true,
-			Deprecated:    "Use a `field_mapping_query` instead",
-			ConflictsWith: []string{"field_mapping_query"},
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"field_name": {
-						Description: "The name of a field. Parsed as a SQL qualified name.",
-						Type:        schema.TypeString,
-						ForceNew:    true,
-						Required:    true,
-					},
-					"type": {
-						Description: "The type of partitions on a field.",
-						Type:        schema.TypeString,
-						ForceNew:    true,
-						Optional:    true,
-					},
-					"keys": {
-						Description: "The values for partitioning of a field.",
-						Type:        schema.TypeList,
-						ForceNew:    true,
-						Optional:    true,
-						MinItems:    1,
-						Elem: &schema.Schema{
-							Type: schema.TypeString,
-						},
-					},
-				},
-			},
-		}, // End clustering_key
 		"description": {
 			Description: "Text describing the collection.",
 			Type:        schema.TypeString,
@@ -62,103 +27,15 @@ func baseCollectionSchema() map[string]*schema.Schema { //nolint:funlen
 			ForceNew:    true,
 			Optional:    true,
 		},
-		"field_mapping": {
-			Description:   "List of field mappings.",
-			Type:          schema.TypeList,
+		"field_mapping_query": {
+			Deprecated:    "Use ingest_transformation instead",
+			Description:   `**Deprecated**`,
+			Type:          schema.TypeString,
+			ConflictsWith: []string{"ingest_transformation"},
 			ForceNew:      true,
 			Optional:      true,
-			Deprecated:    "Use a `field_mapping_query` instead",
-			ConflictsWith: []string{"field_mapping_query"},
-			Elem: &schema.Resource{
-				Schema: map[string]*schema.Schema{
-					"name": {
-						Description: "Name of the field mapping.",
-						Type:        schema.TypeString,
-						ForceNew:    true,
-						Required:    true,
-					},
-					"input_fields": {
-						Description: "List of input fields.",
-						Type:        schema.TypeList,
-						ForceNew:    true,
-						Optional:    true,
-						Elem: &schema.Resource{
-							Schema: map[string]*schema.Schema{
-								"field_name": {
-									Description: "Name of the field in your input data to apply this field mapping to.",
-									Type:        schema.TypeString,
-									ForceNew:    true,
-									Required:    true,
-								},
-								"param": {
-									Description: "Name alias for this field which can be referred to in a SQL " +
-										"expression in the output_field attribute.",
-									Type:     schema.TypeString,
-									ForceNew: true,
-									Required: true,
-								},
-								"if_missing": {
-									Description: "Specifies the behavior for when the field evaluates to either " +
-										"NULL or UNDEFINED. It accepts two valid strings as input: SKIP, which skips " +
-										"the update for this document entirely, or PASS, which will simply set this " +
-										"field to NULL.",
-									Type:     schema.TypeString,
-									ForceNew: true,
-									Required: true,
-									ValidateFunc: validation.StringMatch(
-										regexp.MustCompile("^(PASS|SKIP)$"), "must be either 'PASS' or 'SKIP'"),
-								},
-								"is_drop": {
-									Description: "Specifies whether or not to drop this field completely from the " +
-										"document as it is being inserted.",
-									Type:     schema.TypeBool,
-									ForceNew: true,
-									Required: true,
-								},
-							},
-						},
-					},
-					"output_field": {
-						Description: "List of output fields.",
-						Type:        schema.TypeSet,
-						ForceNew:    true,
-						Required:    true,
-						MinItems:    1,
-						MaxItems:    1,
-						Elem: &schema.Resource{
-							Schema: map[string]*schema.Schema{
-								"field_name": {
-									Description: "Name of the new field created by your SQL expression.",
-									Type:        schema.TypeString,
-									ForceNew:    true,
-									Required:    true,
-								},
-								"sql": {
-									Description: "A string SQL expression used to define the new field being created. " +
-										"It may optionally take another field name as a parameter, or a param " +
-										"name alias specified in an input_fields field mapping.",
-									Type:     schema.TypeString,
-									ForceNew: true,
-									Required: true,
-								},
-								"on_error": {
-									Description: "Specifies the behavior for when there is an error while evaluating " +
-										"the SQL expression defined in the sql parameter. It accepts two valid " +
-										"strings as input: SKIP, which skips only this output field but continues " +
-										"the update, or FAIL, which causes this update to fail entirely.",
-									Type:     schema.TypeString,
-									ForceNew: true,
-									Required: true,
-									ValidateFunc: validation.StringMatch(
-										regexp.MustCompile("^(FAIL|SKIP)$"), "must be either 'FAIL' or 'SKIP'"),
-								},
-							},
-						},
-					},
-				},
-			},
-		}, // End field_mapping
-		"field_mapping_query": {
+		},
+		"ingest_transformation": {
 			Description: `Ingest transformation SQL query. Turns the collection into insert_only mode.
 
 When inserting data into Rockset, you can transform the data by providing a single SQL query, 
@@ -166,10 +43,10 @@ that contains all of the desired data transformations.
 This is referred to as the collection’s ingest transformation or, historically, its field mapping query.
 
 For more information see https://rockset.com/docs/ingest-transformation/`,
-			Type:     schema.TypeString,
-			ForceNew: true,
-			Optional: true,
-			// TODO deprecate in favor of ingest_transformation
+			Type:          schema.TypeString,
+			ConflictsWith: []string{"field_mapping_query"},
+			ForceNew:      true,
+			Optional:      true,
 		},
 		"name": {
 			Description:  "Unique identifier for the collection. Can contain alphanumeric or dash characters.",
@@ -211,11 +88,8 @@ For more information see https://rockset.com/docs/ingest-transformation/`,
 	} // End schema return
 } // End func
 
-/*
-Takes in a collection returned from the api.
-Parses the base fields any collection has and
-puts them into the schema object.
-*/
+// parseBaseCollection takes in a collection returned from the api, parses the base fields any collection has,
+// and puts them into the schema object.
 func parseBaseCollection(collection *openapi.Collection, d *schema.ResourceData) error {
 	var err error
 
@@ -239,17 +113,12 @@ func parseBaseCollection(collection *openapi.Collection, d *schema.ResourceData)
 		return err
 	}
 
-	err = d.Set("field_mapping", flattenFieldMappings(collection.GetFieldMappings()))
-	if err != nil {
-		return err
+	_, ok := d.GetOk("ingest_transformation")
+	if ok {
+		err = d.Set("ingest_transformation", collection.GetFieldMappingQuery().Sql)
+	} else {
+		err = d.Set("field_mapping_query", collection.GetFieldMappingQuery().Sql)
 	}
-
-	err = d.Set("field_mapping_query", collection.GetFieldMappingQuery().Sql)
-	if err != nil {
-		return err
-	}
-
-	err = d.Set("clustering_key", flattenClusteringKeys(collection.GetClusteringKey()))
 	if err != nil {
 		return err
 	}
@@ -271,25 +140,18 @@ func createBaseCollectionRequest(d *schema.ResourceData) *openapi.CreateCollecti
 	params.Name = &name
 	params.SetDescription(description)
 
-	if v, ok := d.GetOk("field_mapping"); ok && len(v.([]interface{})) > 0 {
-		mappings := makeFieldMappings(v.([]interface{}))
-		params.SetFieldMappings(*mappings)
-	}
-
 	if v, ok := d.GetOk("retention_secs"); ok {
 		retentionSecondsDuration := time.Duration(v.(int)) * time.Second
 		retentionSeconds := int64(retentionSecondsDuration.Seconds())
 		params.RetentionSecs = &retentionSeconds
 	}
 
-	if v, ok := d.GetOk("clustering_key"); ok && len(v.([]interface{})) > 0 {
-		// The api and the go client use the singular 'ClusteringKey'
-		// But the value is in fact a list.
-		clusteringKeys := makeClusteringKeys(v.([]interface{}))
-		params.ClusteringKey = *clusteringKeys
+	if v, ok := d.GetOk("field_mapping_query"); ok {
+		fmq := v.(string)
+		params.FieldMappingQuery = &openapi.FieldMappingQuery{Sql: &fmq}
 	}
 
-	if v, ok := d.GetOk("field_mapping_query"); ok {
+	if v, ok := d.GetOk("ingest_transformation"); ok {
 		fmq := v.(string)
 		params.FieldMappingQuery = &openapi.FieldMappingQuery{Sql: &fmq}
 	}

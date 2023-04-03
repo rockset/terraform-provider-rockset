@@ -66,7 +66,7 @@ https://rockset.com/docs/rest-api/
 
 ### Missing AWS IAM role
 
-If you create an AWS IAM role in terraform, which then is used to create an integration, you might get an error like this:
+If you create an AWS IAM role in terraform, which then is used to create an integration, you might an error like this:
 
 ```terraform
 Error: Authentication failed for AWS cross-account role integration with Role ARN arn:aws:iam::000000000000:role/RocksetRole.

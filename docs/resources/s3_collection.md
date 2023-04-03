@@ -47,10 +47,9 @@ resource rockset_s3_collection cities {
 
 ### Optional
 
-- `clustering_key` (Block List, Deprecated) List of clustering fields. (see [below for nested schema](#nestedblock--clustering_key))
 - `description` (String) Text describing the collection.
-- `field_mapping` (Block List, Deprecated) List of field mappings. (see [below for nested schema](#nestedblock--field_mapping))
-- `field_mapping_query` (String) Ingest transformation SQL query. Turns the collection into insert_only mode.
+- `field_mapping_query` (String, Deprecated) **Deprecated**
+- `ingest_transformation` (String) Ingest transformation SQL query. Turns the collection into insert_only mode.
 
 When inserting data into Rockset, you can transform the data by providing a single SQL query, 
 that contains all of the desired data transformations. 
@@ -65,53 +64,6 @@ For more information see https://rockset.com/docs/ingest-transformation/
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-
-<a id="nestedblock--clustering_key"></a>
-### Nested Schema for `clustering_key`
-
-Required:
-
-- `field_name` (String) The name of a field. Parsed as a SQL qualified name.
-
-Optional:
-
-- `keys` (List of String) The values for partitioning of a field.
-- `type` (String) The type of partitions on a field.
-
-
-<a id="nestedblock--field_mapping"></a>
-### Nested Schema for `field_mapping`
-
-Required:
-
-- `name` (String) Name of the field mapping.
-- `output_field` (Block Set, Min: 1, Max: 1) List of output fields. (see [below for nested schema](#nestedblock--field_mapping--output_field))
-
-Optional:
-
-- `input_fields` (Block List) List of input fields. (see [below for nested schema](#nestedblock--field_mapping--input_fields))
-
-<a id="nestedblock--field_mapping--output_field"></a>
-### Nested Schema for `field_mapping.output_field`
-
-Required:
-
-- `field_name` (String) Name of the new field created by your SQL expression.
-- `on_error` (String) Specifies the behavior for when there is an error while evaluating the SQL expression defined in the sql parameter. It accepts two valid strings as input: SKIP, which skips only this output field but continues the update, or FAIL, which causes this update to fail entirely.
-- `sql` (String) A string SQL expression used to define the new field being created. It may optionally take another field name as a parameter, or a param name alias specified in an input_fields field mapping.
-
-
-<a id="nestedblock--field_mapping--input_fields"></a>
-### Nested Schema for `field_mapping.input_fields`
-
-Required:
-
-- `field_name` (String) Name of the field in your input data to apply this field mapping to.
-- `if_missing` (String) Specifies the behavior for when the field evaluates to either NULL or UNDEFINED. It accepts two valid strings as input: SKIP, which skips the update for this document entirely, or PASS, which will simply set this field to NULL.
-- `is_drop` (Boolean) Specifies whether or not to drop this field completely from the document as it is being inserted.
-- `param` (String) Name alias for this field which can be referred to in a SQL expression in the output_field attribute.
-
-
 
 <a id="nestedblock--source"></a>
 ### Nested Schema for `source`
