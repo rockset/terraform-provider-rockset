@@ -29,7 +29,7 @@ func baseCollectionSchema() map[string]*schema.Schema { //nolint:funlen
 		},
 		"field_mapping_query": {
 			Deprecated:    "Use ingest_transformation instead",
-			Description:   `**Deprecated**`,
+			Description:   "**Deprecated** use ingest_transformation instead",
 			Type:          schema.TypeString,
 			ConflictsWith: []string{"ingest_transformation"},
 			ForceNew:      true,

@@ -107,6 +107,8 @@ func TestAccCollection_IngestTransformation(t *testing.T) {
 	})
 }
 
+// TestAccCollection_Deprecated_FieldMappingQuery is used to make sure the field_mapping_query attribute can be used
+// until we finally remove it.
 func TestAccCollection_Deprecated_FieldMappingQuery(t *testing.T) {
 	var collection openapi.Collection
 
