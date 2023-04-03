@@ -159,6 +159,8 @@ func createBaseCollectionRequest(d *schema.ResourceData) *openapi.CreateCollecti
 	return params
 }
 
+const defaultCollectionTimeout = 20 * time.Minute
+
 func resourceCollection() *schema.Resource {
 	return &schema.Resource{
 		Description: "Manages a basic collection with no sources. Usually used for the write api.",
@@ -173,7 +175,7 @@ func resourceCollection() *schema.Resource {
 
 		Schema: baseCollectionSchema(),
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(20 * time.Minute),
+			Create: schema.DefaultTimeout(defaultCollectionTimeout),
 		},
 	}
 }

@@ -23,7 +23,7 @@ Manages a collection with an Kinesis source attached.
 ### Optional
 
 - `description` (String) Text describing the collection.
-- `field_mapping_query` (String, Deprecated) **Deprecated**
+- `field_mapping_query` (String, Deprecated) **Deprecated** use ingest_transformation instead
 - `ingest_transformation` (String) Ingest transformation SQL query. Turns the collection into insert_only mode.
 
 When inserting data into Rockset, you can transform the data by providing a single SQL query, 
@@ -33,6 +33,7 @@ This is referred to as the collection’s ingest transformation or, historically
 For more information see https://rockset.com/docs/ingest-transformation/
 - `retention_secs` (Number) Number of seconds after which data is purged. Based on event time.
 - `source` (Block Set) Defines a source for this collection. (see [below for nested schema](#nestedblock--source))
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 - `wait_for_collection` (Boolean) Wait until the collection is ready.
 - `wait_for_documents` (Number) Wait until the collection has documents. The default is to wait for 0 documents, which means it doesn't wait.
 
@@ -53,5 +54,13 @@ Optional:
 
 - `aws_region` (String) AWS region name for the Kinesis stream, by default us-west-2 is used
 - `dms_primary_key` (List of String) Set of fields that correspond to a DMS primary key. Can only be set if format is mysql or postgres.
+
+
+<a id="nestedblock--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `create` (String)
 
 

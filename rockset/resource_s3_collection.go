@@ -2,10 +2,9 @@ package rockset
 
 import (
 	"context"
-	"github.com/rockset/rockset-go-client/option"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/rockset/rockset-go-client/option"
 
 	"github.com/rockset/rockset-go-client"
 )
@@ -73,6 +72,9 @@ func resourceS3Collection() *schema.Resource {
 		// This schema will use the base collection schema as a foundation
 		// And layer on just the necessary fields for an s3 collection
 		Schema: mergeSchemas(baseCollectionSchema(), s3CollectionSchema()),
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(defaultCollectionTimeout),
+		},
 	}
 }
 
