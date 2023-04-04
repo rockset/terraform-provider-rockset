@@ -2,11 +2,10 @@ package rockset
 
 import (
 	"context"
-	"github.com/rockset/rockset-go-client/option"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rockset/rockset-go-client"
+	"github.com/rockset/rockset-go-client/option"
 )
 
 func resourceGCSCollection() *schema.Resource {
@@ -24,6 +23,9 @@ func resourceGCSCollection() *schema.Resource {
 		// This schema will use the base collection schema as a foundation
 		// And layer on just the necessary fields for an gcs collection
 		Schema: mergeSchemas(baseCollectionSchema(), gcsCollectionSchema()),
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(defaultCollectionTimeout),
+		},
 	}
 }
 

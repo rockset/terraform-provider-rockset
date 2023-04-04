@@ -3,12 +3,11 @@ package rockset
 import (
 	"context"
 	"fmt"
-	"github.com/rockset/rockset-go-client/option"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rockset/rockset-go-client"
 	"github.com/rockset/rockset-go-client/openapi"
+	"github.com/rockset/rockset-go-client/option"
 )
 
 func dynamoDBCollectionSchema() map[string]*schema.Schema {
@@ -103,6 +102,9 @@ func resourceDynamoDBCollection() *schema.Resource {
 		// This schema will use the base collection schema as a foundation
 		// And layer on just the necessary fields for a dynamodb collection
 		Schema: mergeSchemas(baseCollectionSchema(), dynamoDBCollectionSchema()),
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(defaultCollectionTimeout),
+		},
 	}
 }
 

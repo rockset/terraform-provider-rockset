@@ -4,14 +4,13 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"github.com/rockset/rockset-go-client/option"
-	"regexp"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/rockset/rockset-go-client"
 	"github.com/rockset/rockset-go-client/openapi"
+	"github.com/rockset/rockset-go-client/option"
+	"regexp"
 )
 
 func kafkaCollectionSchema() map[string]*schema.Schema {
@@ -131,6 +130,9 @@ func resourceKafkaCollection() *schema.Resource {
 		// This schema will use the base collection schema as a foundation
 		// And layer on just the necessary fields for a Kafka collection
 		Schema: mergeSchemas(baseCollectionSchema(), kafkaCollectionSchema()),
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(defaultCollectionTimeout),
+		},
 	}
 }
 

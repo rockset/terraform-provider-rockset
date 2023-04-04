@@ -48,7 +48,7 @@ resource rockset_s3_collection cities {
 ### Optional
 
 - `description` (String) Text describing the collection.
-- `field_mapping_query` (String, Deprecated) **Deprecated**
+- `field_mapping_query` (String, Deprecated) **Deprecated** use ingest_transformation instead
 - `ingest_transformation` (String) Ingest transformation SQL query. Turns the collection into insert_only mode.
 
 When inserting data into Rockset, you can transform the data by providing a single SQL query, 
@@ -58,6 +58,7 @@ This is referred to as the collection’s ingest transformation or, historically
 For more information see https://rockset.com/docs/ingest-transformation/
 - `retention_secs` (Number) Number of seconds after which data is purged. Based on event time.
 - `source` (Block Set) Defines a source for this collection. (see [below for nested schema](#nestedblock--source))
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 - `wait_for_collection` (Boolean) Wait until the collection is ready.
 - `wait_for_documents` (Number) Wait until the collection has documents. The default is to wait for 0 documents, which means it doesn't wait.
 
@@ -105,5 +106,14 @@ Optional:
 - `encoding` (String) Encoding in which data source is encoded.
 - `root_tag` (String) Tag until which xml is ignored.
 - `value_tag` (String) Tag used for the value when there are attributes in the element having no child.
+
+
+
+<a id="nestedblock--timeouts"></a>
+### Nested Schema for `timeouts`
+
+Optional:
+
+- `create` (String)
 
 
