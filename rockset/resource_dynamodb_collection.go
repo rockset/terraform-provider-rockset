@@ -93,6 +93,7 @@ func resourceDynamoDBCollection() *schema.Resource {
 
 		CreateContext: resourceDynamoDBCollectionCreate,
 		ReadContext:   resourceDynamoDBCollectionRead,
+		UpdateContext: resourceCollectionUpdate, // No change from base collection update
 		DeleteContext: resourceCollectionDelete, // No change from base collection delete
 
 		Importer: &schema.ResourceImporter{

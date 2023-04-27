@@ -24,7 +24,6 @@ func baseCollectionSchema() map[string]*schema.Schema { //nolint:funlen
 			Description: "Text describing the collection.",
 			Type:        schema.TypeString,
 			Default:     "created by Rockset terraform provider",
-			ForceNew:    true,
 			Optional:    true,
 		},
 		"field_mapping_query": {
@@ -45,7 +44,6 @@ This is referred to as the collection’s ingest transformation or, historically
 For more information see https://rockset.com/docs/ingest-transformation/`,
 			Type:          schema.TypeString,
 			ConflictsWith: []string{"field_mapping_query"},
-			ForceNew:      true,
 			Optional:      true,
 		},
 		"name": {
@@ -167,6 +165,7 @@ func resourceCollection() *schema.Resource {
 
 		CreateContext: resourceCollectionCreate,
 		ReadContext:   resourceCollectionRead,
+		UpdateContext: resourceCollectionUpdate,
 		DeleteContext: resourceCollectionDelete,
 
 		Importer: &schema.ResourceImporter{
@@ -242,179 +241,27 @@ func resourceCollectionDelete(ctx context.Context, d *schema.ResourceData, meta 
 	return diags
 }
 
-func makeClusteringKeys(v []interface{}) *[]openapi.FieldPartition {
-	clusteringKeys := make([]openapi.FieldPartition, 0, len(v))
-	for _, raw := range v {
-		fp := openapi.FieldPartition{}
-		cfg := raw.(map[string]interface{})
+func resourceCollectionUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	rc := meta.(*rockset.RockClient)
+	var diags diag.Diagnostics
+	var err error
 
-		if v, ok := cfg["field_name"]; ok {
-			fieldName := v.(string)
-			fp.FieldName = &fieldName
-		}
+	workspace, name := workspaceAndNameFromID(d.Id())
 
-		if v, ok := cfg["type"]; ok {
-			partitionType := v.(string)
-			fp.Type = &partitionType
-		}
-
-		if v, ok := cfg["keys"]; ok {
-			partitionKeys := toStringArray(v.([]interface{}))
-			fp.Keys = partitionKeys
-		}
-
-		clusteringKeys = append(clusteringKeys, fp)
+	var options []option.CollectionOption
+	if desc := d.Get("description"); desc != nil {
+		options = append(options, option.WithCollectionDescription(desc.(string)))
+	}
+	if it := d.Get("ingest_transformation"); it != nil {
+		options = append(options, option.WithIngestTransformation(it.(string)))
 	}
 
-	return &clusteringKeys
-}
-
-func makeFieldMappings(v []interface{}) *[]openapi.FieldMappingV2 {
-	mappings := make([]openapi.FieldMappingV2, 0, len(v))
-	for _, raw := range v {
-		fm := openapi.FieldMappingV2{}
-		cfg := raw.(map[string]interface{})
-
-		if v, ok := cfg["name"]; ok {
-			fieldMappingName := v.(string)
-			fm.Name = &fieldMappingName
-		}
-
-		if v, ok := cfg["output_field"]; ok {
-			fm.OutputField = makeOutputField(v)
-		}
-
-		if v, ok := cfg["input_fields"]; ok {
-			fm.InputFields = makeInputFields(v)
-		}
-
-		mappings = append(mappings, fm)
+	_, err = rc.UpdateCollection(ctx, workspace, name, options...)
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
-	return &mappings
-}
-
-func makeOutputField(in interface{}) *openapi.OutputField {
-	of := openapi.OutputField{}
-
-	for _, i := range in.(*schema.Set).List() {
-		if val, ok := i.(map[string]interface{}); ok {
-			for k, v := range val {
-				switch k {
-				case "field_name":
-					field := v.(string)
-					of.FieldName = &field
-				case "on_error":
-					field := v.(string)
-					of.OnError = &field
-				case "sql":
-					field := v.(string)
-					of.Value = &openapi.SqlExpression{Sql: &field}
-				}
-			}
-		}
-	}
-
-	return &of
-}
-
-func makeInputFields(in interface{}) []openapi.InputField {
-	fields := make([]openapi.InputField, 0)
-
-	if arr, ok := in.([]interface{}); ok {
-		for _, a := range arr {
-			cfg, ok := a.(map[string]interface{})
-			if !ok {
-				// TODO: should handle the error if this happens,
-				// But we generally are dealing with an interface defined by two rigid systems
-				// Terraform schema and the openapi go client.
-				continue
-			}
-
-			i := openapi.InputField{}
-
-			if v, ok := cfg["field_name"]; ok {
-				field := v.(string)
-				i.FieldName = &field
-			}
-
-			if v, ok := cfg["param"]; ok {
-				field := v.(string)
-				i.Param = &field
-			}
-
-			if v, ok := cfg["if_missing"]; ok {
-				field := v.(string)
-				i.IfMissing = &field
-			}
-
-			if v, ok := cfg["is_drop"]; ok {
-				field := v.(bool)
-				i.IsDrop = &field
-			}
-
-			fields = append(fields, i)
-		}
-	}
-
-	return fields
-}
-
-func flattenFieldMappings(fieldMappings []openapi.FieldMappingV2) []interface{} {
-	var out = make([]interface{}, 0, len(fieldMappings))
-
-	for _, f := range fieldMappings {
-		m := make(map[string]interface{})
-
-		m["name"] = f.Name
-		m["output_field"] = flattenOutputField(*f.OutputField)
-		m["input_fields"] = flattenInputFields(f.InputFields)
-
-		out = append(out, m)
-	}
-
-	return out
-}
-
-func flattenOutputField(outputField openapi.OutputField) []interface{} {
-	m := make(map[string]interface{})
-
-	m["field_name"] = outputField.FieldName
-	m["on_error"] = outputField.OnError
-	m["sql"] = outputField.Value.Sql
-
-	return []interface{}{m}
-}
-
-func flattenInputFields(inputFields []openapi.InputField) []interface{} {
-	var out = make([]interface{}, 0, len(inputFields))
-
-	for _, i := range inputFields {
-		m := make(map[string]interface{})
-		m["field_name"] = i.FieldName
-		m["if_missing"] = i.IfMissing
-		m["is_drop"] = i.IsDrop
-		m["param"] = i.Param
-		out = append(out, m)
-	}
-
-	return out
-}
-
-func flattenClusteringKeys(clusteringKeys []openapi.FieldPartition) []interface{} {
-	var out = make([]interface{}, 0, len(clusteringKeys))
-
-	for _, fieldPartition := range clusteringKeys {
-		m := make(map[string]interface{})
-
-		m["field_name"] = fieldPartition.FieldName
-		m["type"] = fieldPartition.Type
-		m["keys"] = fieldPartition.Keys
-
-		out = append(out, m)
-	}
-
-	return out
+	return diags
 }
 
 func waitForCollectionAndDocuments(ctx context.Context, rc *rockset.RockClient, d *schema.ResourceData, workspace, name string) error {

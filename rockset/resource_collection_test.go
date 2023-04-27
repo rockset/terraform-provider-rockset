@@ -83,8 +83,11 @@ func TestAccCollection_IngestTransformation(t *testing.T) {
 		Description:          description(),
 		Workspace:            "acc",
 		Retention:            60,
-		IngestTransformation: "SELECT COUNT(*) AS cnt FROM _input",
+		IngestTransformation: "SELECT LOWER(_input.name) AS lower, * FROM _input",
 	}
+	updatedValues := values
+	updatedValues.Description = "updated description"
+	updatedValues.IngestTransformation = "SELECT UPPER(_input.name) AS upper, * FROM _input"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -100,6 +103,17 @@ func TestAccCollection_IngestTransformation(t *testing.T) {
 					resource.TestCheckResourceAttr("rockset_collection.test", "description", values.Description),
 					resource.TestCheckResourceAttr("rockset_collection.test", "ingest_transformation", values.IngestTransformation),
 					testAccCheckRetentionSecsMatches(&collection, values.Retention),
+				),
+				ExpectNonEmptyPlan: false,
+			},
+			{
+				Config: getHCLTemplate("collection_basic.tf", updatedValues),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRocksetCollectionExists("rockset_collection.test", &collection),
+					resource.TestCheckResourceAttr("rockset_collection.test", "name", updatedValues.Name),
+					resource.TestCheckResourceAttr("rockset_collection.test", "workspace", updatedValues.Workspace),
+					resource.TestCheckResourceAttr("rockset_collection.test", "description", updatedValues.Description),
+					resource.TestCheckResourceAttr("rockset_collection.test", "ingest_transformation", updatedValues.IngestTransformation),
 				),
 				ExpectNonEmptyPlan: false,
 			},

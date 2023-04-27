@@ -116,6 +116,7 @@ func resourceKafkaCollection() *schema.Resource {
 
 		CreateContext: resourceKafkaCollectionCreate,
 		ReadContext:   resourceKafkaCollectionRead,
+		UpdateContext: resourceCollectionUpdate, // No change from base collection update
 		DeleteContext: resourceCollectionDelete, // No change from base collection delete
 
 		Importer: &schema.ResourceImporter{

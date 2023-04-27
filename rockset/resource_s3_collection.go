@@ -63,6 +63,7 @@ func resourceS3Collection() *schema.Resource {
 
 		CreateContext: resourceS3CollectionCreate,
 		ReadContext:   resourceS3CollectionRead,
+		UpdateContext: resourceCollectionUpdate, // No change from base collection update
 		DeleteContext: resourceCollectionDelete, // No change from base collection delete
 
 		Importer: &schema.ResourceImporter{

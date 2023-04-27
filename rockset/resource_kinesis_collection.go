@@ -75,6 +75,7 @@ func resourceKinesisCollection() *schema.Resource {
 
 		CreateContext: resourceKinesisCollectionCreate,
 		ReadContext:   resourceKinesisCollectionRead,
+		UpdateContext: resourceCollectionUpdate, // No change from base collection update
 		DeleteContext: resourceCollectionDelete, // No change from base collection delete
 
 		Importer: &schema.ResourceImporter{

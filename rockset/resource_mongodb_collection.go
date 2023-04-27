@@ -106,6 +106,7 @@ func resourceMongoDBCollection() *schema.Resource {
 
 		CreateContext: resourceMongoDBCollectionCreate,
 		ReadContext:   resourceMongoDBCollectionRead,
+		UpdateContext: resourceCollectionUpdate, // No change from base collection update
 		DeleteContext: resourceCollectionDelete, // No change from base collection delete
 
 		Importer: &schema.ResourceImporter{
