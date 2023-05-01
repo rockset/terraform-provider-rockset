@@ -2,13 +2,11 @@ module github.com/rockset/terraform-provider-rockset
 
 go 1.20
 
-replace github.com/rockset/rockset-go-client => github.com/rockset/rockset-go-client v0.16.2-0.20230427212759-cecaa26037a9
-
 require (
 	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320
 	github.com/hashicorp/terraform-plugin-log v0.7.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.24.1
-	github.com/rockset/rockset-go-client v0.16.1
+	github.com/rockset/rockset-go-client v0.18.0
 	github.com/rs/zerolog v1.29.1
 	github.com/stretchr/testify v1.8.2
 )
