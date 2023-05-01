@@ -179,8 +179,8 @@ github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINE
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4/go.mod h1:xMI15A0UPsDsEKsMN9yxemIoYk6Tm2C1GtYGdfGttqA=
-github.com/rockset/rockset-go-client v0.16.2-0.20230427212759-cecaa26037a9 h1:tWNF53qc4HX2ATbYBUHaZAIZbk7shwn95rOBYEmSKxM=
-github.com/rockset/rockset-go-client v0.16.2-0.20230427212759-cecaa26037a9/go.mod h1:M7DeKgLeGWyl3gA1hq5lXj8yraPl4kLWihlDrISHhRE=
+github.com/rockset/rockset-go-client v0.18.0 h1:38HBd3MPqCVQzxIlvWvikJBeHyidsuCakCtAHPIfvgk=
+github.com/rockset/rockset-go-client v0.18.0/go.mod h1:M7DeKgLeGWyl3gA1hq5lXj8yraPl4kLWihlDrISHhRE=
 github.com/rs/xid v1.4.0/go.mod h1:trrq9SKmegXys3aeAKXMUTdJsYXVwGY3RLcfgqegfbg=
 github.com/rs/zerolog v1.29.1 h1:cO+d60CHkknCbvzEWxP0S9K6KqyTjrCNUy1LdQLCGPc=
 github.com/rs/zerolog v1.29.1/go.mod h1:Le6ESbR7hc+DP6Lt1THiV8CQSdkkNrd3R0XbEgp3ZBU=
