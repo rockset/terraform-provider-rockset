@@ -26,14 +26,6 @@ func baseCollectionSchema() map[string]*schema.Schema { //nolint:funlen
 			Default:     "created by Rockset terraform provider",
 			Optional:    true,
 		},
-		"field_mapping_query": {
-			Deprecated:    "Use ingest_transformation instead",
-			Description:   "**Deprecated** use ingest_transformation instead",
-			Type:          schema.TypeString,
-			ConflictsWith: []string{"ingest_transformation"},
-			ForceNew:      true,
-			Optional:      true,
-		},
 		"ingest_transformation": {
 			Description: `Ingest transformation SQL query. Turns the collection into insert_only mode.
 
@@ -42,9 +34,8 @@ that contains all of the desired data transformations.
 This is referred to as the collection’s ingest transformation or, historically, its field mapping query.
 
 For more information see https://rockset.com/docs/ingest-transformation/`,
-			Type:          schema.TypeString,
-			ConflictsWith: []string{"field_mapping_query"},
-			Optional:      true,
+			Type:     schema.TypeString,
+			Optional: true,
 		},
 		"name": {
 			Description:  "Unique identifier for the collection. Can contain alphanumeric or dash characters.",
@@ -111,12 +102,7 @@ func parseBaseCollection(collection *openapi.Collection, d *schema.ResourceData)
 		return err
 	}
 
-	_, ok := d.GetOk("ingest_transformation")
-	if ok {
-		err = d.Set("ingest_transformation", collection.GetFieldMappingQuery().Sql)
-	} else {
-		err = d.Set("field_mapping_query", collection.GetFieldMappingQuery().Sql)
-	}
+	err = d.Set("ingest_transformation", collection.GetFieldMappingQuery().Sql)
 	if err != nil {
 		return err
 	}
@@ -142,11 +128,6 @@ func createBaseCollectionRequest(d *schema.ResourceData) *openapi.CreateCollecti
 		retentionSecondsDuration := time.Duration(v.(int)) * time.Second
 		retentionSeconds := int64(retentionSecondsDuration.Seconds())
 		params.RetentionSecs = &retentionSeconds
-	}
-
-	if v, ok := d.GetOk("field_mapping_query"); ok {
-		fmq := v.(string)
-		params.FieldMappingQuery = &openapi.FieldMappingQuery{Sql: &fmq}
 	}
 
 	if v, ok := d.GetOk("ingest_transformation"); ok {

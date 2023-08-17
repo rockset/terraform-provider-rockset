@@ -32,5 +32,3 @@ Read-Only:
 - `api_server` (String)
 - `aws_region` (String)
 - `type` (String)
-
-

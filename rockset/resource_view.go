@@ -12,7 +12,11 @@ import (
 
 func resourceView() *schema.Resource {
 	return &schema.Resource{
-		Description: "Manages a Rockset view.",
+		Description: "Manages a Rockset view.\n\n" +
+			"~> Note that terraform doesn't understand the contents of the `query` field, " +
+			"so you either have to add a `depends_on` field referencing the `rockset_collection`, " +
+			"or use [`templatefile()`](https://developer.hashicorp.com/terraform/language/functions/templatefile) and pass in a reference to the collection, " +
+			"to get a correct dependency graph",
 
 		CreateContext: resourceViewCreate,
 		ReadContext:   resourceViewRead,

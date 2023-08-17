@@ -25,5 +25,3 @@ Manages a Rockset Query Lambda Tag.
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-
-

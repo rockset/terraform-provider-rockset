@@ -27,5 +27,3 @@ Manages a Rockset S3 Integration.
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-
-

@@ -89,24 +89,27 @@ It relies on having [`tfplugindocs`](https://github.com/hashicorp/terraform-plug
 
 See [pre-commit](https://pre-commit.com/) for more details.
 
-## Manual Installation
+##  Local testing
 
-To manually install this provider from a build or release 
-follow these steps to place the executable in the folder Terraform expects.
+If you want to test with a dev version of the provider, update your `~/.terraformrc` with
 
-This should not be necessary for general use of the provider as you can fetch it from the repository.
-But this can be useful for local testing as you're building new features of the provider.
-
-### Move the provider
-
-Untar/zip the provider. The executable should be named `terraform-provider-rockset`. Rename it to match if necessary.
-
-Create the folder structure and move the provider to it.
-
-The path will include the platform (e.g. `linux_amd64`, `windows_amd64`) and the version (e.g. `0.1.0`)
 ```
-mkdir -p ~/.terraform.d/plugins/terraform.rockset.com/rockset/rockset/0.1.0/linux_amd64/
-mv terraform-provider-rockset ~/.terraform.d/plugins/terraform.rockset.com/rockset/rockset/0.1.0/linux_amd64/
+provider_installation {
+  dev_overrides {
+    "rockset/rockset" = "/Users/pme/src/rockset/terraform-provider-rockset"
+  }
+}
+```
+
+and you should see this warning when you run `terraform`
+
+```
+│ Warning: Provider development overrides are in effect
+│
+│ The following provider development overrides are set in the CLI configuration:
+│  - rockset/rockset in /Users/pme/src/rockset/terraform-provider-rockset
+│
+│ The behavior may therefore not match any released version of the provider and applying changes may cause the state to become incompatible with published releases.
 ```
 
 ### Configure Terraform
