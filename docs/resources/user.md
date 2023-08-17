@@ -35,5 +35,3 @@ i.e. when the state is ACCEPTED.
 - `created_at` (String) The ISO-8601 time of when the user was created.
 - `id` (String) The ID of this resource.
 - `state` (String) State of the user, either NEW or ACTIVE.
-
-

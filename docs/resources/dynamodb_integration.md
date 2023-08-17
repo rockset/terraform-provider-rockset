@@ -28,5 +28,3 @@ Manages a Rockset DynamoDB Integration.
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-
-

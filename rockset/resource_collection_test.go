@@ -121,39 +121,6 @@ func TestAccCollection_IngestTransformation(t *testing.T) {
 	})
 }
 
-// TestAccCollection_Deprecated_FieldMappingQuery is used to make sure the field_mapping_query attribute can be used
-// until we finally remove it.
-func TestAccCollection_Deprecated_FieldMappingQuery(t *testing.T) {
-	var collection openapi.Collection
-
-	values := Values{
-		Name:                 randomName("collection"),
-		Description:          description(),
-		Workspace:            "acc",
-		Retention:            60,
-		IngestTransformation: "SELECT COUNT(*) AS cnt FROM _input",
-	}
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckRocksetCollectionDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: getHCLTemplate("collection_basic_fmq.tf", values),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRocksetCollectionExists("rockset_collection.test", &collection),
-					resource.TestCheckResourceAttr("rockset_collection.test", "name", values.Name),
-					resource.TestCheckResourceAttr("rockset_collection.test", "workspace", values.Workspace),
-					resource.TestCheckResourceAttr("rockset_collection.test", "description", values.Description),
-					resource.TestCheckResourceAttr("rockset_collection.test", "field_mapping_query", values.IngestTransformation),
-					testAccCheckRetentionSecsMatches(&collection, values.Retention),
-				),
-			},
-		},
-	})
-}
-
 /*
 Check if any type of collection was successfully destroyed
 */

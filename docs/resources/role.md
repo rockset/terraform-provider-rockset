@@ -65,5 +65,3 @@ Optional:
 
 - `cluster` (String) Rockset cluster ID for which this action is allowed. Only valid for Workspace actions. Use '*ALL*' for actions which apply to all clusters.
 - `resource_name` (String) The resource on which this action is allowed. Defaults to 'All' if not specified.
-
-

@@ -50,5 +50,3 @@ Required:
 - `name` (String)
 - `type` (String)
 - `value` (String)
-
-

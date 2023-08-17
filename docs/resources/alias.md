@@ -28,5 +28,3 @@ Manages an alias for a set of collections.
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-
-

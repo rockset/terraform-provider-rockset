@@ -27,5 +27,3 @@ Manages a Rockset workspace.
 
 - `created_by` (String) The user who created the workspace.
 - `id` (String) The ID of this resource.
-
-

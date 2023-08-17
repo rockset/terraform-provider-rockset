@@ -48,7 +48,6 @@ resource rockset_s3_collection cities {
 ### Optional
 
 - `description` (String) Text describing the collection.
-- `field_mapping_query` (String, Deprecated) **Deprecated** use ingest_transformation instead
 - `ingest_transformation` (String) Ingest transformation SQL query. Turns the collection into insert_only mode.
 
 When inserting data into Rockset, you can transform the data by providing a single SQL query, 
@@ -115,5 +114,3 @@ Optional:
 Optional:
 
 - `create` (String)
-
-
