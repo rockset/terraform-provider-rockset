@@ -11,6 +11,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/rockset/rockset-go-client"
 )
 
@@ -46,7 +47,10 @@ func Provider() *schema.Provider {
 			"rockset_workspace":            resourceWorkspace(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			"rockset_account": dataSourceRocksetAccount(),
+			"rockset_account":          dataSourceRocksetAccount(),
+			"rockset_query_lambda_tag": dataSourceRocksetQueryLambdaTag(),
+			"rockset_virtual_instance": dataSourceRocksetVirtualInstance(),
+			"rockset_workspace":        dataSourceRocksetWorkspace(),
 		},
 		Schema: map[string]*schema.Schema{
 			"api_key": {
