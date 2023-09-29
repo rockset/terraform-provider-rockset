@@ -2,6 +2,7 @@ package rockset
 
 import (
 	"context"
+
 	"github.com/rockset/rockset-go-client"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -14,6 +15,11 @@ func dataSourceRocksetWorkspace() *schema.Resource {
 		ReadContext: dataSourceReadRocksetWorkspace,
 
 		Schema: map[string]*schema.Schema{
+			"id": {
+				Description: "The workspace `name`.",
+				Type:        schema.TypeString,
+				Computed:    true,
+			},
 			"name": {
 				Description: "Workspace name.",
 				Type:        schema.TypeString,
