@@ -23,7 +23,7 @@ func TestAccCollection_Basic(t *testing.T) {
 		Retention:   3600,
 	}
 	updated := values
-	updated.Retention = 61
+	updated.Retention = 4800
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -61,6 +61,7 @@ func TestAccCollection_Timeout(t *testing.T) {
 		Description:   description(),
 		Workspace:     "acc",
 		CreateTimeout: "5s",
+		Retention:     3600,
 	}
 
 	resource.Test(t, resource.TestCase{
