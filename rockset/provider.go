@@ -28,6 +28,7 @@ func Provider() *schema.Provider {
 			"rockset_alias":                resourceAlias(),
 			"rockset_api_key":              resourceApiKey(),
 			"rockset_collection":           resourceCollection(),
+			"rockset_collection_mount":     resourceCollectionMount(),
 			"rockset_dynamodb_collection":  resourceDynamoDBCollection(),
 			"rockset_dynamodb_integration": resourceDynamoDBIntegration(),
 			"rockset_gcs_collection":       resourceGCSCollection(),
@@ -45,6 +46,7 @@ func Provider() *schema.Provider {
 			"rockset_s3_integration":       resourceS3Integration(),
 			"rockset_user":                 resourceUser(),
 			"rockset_view":                 resourceView(),
+			"rockset_virtual_instance":     resourceVirtualInstance(),
 			"rockset_workspace":            resourceWorkspace(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
@@ -113,7 +115,9 @@ func (c *Config) Client() (interface{}, diag.Diagnostics) {
 	return rc, diags
 }
 
-var nameRegexp = regexp.MustCompile("^[[:alnum:]][[:alnum:]-_]*$")
+const nameRe = "[[:alnum:]][[:alnum:]-_]*"
+
+var nameRegexp = regexp.MustCompile(fmt.Sprintf("^%s$", nameRe))
 
 func rocksetNameValidator(val interface{}, key string) ([]string, []error) {
 	s := val.(string)
