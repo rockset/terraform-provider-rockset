@@ -3,13 +3,15 @@ package rockset
 import (
 	"context"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"time"
+
 	"github.com/rockset/rockset-go-client"
 	"github.com/rockset/rockset-go-client/option"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
 	"github.com/rockset/rockset-go-client/openapi"
 )
 
@@ -49,7 +51,7 @@ For more information see https://rockset.com/docs/ingest-transformation/`,
 			Type:         schema.TypeInt,
 			ForceNew:     true,
 			Optional:     true,
-			ValidateFunc: validation.IntAtLeast(0),
+			ValidateFunc: validation.IntBetween(3_600, 315_360_000),
 		},
 		"wait_for_collection": {
 			Description:  "Wait until the collection is ready.",

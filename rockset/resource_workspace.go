@@ -78,6 +78,11 @@ func resourceWorkspaceCreate(ctx context.Context, d *schema.ResourceData, meta i
 		return diag.FromErr(err)
 	}
 
+	err = d.Set("created_by", workspace.GetCreatedBy())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	err = d.Set("collection_count", workspace.GetCollectionCount())
 	if err != nil {
 		return diag.FromErr(err)

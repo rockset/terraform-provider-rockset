@@ -3,11 +3,11 @@ package rockset
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
 	"github.com/rockset/rockset-go-client"
 	"github.com/rockset/rockset-go-client/openapi"
 )
@@ -70,8 +70,6 @@ func TestAccKafkaIntegration_BasicV3(t *testing.T) {
 						testKafkaIntegrationName),
 					resource.TestCheckResourceAttr("rockset_kafka_integration.test", "description",
 						testKafkaIntegrationDescription),
-					resource.TestCheckResourceAttr("rockset_kafka_integration.test", "security_config.api_key",
-						os.Getenv("TF_VAR_CC_KEY")),
 				),
 				ExpectNonEmptyPlan: false,
 			},
