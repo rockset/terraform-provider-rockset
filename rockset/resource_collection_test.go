@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
 	"github.com/rockset/rockset-go-client"
 	"github.com/rockset/rockset-go-client/openapi"
 )
@@ -19,10 +20,10 @@ func TestAccCollection_Basic(t *testing.T) {
 		Name:        randomName("collection"),
 		Description: description(),
 		Workspace:   "acc",
-		Retention:   60,
+		Retention:   3600,
 	}
 	updated := values
-	updated.Retention = 61
+	updated.Retention = 4800
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -60,6 +61,7 @@ func TestAccCollection_Timeout(t *testing.T) {
 		Description:   description(),
 		Workspace:     "acc",
 		CreateTimeout: "5s",
+		Retention:     3600,
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -82,7 +84,7 @@ func TestAccCollection_IngestTransformation(t *testing.T) {
 		Name:                 randomName("collection"),
 		Description:          description(),
 		Workspace:            "acc",
-		Retention:            60,
+		Retention:            3600,
 		IngestTransformation: "SELECT LOWER(_input.name) AS lower, * FROM _input",
 	}
 	updatedValues := values
