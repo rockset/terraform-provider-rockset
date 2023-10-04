@@ -208,7 +208,7 @@ func resourceKafkaIntegrationCreate(ctx context.Context, d *schema.ResourceData,
 			tflog.Debug(ctx, "waiting for integration", map[string]interface{}{
 				"name": name,
 			})
-			if err = rc.WaitUntilKafkaIntegrationActive(ctx, name); err != nil {
+			if err = rc.Wait.UntilKafkaIntegrationActive(ctx, name); err != nil {
 				return diag.FromErr(err)
 			}
 		}

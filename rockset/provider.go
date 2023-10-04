@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/rockset/rockset-go-client"
+	rockerr "github.com/rockset/rockset-go-client/errors"
 )
 
 type Config struct {
@@ -186,7 +187,7 @@ func mergeSchemas(mergeOnto map[string]*schema.Schema, toMerge map[string]*schem
 // checkForNotFoundError check is the error is a Rockset NotFoundError, and then clears the id which makes
 // terraform create the resource, but if it isn't a NotFoundError it will return the error wrapped in diag.Diagnostics
 func checkForNotFoundError(d *schema.ResourceData, err error) diag.Diagnostics {
-	var re rockset.Error
+	var re rockerr.Error
 	if !errors.As(err, &re) {
 		return diag.FromErr(err)
 	}

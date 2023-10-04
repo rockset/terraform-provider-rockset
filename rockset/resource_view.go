@@ -153,7 +153,7 @@ func resourceViewDelete(ctx context.Context, d *schema.ResourceData, meta interf
 		return diag.FromErr(err)
 	}
 
-	err = rc.WaitUntilViewGone(ctx, workspace, name)
+	err = rc.Wait.UntilViewGone(ctx, workspace, name)
 	if err != nil {
 		return diag.FromErr(err)
 	}

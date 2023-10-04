@@ -143,7 +143,7 @@ func resourceWorkspaceDelete(ctx context.Context, d *schema.ResourceData, meta i
 		return diag.FromErr(err)
 	}
 
-	err = rc.WaitUntilWorkspaceGone(ctx, name)
+	err = rc.Wait.UntilWorkspaceGone(ctx, name)
 	if err != nil {
 		return diag.FromErr(err)
 	}

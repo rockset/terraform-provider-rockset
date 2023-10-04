@@ -3,6 +3,7 @@ package rockset
 import (
 	"errors"
 	"fmt"
+	rockerr "github.com/rockset/rockset-go-client/errors"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -107,7 +108,7 @@ func testAccCheckRocksetApiKeyDestroy(s *terraform.State) error {
 			return fmt.Errorf("api Key %s still exists", rs.Primary.ID)
 		}
 
-		var re rockset.Error
+		var re rockerr.Error
 		if errors.As(err, &re) {
 			if re.IsNotFoundError() {
 				continue

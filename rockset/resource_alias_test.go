@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	rockerr "github.com/rockset/rockset-go-client/errors"
 	"reflect"
 	"testing"
 
@@ -109,7 +110,7 @@ func testAccCheckRocksetAliasDestroy(s *terraform.State) error {
 			return fmt.Errorf("alias %s:%s still exists", name, workspace)
 		}
 
-		var re rockset.Error
+		var re rockerr.Error
 		if errors.As(err, &re) {
 			if re.IsNotFoundError() {
 				// this is what we expect
