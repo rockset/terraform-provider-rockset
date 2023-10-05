@@ -216,7 +216,7 @@ func resourceCollectionDelete(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(err)
 	}
 
-	err = rc.WaitUntilCollectionGone(ctx, workspace, name)
+	err = rc.Wait.UntilCollectionGone(ctx, workspace, name)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -253,7 +253,7 @@ func waitForCollectionAndDocuments(ctx context.Context, rc *rockset.RockClient, 
 			"workspace": workspace,
 			"name":      name,
 		})
-		if err := rc.WaitUntilCollectionReady(ctx, workspace, name); err != nil {
+		if err := rc.Wait.UntilCollectionReady(ctx, workspace, name); err != nil {
 			return err
 		}
 	}
@@ -263,7 +263,7 @@ func waitForCollectionAndDocuments(ctx context.Context, rc *rockset.RockClient, 
 			"workspace": workspace,
 			"name":      name,
 		})
-		if err := rc.WaitUntilCollectionHasDocuments(ctx, workspace, name, int64(nDocs)); err != nil {
+		if err := rc.Wait.UntilCollectionHasDocuments(ctx, workspace, name, int64(nDocs)); err != nil {
 			return err
 		}
 	}

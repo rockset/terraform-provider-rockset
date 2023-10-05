@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rockset/rockset-go-client"
 	"github.com/rockset/rockset-go-client/option"
+	"github.com/rockset/rockset-go-client/retry"
 )
 
 func resourceAlias() *schema.Resource {
@@ -67,7 +68,7 @@ func resourceAlias() *schema.Resource {
 }
 
 func aliasCollectionsSet(ctx context.Context, rc *rockset.RockClient, workspace string, name string,
-	collections []string) rockset.RetryCheck {
+	collections []string) retry.CheckFn {
 	/*
 		Implements a Retry func to wait for the create or update
 		to finalize and show the specified collections.
@@ -180,7 +181,7 @@ func resourceAliasDelete(ctx context.Context, d *schema.ResourceData, meta inter
 		return diag.FromErr(err)
 	}
 
-	err = rc.WaitUntilAliasGone(ctx, workspace, name)
+	err = rc.Wait.UntilAliasGone(ctx, workspace, name)
 	if err != nil {
 		return diag.FromErr(err)
 	}
