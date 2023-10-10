@@ -194,11 +194,10 @@ func resourceVirtualInstanceDelete(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
-	// TODO wait until deleted
-	//err = rc.Wait.UntilVirtualInstanceGone(ctx, id)
-	//if err != nil {
-	//	return diag.FromErr(err)
-	//}
+	err = rc.Wait.UntilVirtualInstanceGone(ctx, id)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	return diags
 }
