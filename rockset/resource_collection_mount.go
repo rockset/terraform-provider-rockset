@@ -149,17 +149,20 @@ func resourceCollectionMountDelete(ctx context.Context, d *schema.ResourceData, 
 
 	vid := d.Get("virtual_instance_id").(string)
 	path := d.Get("path").(string)
+	fields := strings.Split(path, ".")
+	if len(fields) != 2 {
+		return diag.Errorf("path couldn't be split into workspace and collection: %s", path)
+	}
 
 	_, err := rc.UnmountCollection(ctx, vid, path)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	// TODO wait until deleted
-	//err = rc.Wait.UntilCollectionUnmounted(ctx, id)
-	//if err != nil {
-	//	return diag.FromErr(err)
-	//}
+	err = rc.Wait.UntilMountGone(ctx, vid, fields[0], fields[1])
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	return diags
 }
