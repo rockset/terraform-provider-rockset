@@ -1,6 +1,9 @@
 package rockset
 
 import (
+	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/rockset/rockset-go-client"
 	"strconv"
 	"testing"
 
@@ -23,7 +26,7 @@ func TestAccVirtualInstance_Basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
-		CheckDestroy:      testAccCheckRocksetWorkspaceDestroy,
+		CheckDestroy:      testAccCheckRocksetVirtualInstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: getHCLTemplate("virtual_instance_basic.tf", v1),
@@ -38,6 +41,7 @@ func TestAccVirtualInstance_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(vi, "remount_on_resume", strconv.FormatBool(v1.Remount)),
 					resource.TestCheckResourceAttr(vi, "default", "false"),
 					resource.TestCheckResourceAttr(vi, "state", "ACTIVE"),
+					resource.TestCheckResourceAttr(vi, "auto_suspend_seconds", "900"),
 					// mount
 					resource.TestCheckResourceAttrSet(mount, "id"),
 					resource.TestCheckResourceAttrSet(mount, "rrn"),
@@ -67,4 +71,25 @@ func TestAccVirtualInstance_Basic(t *testing.T) {
 			},
 		},
 	})
+}
+
+func testAccCheckRocksetVirtualInstanceDestroy(s *terraform.State) error {
+	rc := testAccProvider.Meta().(*rockset.RockClient)
+
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "rockset_virtual_instance" {
+			continue
+		}
+
+		id := rs.Primary.ID
+		vi, err := rc.GetVirtualInstance(testCtx, id)
+
+		// An error would mean we didn't find the key, we expect an error
+		if err == nil {
+			// We did not get an error, so we failed to delete the key.
+			return fmt.Errorf("virtual instance %s (%s) still exists", vi.GetName(), id)
+		}
+	}
+
+	return nil
 }

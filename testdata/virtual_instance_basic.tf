@@ -3,6 +3,7 @@ resource "rockset_virtual_instance" "test" {
   description = "{{ .Description }}"
   size = "{{ .Size }}"
   remount_on_resume = {{ .Remount }}
+  auto_suspend_seconds = 900
 }
 
 resource "rockset_collection_mount" "patch" {
