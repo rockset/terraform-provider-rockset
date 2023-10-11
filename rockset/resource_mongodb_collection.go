@@ -39,6 +39,13 @@ func mongoDBCollectionSchema() map[string]*schema.Schema {
 						ForceNew:    true,
 						Required:    true,
 					},
+					"retrieve_full_document": {
+						Description: `Whether to get the full document from the MongoDB change stream to enable multi-field expression transformations.
+Selecting this option will increase load on your upstream MongoDB database.`,
+						Type:     schema.TypeBool,
+						Optional: true,
+						Default:  false,
+					},
 					"scan_start_time": {
 						Description: "MongoDB scan start time.",
 						Type:        schema.TypeString,
@@ -205,6 +212,7 @@ func flattenMongoDBSourceParams(sources *[]openapi.Source) []interface{} {
 		m["integration_name"] = source.IntegrationName
 		m["database_name"] = source.Mongodb.DatabaseName
 		m["collection_name"] = source.Mongodb.CollectionName
+		m["retrieve_full_document"] = source.Mongodb.GetRetrieveFullDocument()
 		m["scan_start_time"] = source.Mongodb.Status.GetScanStartTime()
 		m["scan_end_time"] = source.Mongodb.Status.GetScanEndTime()
 		m["scan_records_processed"] = source.Mongodb.Status.GetScanRecordsProcessed()
@@ -238,6 +246,8 @@ func makeMongoDBSourceParams(in interface{}) []openapi.Source {
 					source.Mongodb.DatabaseName = v.(string)
 				case "collection_name":
 					source.Mongodb.CollectionName = v.(string)
+				case "retrieve_full_document":
+					source.Mongodb.RetrieveFullDocument = openapi.PtrBool(v.(bool))
 				}
 			}
 			sources = append(sources, source)

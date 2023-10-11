@@ -18,6 +18,7 @@ resource rockset_mongodb_collection test {
     integration_name  = rockset_mongodb_integration.test.name
     database_name = "sample_analytics"
     collection_name = "accounts"
+    retrieve_full_document = true
   }
 
   source {

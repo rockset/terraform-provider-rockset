@@ -328,14 +328,21 @@ func rolePrivsToOptions(privs []openapi.Privilege) ([]option.RoleOption, error) 
 			continue
 		}
 
+		if a := option.GetVirtualInstanceAction(p.GetAction()); a != option.UnknownVirtualInstanceAction {
+			var c []option.ClusterPrivileges
+			if p.GetCluster() != "" {
+				log.Printf("cluster: %s", p.GetCluster())
+				c = append(c, option.WithCluster(p.GetCluster()))
+			}
+			opts = append(opts, option.WithVirtualInstancePrivilege(a, p.GetResourceName(), c...))
+			continue
+		}
+
 		if a := option.GetWorkspaceAction(p.GetAction()); a != option.UnknownWorkspaceAction {
 			var c []option.ClusterPrivileges
 			if p.GetCluster() != "" {
 				log.Printf("cluster: %s", p.GetCluster())
 				c = append(c, option.WithCluster(p.GetCluster()))
-				//} else {
-				//	log.Printf("cluster: %s", option.AllClusters)
-				//	c = append(c, option.WithCluster(option.AllClusters))
 			}
 			opts = append(opts, option.WithWorkspacePrivilege(a, p.GetResourceName(), c...))
 			continue

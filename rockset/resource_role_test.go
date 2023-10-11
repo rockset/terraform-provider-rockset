@@ -31,33 +31,37 @@ func TestAccRole_Basic(t *testing.T) {
 					testAccCheckRocksetRoleExists("rockset_role.test", &role),
 					resource.TestCheckResourceAttr("rockset_role.test", "name", testRoleName),
 					resource.TestCheckResourceAttr("rockset_role.test", "description", testRoleDescription),
-					/*
-						// TODO check that a workspace action without an explicit cluster defaults to *ALL*
-						testAccCheckRocksetRolePrivileges(&role, []openapi.Privilege{
-							{
-								Action:       openapi.PtrString("LIST_RESOURCES_WS"),
-								ResourceName: openapi.PtrString("common"),
-								Cluster:      openapi.PtrString("*ALL*"),
-							},
-							{
-								Action:       openapi.PtrString("EXECUTE_QUERY_LAMBDA_WS"),
-								ResourceName: openapi.PtrString("common"),
-								Cluster:      openapi.PtrString("usw2a1"),
-							},
-							{
-								Action:       openapi.PtrString("QUERY_DATA_WS"),
-								ResourceName: openapi.PtrString("common"),
-								Cluster:      openapi.PtrString("*ALL*"),
-							},
-							{
-								Action:       openapi.PtrString("CREATE_COLLECTION_INTEGRATION"),
-								ResourceName: openapi.PtrString("dummy"),
-							},
-							{
-								Action: openapi.PtrString("GET_METRICS_GLOBAL"),
-							},
-						}),
-					*/
+
+					// TODO check that a workspace action without an explicit cluster defaults to *ALL*
+					testAccCheckRocksetRolePrivileges(&role, []openapi.Privilege{
+						{
+							Action:       openapi.PtrString("LIST_RESOURCES_WS"),
+							ResourceName: openapi.PtrString("common"),
+							Cluster:      openapi.PtrString("*ALL*"),
+						},
+						{
+							Action:       openapi.PtrString("EXECUTE_QUERY_LAMBDA_WS"),
+							ResourceName: openapi.PtrString("common"),
+							Cluster:      openapi.PtrString("usw2a1"),
+						},
+						{
+							Action:       openapi.PtrString("QUERY_DATA_WS"),
+							ResourceName: openapi.PtrString("common"),
+							Cluster:      openapi.PtrString("*ALL*"),
+						},
+						{
+							Action:       openapi.PtrString("QUERY_VI"),
+							ResourceName: openapi.PtrString("29e4a43c-fff4-4fe6-80e3-1ee57bc22e82"),
+							Cluster:      openapi.PtrString("usw2a1"),
+						},
+						{
+							Action:       openapi.PtrString("CREATE_COLLECTION_INTEGRATION"),
+							ResourceName: openapi.PtrString("dummy"),
+						},
+						{
+							Action: openapi.PtrString("GET_METRICS_GLOBAL"),
+						},
+					}),
 				),
 				ExpectNonEmptyPlan: false,
 			},
@@ -85,29 +89,38 @@ func TestAccRole_Basic(t *testing.T) {
 
 func testAccCheckRocksetRolePrivileges(role *openapi.Role, privs []openapi.Privilege) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
-		if !reflect.DeepEqual(role.GetPrivileges(), privs) {
-			var b strings.Builder
-			b.WriteString("\nexpected\n")
+		var b strings.Builder
 
-			for _, p := range privs {
-				b.WriteString(fmt.Sprintf("action: %s\n", p.GetAction()))
-				b.WriteString(fmt.Sprintf("resource name: %s\n", p.GetResourceName()))
-				b.WriteString(fmt.Sprintf("cluster: %s\n", p.GetCluster()))
-			}
+		comp(&b, "missing in actual list", privs, role.Privileges)
+		comp(&b, "missing in expected list", role.Privileges, privs)
 
-			b.WriteString("\nactual\n")
-
-			for _, p := range role.Privileges {
-				b.WriteString(fmt.Sprintf("action: %s\n", p.GetAction()))
-				b.WriteString(fmt.Sprintf("resource name: %s\n", p.GetResourceName()))
-				b.WriteString(fmt.Sprintf("cluster: %s\n", p.GetCluster()))
-			}
-
+		if b.String() != "" {
 			return fmt.Errorf(b.String())
 		}
 
 		return nil
 	}
+}
+
+func comp(b *strings.Builder, title string, list1, list2 []openapi.Privilege) {
+	for _, p1 := range list1 {
+		var found bool
+		for _, p2 := range list2 {
+			if reflect.DeepEqual(p1, p2) {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			b.WriteString("\n")
+			b.WriteString(title)
+			b.WriteString(fmt.Sprintf("\naction: %s\n", p1.GetAction()))
+			b.WriteString(fmt.Sprintf("resource name: %s\n", p1.GetResourceName()))
+			b.WriteString(fmt.Sprintf("cluster: %s\n", p1.GetCluster()))
+		}
+	}
+
 }
 
 func testAccCheckRocksetRoleDestroy(s *terraform.State) error {

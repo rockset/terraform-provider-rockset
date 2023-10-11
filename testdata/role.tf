@@ -19,6 +19,11 @@ resource rockset_role test {
     cluster       = "usw2a1"
   }
   privilege {
+    action        = "QUERY_VI"
+    resource_name = "29e4a43c-fff4-4fe6-80e3-1ee57bc22e82"
+    cluster       = "usw2a1"
+  }
+  privilege {
     action        = "LIST_RESOURCES_WS"
     resource_name = "common"
     cluster = "*ALL*"

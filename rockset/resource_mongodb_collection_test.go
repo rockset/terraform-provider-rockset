@@ -30,6 +30,7 @@ func TestAccMongoDBCollection_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr("rockset_mongodb_collection.test", "name", testMongoDBCollectionName),
 					resource.TestCheckResourceAttr("rockset_mongodb_collection.test", "workspace", testMongoDBCollectionWorkspace),
 					resource.TestCheckResourceAttr("rockset_mongodb_collection.test", "description", testMongoDBCollectionDescription),
+					resource.TestCheckResourceAttr("rockset_mongodb_collection.test", "retrieve_full_document", "true"),
 					testAccCheckRetentionSecsMatches(&collection, 3600),
 					testAccCheckMongoDBSourcesExpected(t, &collection),
 				),
