@@ -2,6 +2,7 @@ package rockset
 
 import (
 	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -72,9 +73,10 @@ which must be SMALL or larger. To enable live mount, the secondary virtual insta
 				Optional:    true,
 			},
 			"auto_suspend_seconds": {
-				Description: "Number of seconds without queries after which the Virtual Instance is suspended.",
-				Type:        schema.TypeInt,
-				Optional:    true,
+				Description:  "Number of seconds without queries after which the Virtual Instance is suspended.",
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ValidateFunc: validation.IntAtLeast(900),
 			},
 			"mount_refresh_interval_seconds": {
 				Description: "Number of seconds between data refreshes for mounts on this Virtual Instance. A value of 0 means continuous refresh and a value of null means never refresh.",
