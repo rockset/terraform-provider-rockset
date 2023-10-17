@@ -78,11 +78,6 @@ which must be SMALL or larger. To enable live mount, the secondary virtual insta
 				Optional:     true,
 				ValidateFunc: validation.IntAtLeast(900),
 			},
-			"mount_refresh_interval_seconds": {
-				Description: "Number of seconds between data refreshes for mounts on this Virtual Instance. A value of 0 means continuous refresh and a value of null means never refresh.",
-				Type:        schema.TypeInt,
-				Optional:    true,
-			},
 			"state": {
 				Description: "Virtual Instance state.",
 				Type:        schema.TypeString,
@@ -223,11 +218,6 @@ func getVirtualInstanceOptions(d *schema.ResourceData) []option.VirtualInstanceO
 	addOptionIfChanged(d, "remount_on_resume", &options, func(a any) option.VirtualInstanceOption {
 		return option.WithRemountOnResume(a.(bool))
 	})
-	addOptionIfChanged(d, "mount_refresh_interval_seconds", &options, func(a any) option.VirtualInstanceOption {
-		// option.WithNoMountRefresh()
-		seconds := time.Duration(a.(int)) * time.Second
-		return option.WithMountRefreshInterval(seconds)
-	})
 
 	return options
 }
@@ -252,9 +242,6 @@ func parseVirtualInstanceFields(vi openapi.VirtualInstance, d *schema.ResourceDa
 		return err
 	}
 	if err := setValue(d, "auto_suspend_seconds", vi.GetAutoSuspendSecondsOk); err != nil {
-		return err
-	}
-	if err := setValue(d, "mount_refresh_interval_seconds", vi.GetMountRefreshIntervalSecondsOk); err != nil {
 		return err
 	}
 	if err := setValue(d, "state", vi.GetStateOk); err != nil {

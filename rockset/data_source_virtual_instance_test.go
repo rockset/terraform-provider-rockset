@@ -24,7 +24,6 @@ func TestAccVirtualInstance_Data(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "default", "true"),
 					resource.TestCheckResourceAttr(resourceName, "state", "ACTIVE"),
 					resource.TestCheckResourceAttr(resourceName, "enable_remount_on_resume", "false"),
-					resource.TestCheckResourceAttr(resourceName, "mount_refresh_interval_seconds", "0"),
 				),
 			},
 		},

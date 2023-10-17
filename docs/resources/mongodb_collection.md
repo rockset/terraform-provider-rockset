@@ -49,6 +49,11 @@ Required:
 - `database_name` (String) MongoDB database name containing the target collection.
 - `integration_name` (String) The name of the Rockset MongoDB integration.
 
+Optional:
+
+- `retrieve_full_document` (Boolean) Whether to get the full document from the MongoDB change stream to enable multi-field expression transformations.
+Selecting this option will increase load on your upstream MongoDB database.
+
 Read-Only:
 
 - `scan_end_time` (String) MongoDB scan end time.

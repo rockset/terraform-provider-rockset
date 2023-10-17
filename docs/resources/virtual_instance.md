@@ -42,7 +42,6 @@ resource "rockset_collection_mount" "patch" {
 
 - `auto_suspend_seconds` (Number) Number of seconds without queries after which the Virtual Instance is suspended.
 - `description` (String) Description of the virtual instance.
-- `mount_refresh_interval_seconds` (Number) Number of seconds between data refreshes for mounts on this Virtual Instance. A value of 0 means continuous refresh and a value of null means never refresh.
 - `remount_on_resume` (Boolean) When a Virtual Instance is resumed, remount all collections that were mounted when the Virtual Instance was suspended.
 
 ### Read-Only
