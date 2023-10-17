@@ -111,6 +111,7 @@ func TestAccCollection_IngestTransformation(t *testing.T) {
 			{
 				Config: getHCLTemplate("collection_basic.tf", updatedValues),
 				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRocksetCollectionSame("rockset_collection.test", &collection),
 					testAccCheckRocksetCollectionExists("rockset_collection.test", &collection),
 					resource.TestCheckResourceAttr("rockset_collection.test", "name", updatedValues.Name),
 					resource.TestCheckResourceAttr("rockset_collection.test", "workspace", updatedValues.Workspace),
@@ -164,6 +165,28 @@ func testAccCheckRocksetCollectionExists(resource string, collection *openapi.Co
 		}
 
 		*collection = resp
+
+		return nil
+	}
+}
+func testAccCheckRocksetCollectionSame(resource string, collection *openapi.Collection) resource.TestCheckFunc {
+	return func(state *terraform.State) error {
+		rc := testAccProvider.Meta().(*rockset.RockClient)
+
+		rs, err := getResourceFromState(state, resource)
+		if err != nil {
+			return err
+		}
+
+		workspace, name := workspaceAndNameFromID(rs.Primary.ID)
+		resp, err := rc.GetCollection(testCtx, workspace, name)
+		if err != nil {
+			return err
+		}
+
+		if resp.GetCreatedAt() != collection.GetCreatedAt() {
+			return fmt.Errorf("created_at has changed: %s != %s", resp.GetCreatedAt(), collection.GetCreatedAt())
+		}
 
 		return nil
 	}
