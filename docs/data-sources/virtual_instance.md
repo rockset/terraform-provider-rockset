@@ -27,6 +27,5 @@ description: |-
 - `description` (String) Virtual Instance description.
 - `desired_size` (String) Virtual Instance desired size.
 - `enable_remount_on_resume` (Boolean) When a Virtual Instance is resumed, it will remount all collections that were mounted when the Virtual Instance was suspended.
-- `mount_refresh_interval_seconds` (Number) Number of seconds between data refreshes for mounts on this Virtual Instance.
 - `name` (String) Virtual Instance name.
 - `state` (String) Virtual Instance state.

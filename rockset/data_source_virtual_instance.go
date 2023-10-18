@@ -59,11 +59,6 @@ func dataSourceRocksetVirtualInstance() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 			},
-			"mount_refresh_interval_seconds": {
-				Description: "Number of seconds between data refreshes for mounts on this Virtual Instance.",
-				Type:        schema.TypeInt,
-				Optional:    true,
-			},
 			// TODO: auto_scaling_policy
 		}}
 }
@@ -101,9 +96,6 @@ func dataSourceReadRocksetVirtualInstance(ctx context.Context, d *schema.Resourc
 		return diag.FromErr(err)
 	}
 	if err = d.Set("enable_remount_on_resume", vi.GetEnableRemountOnResume()); err != nil {
-		return diag.FromErr(err)
-	}
-	if err = d.Set("mount_refresh_interval_seconds", vi.GetMountRefreshIntervalSeconds()); err != nil {
 		return diag.FromErr(err)
 	}
 
