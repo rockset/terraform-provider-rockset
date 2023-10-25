@@ -8,6 +8,7 @@ import (
 
 func TestAccDataUser_Basic(t *testing.T) {
 	user := "data.rockset_user.pme"
+	current := "data.rockset_user.current"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -22,6 +23,10 @@ func TestAccDataUser_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(user, "state", "NEW"),
 					resource.TestCheckResourceAttr(user, "roles.0", "read-only"),
 					resource.TestCheckResourceAttr(user, "roles.1", "query-only"),
+					resource.TestCheckResourceAttr(current, "email", "pme+circleci@rockset.com"),
+					resource.TestCheckResourceAttr(current, "first_name", "Martin"),
+					resource.TestCheckResourceAttr(current, "last_name", "Englund"),
+					resource.TestCheckResourceAttr(current, "state", "NEW"),
 				),
 			},
 		},

@@ -2,10 +2,12 @@ package rockset
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/rockset/rockset-go-client"
+	"github.com/rockset/rockset-go-client/openapi"
 )
 
 func dataSourceRocksetUser() *schema.Resource {
@@ -20,9 +22,9 @@ func dataSourceRocksetUser() *schema.Resource {
 				Computed:    true,
 			},
 			"email": {
-				Description: "User email.",
+				Description: "User email. If absent or blank, it gets the current user.",
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 			},
 			"first_name": {
 				Description: "User's first name.",
@@ -53,10 +55,17 @@ func dataSourceRocksetUser() *schema.Resource {
 func dataSourceReadRocksetUser(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	rc := meta.(*rockset.RockClient)
 	var diags diag.Diagnostics
+	var err error
+	var user openapi.User
 
 	email := d.Get("email").(string)
 
-	user, err := rc.GetUser(ctx, email)
+	if email == "" {
+		user, err = rc.GetCurrentUser(ctx)
+	} else {
+		user, err = rc.GetUser(ctx, email)
+	}
+
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -78,7 +87,7 @@ func dataSourceReadRocksetUser(ctx context.Context, d *schema.ResourceData, meta
 		return diag.FromErr(err)
 	}
 
-	d.SetId(email)
+	d.SetId(user.GetEmail())
 
 	return diags
 }
