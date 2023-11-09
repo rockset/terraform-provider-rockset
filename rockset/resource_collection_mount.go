@@ -27,7 +27,7 @@ func resourceCollectionMount() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"id": {
-				Description: "Unique ID of this mount.",
+				Description: "Unique ID of this mount, collection path and virtual instance id, joined by a `:`.",
 				Type:        schema.TypeString,
 				Computed:    true,
 			},
@@ -98,8 +98,7 @@ func resourceCollectionMountCreate(ctx context.Context, d *schema.ResourceData, 
 	}
 	tflog.Info(ctx, "mounted")
 
-	mount := mounts[0]
-	id := mount.GetId()
+	id := mountToID(path, vid)
 	d.SetId(id)
 
 	fields := strings.SplitN(path, ".", 2)
@@ -128,8 +127,10 @@ func resourceCollectionMountRead(ctx context.Context, d *schema.ResourceData, me
 	rc := meta.(*rockset.RockClient)
 	var diags diag.Diagnostics
 
-	vid := d.Get("virtual_instance_id").(string)
-	path := d.Get("path").(string)
+	path, vid, err := idToMount(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	m, err := rc.GetCollectionMount(ctx, vid, path)
 	if err != nil {
@@ -147,14 +148,17 @@ func resourceCollectionMountDelete(ctx context.Context, d *schema.ResourceData, 
 	rc := meta.(*rockset.RockClient)
 	var diags diag.Diagnostics
 
-	vid := d.Get("virtual_instance_id").(string)
-	path := d.Get("path").(string)
+	path, vid, err := idToMount(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	fields := strings.Split(path, ".")
 	if len(fields) != 2 {
 		return diag.Errorf("path couldn't be split into workspace and collection: %s", path)
 	}
 
-	_, err := rc.UnmountCollection(ctx, vid, path)
+	_, err = rc.UnmountCollection(ctx, vid, path)
 	if err != nil {
 		return diag.FromErr(err)
 	}

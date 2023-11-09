@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"regexp"
 	"strings"
@@ -137,12 +136,25 @@ func toID(workspace, name string) string {
 }
 
 func workspaceAndNameFromID(id string) (string, string) {
-	tokens := strings.SplitN(id, ".", 2)
+	// TODO refactor this call to return the error
+	ws, name, _ := split(id, ".")
+	return ws, name
+}
+
+func mountToID(collectionPath, id string) string {
+	return collectionPath + ":" + id
+}
+
+func idToMount(id string) (string, string, error) {
+	return split(id, ":")
+}
+
+func split(id, sep string) (string, string, error) {
+	tokens := strings.SplitN(id, sep, 2)
 	if len(tokens) != 2 {
-		log.Printf("unparsable id: %s", id)
-		return "", ""
+		return "", "", fmt.Errorf("could not locate separator %s in %s", sep, id)
 	}
-	return tokens[0], tokens[1]
+	return tokens[0], tokens[1], nil
 }
 
 // convert an array of interface{} to an array of string
