@@ -50,6 +50,7 @@ func Provider() *schema.Provider {
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"rockset_account":          dataSourceRocksetAccount(),
+			"rockset_query_lambda":     dataSourceRocksetQueryLambda(),
 			"rockset_query_lambda_tag": dataSourceRocksetQueryLambdaTag(),
 			"rockset_user":             dataSourceRocksetUser(),
 			"rockset_virtual_instance": dataSourceRocksetVirtualInstance(),

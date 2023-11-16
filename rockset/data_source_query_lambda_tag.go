@@ -11,7 +11,9 @@ import (
 
 func dataSourceRocksetQueryLambdaTag() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceReadRocksetQueryLambdaTag,
+		Description:        "Deprecated. Use `rockset_query_lambda` instead and specify the `tag`.",
+		DeprecationMessage: "Use the `rockset_query_lambda` data source instead",
+		ReadContext:        dataSourceReadRocksetQueryLambdaTag,
 
 		Schema: map[string]*schema.Schema{
 			"workspace": {

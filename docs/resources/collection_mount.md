@@ -30,7 +30,7 @@ resource "rockset_collection_mount" "data" {
 ### Read-Only
 
 - `created_at` (String) ISO 8601 date when the mount was created.
-- `id` (String) Unique ID of this mount.
+- `id` (String) Unique ID of this mount, collection path and virtual instance id, joined by a `:`.
 - `last_refresh_time` (Number) UNIX timestamp in milliseconds for most recent refresh. Not applicable for live mounts.
 - `rrn` (String) RRN of this mount.
 - `snapshot_expiration_time` (Number) UNIX timestamp in milliseconds when the snapshot expires.
