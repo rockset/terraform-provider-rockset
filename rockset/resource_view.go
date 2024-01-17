@@ -74,12 +74,12 @@ func resourceViewCreate(ctx context.Context, d *schema.ResourceData, meta interf
 
 	view, err := rc.CreateView(ctx, workspace, name, query, option.WithViewDescription(description))
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	err = d.Set("created_by", view.GetCreatorEmail())
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	d.SetId(toID(workspace, name))
@@ -102,7 +102,7 @@ func resourceViewUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 
 	_, err := rc.UpdateView(ctx, workspace, name, query, opts...)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	return diags
@@ -121,22 +121,22 @@ func resourceViewRead(ctx context.Context, d *schema.ResourceData, meta interfac
 
 	err = d.Set("name", view.GetName())
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	err = d.Set("query", view.GetQuerySql())
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	err = d.Set("description", view.GetDescription())
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	err = d.Set("created_by", view.GetCreatorEmail())
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	return diags
@@ -150,12 +150,12 @@ func resourceViewDelete(ctx context.Context, d *schema.ResourceData, meta interf
 
 	err := rc.DeleteView(ctx, workspace, name)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	err = rc.Wait.UntilViewGone(ctx, workspace, name)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	return diags

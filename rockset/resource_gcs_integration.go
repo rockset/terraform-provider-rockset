@@ -55,7 +55,7 @@ func resourceGCSIntegrationCreate(ctx context.Context, d *schema.ResourceData, m
 		d.Get("service_account_key").(string),
 		option.WithGCSIntegrationDescription(d.Get("description").(string)))
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	d.SetId(r.GetName())

@@ -70,22 +70,22 @@ func resourceWorkspaceCreate(ctx context.Context, d *schema.ResourceData, meta i
 
 	workspace, err := rc.CreateWorkspace(ctx, name, option.WithWorkspaceDescription(description))
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	err = d.Set("created_at", workspace.GetCreatedAt())
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	err = d.Set("created_by", workspace.GetCreatedBy())
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	err = d.Set("collection_count", workspace.GetCollectionCount())
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	d.SetId(name)
@@ -101,32 +101,32 @@ func resourceWorkspaceRead(ctx context.Context, d *schema.ResourceData, meta int
 
 	workspace, err := rc.GetWorkspace(ctx, name)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	err = d.Set("name", workspace.GetName())
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	err = d.Set("description", workspace.GetDescription())
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	err = d.Set("created_by", workspace.GetCreatedBy())
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	err = d.Set("created_at", workspace.GetCreatedAt())
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	err = d.Set("collection_count", workspace.GetCollectionCount())
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	return diags
@@ -140,12 +140,12 @@ func resourceWorkspaceDelete(ctx context.Context, d *schema.ResourceData, meta i
 
 	err := rc.DeleteWorkspace(ctx, name)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	err = rc.Wait.UntilWorkspaceGone(ctx, name)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	return diags

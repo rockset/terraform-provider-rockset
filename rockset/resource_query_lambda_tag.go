@@ -3,9 +3,9 @@ package rockset
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rockset/rockset-go-client"
@@ -63,7 +63,7 @@ func toQueryLambdaTagID(workspace string, queryLambdaName string, tagName string
 func fromQueryLambdaTagID(id string) (string, string, string) {
 	tokens := strings.SplitN(id, ".", 3)
 	if len(tokens) != 3 {
-		log.Printf("unparsable id: %s", id)
+		tflog.Error(nil, "unable to parse tag", map[string]any{"id": id})
 		return "", "", ""
 	}
 	return tokens[0], tokens[1], tokens[2]
@@ -82,7 +82,7 @@ func resourceQueryLambdaTagCreate(ctx context.Context, d *schema.ResourceData, m
 
 	_, err := rc.CreateQueryLambdaTag(ctx, workspace, queryLambdaName, version, tagName)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	return diags
@@ -101,7 +101,7 @@ func resourceQueryLambdaTagRead(ctx context.Context, d *schema.ResourceData, met
 
 	err = parseQueryLambdaTag(&queryLambdaTag, d)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	return diags

@@ -97,12 +97,12 @@ func resourceApiKeyCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	key, err := rc.CreateAPIKey(ctx, name, opts...)
 
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	err = d.Set("key", key.GetKey())
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	d.SetId(id)
@@ -116,7 +116,7 @@ func resourceApiKeyRead(ctx context.Context, d *schema.ResourceData, meta interf
 
 	name, user, err := idToUserAndName(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	var options []option.APIKeyOption
@@ -129,17 +129,17 @@ func resourceApiKeyRead(ctx context.Context, d *schema.ResourceData, meta interf
 	}
 
 	if foundApiKey.GetName() == "" { // Failed to find
-		return diag.FromErr(fmt.Errorf("API key not found in list"))
+		return diag.Errorf("API key not found in list")
 	}
 
 	err = d.Set("name", foundApiKey.GetName())
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	err = d.Set("role", foundApiKey.GetRole())
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	// We intentionally omit here the actual key, as it comes obfuscated from the API.
@@ -148,7 +148,7 @@ func resourceApiKeyRead(ctx context.Context, d *schema.ResourceData, meta interf
 	// We can only use the field set from the id
 	err = d.Set("user", user)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	return diags
@@ -160,7 +160,7 @@ func resourceApiKeyDelete(ctx context.Context, d *schema.ResourceData, meta inte
 
 	name, user, err := idToUserAndName(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	var options []option.APIKeyOption
@@ -171,7 +171,7 @@ func resourceApiKeyDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	err = rc.DeleteAPIKey(ctx, name, options...)
 
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	return diags

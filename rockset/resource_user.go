@@ -2,6 +2,7 @@ package rockset
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rockset/rockset-go-client"
@@ -75,7 +76,7 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 
 	resp, err := rc.CreateUser(ctx, email, roles)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	d.SetId(resp.GetEmail())
@@ -96,35 +97,35 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, meta interfac
 
 	err = d.Set("email", user.GetEmail())
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	if name, ok := user.GetFirstNameOk(); ok {
 		if err = d.Set("first_name", name); err != nil {
-			return diag.FromErr(err)
+			return DiagFromErr(err)
 		}
 	}
 
 	if name, ok := user.GetLastNameOk(); ok {
 		if err = d.Set("last_name", name); err != nil {
-			return diag.FromErr(err)
+			return DiagFromErr(err)
 		}
 	}
 
 	if createdAt, ok := user.GetCreatedAtOk(); ok {
 		if err = d.Set("created_at", createdAt); err != nil {
-			return diag.FromErr(err)
+			return DiagFromErr(err)
 		}
 	}
 
 	if state, ok := user.GetStateOk(); ok {
 		if err = d.Set("state", state); err != nil {
-			return diag.FromErr(err)
+			return DiagFromErr(err)
 		}
 	}
 
 	if err = d.Set("roles", user.GetRoles()); err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	return diags
@@ -137,7 +138,7 @@ func resourceUserDelete(ctx context.Context, d *schema.ResourceData, meta interf
 	email := d.Id()
 	err := rc.DeleteUser(ctx, email)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	return diags
@@ -156,7 +157,7 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 
 	_, err := rc.UpdateUser(ctx, email, roles, names...)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	return diags

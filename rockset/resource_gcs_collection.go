@@ -2,6 +2,7 @@ package rockset
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rockset/rockset-go-client"
@@ -82,17 +83,17 @@ func resourceGCSCollectionCreate(ctx context.Context, d *schema.ResourceData, me
 	// Add fields for gcs
 	sources, err := makeBucketSourceParams("gcs", d.Get("source"))
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 	params.Sources = sources
 
 	_, err = rc.CreateCollection(ctx, workspace, name, option.WithCollectionRequest(*params))
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	if err = waitForCollectionAndDocuments(ctx, rc, d, workspace, name); err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	d.SetId(toID(workspace, name))
@@ -115,13 +116,13 @@ func resourceGCSCollectionRead(ctx context.Context, d *schema.ResourceData, meta
 	// Gets all the fields any generic collection has
 	err = parseBaseCollection(&collection, d)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	// Gets all the fields relevant to an s3 collection
 	err = parseBucketCollection("gcs", &collection, d)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	return diags

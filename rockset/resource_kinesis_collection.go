@@ -3,13 +3,14 @@ package rockset
 import (
 	"context"
 	"fmt"
+	"regexp"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/rockset/rockset-go-client"
 	"github.com/rockset/rockset-go-client/openapi"
 	"github.com/rockset/rockset-go-client/option"
-	"regexp"
 )
 
 func kinesisCollectionSchema() map[string]*schema.Schema {
@@ -106,11 +107,11 @@ func resourceKinesisCollectionCreate(ctx context.Context, d *schema.ResourceData
 
 	_, err = rc.CreateCollection(ctx, workspace, name, option.WithCollectionRequest(*params))
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	if err = waitForCollectionAndDocuments(ctx, rc, d, workspace, name); err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	d.SetId(toID(workspace, name))
@@ -133,13 +134,13 @@ func resourceKinesisCollectionRead(ctx context.Context, d *schema.ResourceData, 
 	// Gets all the fields any generic collection has
 	err = parseBaseCollection(&collection, d)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	// Gets all the fields relevant to a Kinesis collection
 	err = parseKinesisCollection(&collection, d)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	return diags

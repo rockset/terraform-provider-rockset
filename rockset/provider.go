@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"regexp"
 	"strings"
@@ -108,7 +109,7 @@ func (c *Config) Client() (interface{}, diag.Diagnostics) {
 
 	rc, err := rockset.NewClient(opts...)
 	if err != nil {
-		return nil, diag.FromErr(err)
+		return nil, DiagFromErr(err)
 	}
 
 	return rc, diags
@@ -205,14 +206,61 @@ func mergeSchemas(mergeOnto map[string]*schema.Schema, toMerge map[string]*schem
 func checkForNotFoundError(d *schema.ResourceData, err error) diag.Diagnostics {
 	var re rockerr.Error
 	if !errors.As(err, &re) {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	if !re.IsNotFoundError() {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	d.SetId("")
 
 	return diag.Diagnostics{}
+}
+
+func DiagFromErr(err error) diag.Diagnostics {
+	if err == nil {
+		return nil
+	}
+	d := diag.Diagnostic{
+		Severity: diag.Error,
+		Summary:  err.Error(),
+	}
+
+	var re rockerr.Error
+	if errors.As(err, &re) {
+		var sb strings.Builder
+		var msgs []string
+
+		sb.WriteString(re.GetMessage())
+		sb.WriteString(": ")
+
+		if t, ok := re.GetTypeOk(); ok {
+			msgs = append(msgs, fmt.Sprintf("Error Type: %s", *t))
+		}
+		if re.StatusCode != 0 {
+			msgs = append(msgs, fmt.Sprintf("HTTP status code (%d) %s", re.StatusCode, http.StatusText(re.StatusCode)))
+		}
+		if re.GetTraceId() != "" {
+			msgs = append(msgs, fmt.Sprintf("Trace ID: %s", re.GetTraceId()))
+		}
+		if re.GetErrorId() != "" {
+			msgs = append(msgs, fmt.Sprintf("Error ID: %s", re.GetErrorId()))
+		}
+		if re.GetQueryId() != "" {
+			msgs = append(msgs, fmt.Sprintf("Query ID: %s", re.GetQueryId()))
+		}
+		if re.HasLine() {
+			msgs = append(msgs, fmt.Sprintf("Line: %d", re.GetLine()))
+		}
+		if re.HasColumn() {
+			msgs = append(msgs, fmt.Sprintf("Column: %d", re.GetColumn()))
+		}
+
+		sb.WriteString(strings.Join(msgs, ", "))
+
+		d.Detail = sb.String()
+	}
+
+	return diag.Diagnostics{d}
 }

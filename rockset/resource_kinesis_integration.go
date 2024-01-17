@@ -58,7 +58,7 @@ func resourceKinesisIntegrationCreate(ctx context.Context, d *schema.ResourceDat
 	//   Authentication failed for AWS cross-account role integration with Role ARN
 	//   as it can be due to the role taking a few seconds to propagate
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	d.SetId(r.GetName())

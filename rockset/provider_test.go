@@ -3,18 +3,24 @@ package rockset
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
-	"github.com/rockset/rockset-go-client"
-	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"log"
 	"math/rand"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 	"text/template"
 	"time"
+
+	"github.com/rockset/rockset-go-client"
+	rockerr "github.com/rockset/rockset-go-client/errors"
+	"github.com/rockset/rockset-go-client/openapi"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -250,5 +256,42 @@ func testAccCheckRocksetIntegrationDestroy(resource string) func(*terraform.Stat
 		}
 
 		return nil
+	}
+}
+
+func TestDiagFromErr(t *testing.T) {
+	err := rockerr.NewWithStatusCode(errors.New("apierr"), &http.Response{StatusCode: http.StatusConflict})
+
+	var re rockerr.Error
+	require.True(t, errors.As(err, &re))
+
+	re.ErrorModel = &openapi.ErrorModel{
+		Message: openapi.PtrString("api error"),
+		TraceId: openapi.PtrString("foobar"),
+		QueryId: openapi.PtrString("queryid"),
+		ErrorId: openapi.PtrString("errorid"),
+		Line:    openapi.PtrInt32(42),
+		Column:  openapi.PtrInt32(42),
+	}
+
+	tests := []struct {
+		name string
+		err  error
+		want string
+	}{
+		{"plain error", errors.New("plain error"), ""},
+		{
+			"rockset error with http code",
+			re,
+			"api error: HTTP status code (409) Conflict, Trace ID: foobar, Error ID: errorid, " +
+				"Query ID: queryid, Line: 42, Column: 42",
+		},
+	}
+	for _, tst := range tests {
+		t.Run(tst.name, func(t *testing.T) {
+			d := DiagFromErr(tst.err)
+			require.Len(t, d, 1)
+			assert.Equal(t, tst.want, d[0].Detail)
+		})
 	}
 }

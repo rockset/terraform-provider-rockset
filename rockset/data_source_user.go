@@ -67,24 +67,24 @@ func dataSourceReadRocksetUser(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	if err = d.Set("email", user.GetEmail()); err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	if err = d.Set("first_name", user.GetFirstName()); err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 	if err = d.Set("last_name", user.GetLastName()); err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 	if err = d.Set("roles", user.GetRoles()); err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 	if err = d.Set("state", user.GetState()); err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	d.SetId(user.GetEmail())

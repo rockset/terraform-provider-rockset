@@ -2,8 +2,9 @@ package rockset
 
 import (
 	"context"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -107,7 +108,7 @@ func resourceVirtualInstanceCreate(ctx context.Context, d *schema.ResourceData, 
 
 	vi, err := rc.CreateVirtualInstance(ctx, name, options...)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	id := vi.GetId()
@@ -116,16 +117,16 @@ func resourceVirtualInstanceCreate(ctx context.Context, d *schema.ResourceData, 
 	// TODO make it possible to skip waiting, and then parse the fields from the created vi
 	err = rc.Wait.UntilVirtualInstanceActive(ctx, id)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	// get the vi info, so we have updated value for current_size
 	vi, err = rc.GetVirtualInstance(ctx, id)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 	if err = parseVirtualInstanceFields(vi, d); err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	return diags
@@ -139,11 +140,11 @@ func resourceVirtualInstanceRead(ctx context.Context, d *schema.ResourceData, me
 
 	vi, err := rc.GetVirtualInstance(ctx, id)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	if err = parseVirtualInstanceFields(vi, d); err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	return diags
@@ -159,22 +160,22 @@ func resourceVirtualInstanceUpdate(ctx context.Context, d *schema.ResourceData,
 
 	vi, err := rc.UpdateVirtualInstance(ctx, id, options...)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	// TODO make it possible to skip waiting
 	err = rc.Wait.UntilVirtualInstanceActive(ctx, id)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	// get the vi info, so we have updated value for current_size
 	vi, err = rc.GetVirtualInstance(ctx, id)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 	if err = parseVirtualInstanceFields(vi, d); err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	return diags
@@ -188,12 +189,12 @@ func resourceVirtualInstanceDelete(ctx context.Context, d *schema.ResourceData, 
 
 	_, err := rc.DeleteVirtualInstance(ctx, id)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	err = rc.Wait.UntilVirtualInstanceGone(ctx, id)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	return diags
