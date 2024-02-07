@@ -56,7 +56,7 @@ func resourceMongoDBIntegrationCreate(ctx context.Context, d *schema.ResourceDat
 	r, err := rc.CreateMongoDBIntegration(ctx, d.Get("name").(string), d.Get("connection_uri").(string),
 		option.WithMongoDBIntegrationDescription(d.Get("description").(string)))
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	d.SetId(r.GetName())

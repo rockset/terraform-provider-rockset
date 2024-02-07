@@ -2,10 +2,11 @@ package rockset
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/rockset/rockset-go-client"
 	"strconv"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/rockset/rockset-go-client"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
@@ -48,8 +49,6 @@ func TestAccVirtualInstance_Basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(mount, "virtual_instance_id"),
 					resource.TestCheckResourceAttrSet(mount, "virtual_instance_rrn"),
 					resource.TestCheckResourceAttrSet(mount, "created_at"),
-					//resource.TestCheckResourceAttrSet(mount, "last_refresh_time"),
-					resource.TestCheckResourceAttrSet(mount, "snapshot_expiration_time"),
 					resource.TestCheckResourceAttr(mount, "state", "ACTIVE"),
 					resource.TestCheckResourceAttr(mount, "path", "persistent.patch"),
 				),

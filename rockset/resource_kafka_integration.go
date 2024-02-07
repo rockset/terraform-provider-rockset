@@ -2,6 +2,7 @@ package rockset
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -61,10 +62,10 @@ func resourceKafkaIntegration() *schema.Resource {
 			"connection_string": {
 				Type:     schema.TypeString,
 				Optional: true,
-				//ForceNew:      true,
+				// ForceNew:      true,
 				Description: "Kafka connection string.",
 				Computed:    true,
-				//ConflictsWith: []string{"bootstrap_servers", "security_config", "schema_registry_config"},
+				// ConflictsWith: []string{"bootstrap_servers", "security_config", "schema_registry_config"},
 				// Sensitive:     true,
 				// TODO: can't be sensitive as it is needed to configure kafka-connect
 			},
@@ -149,9 +150,9 @@ func resourceKafkaIntegrationCreate(ctx context.Context, d *schema.ResourceData,
 		opts = append(opts, option.WithKafkaIntegrationDescription(v.(string)))
 	}
 
-	//if v, ok := d.GetOk("connection_string"); ok {
+	// if v, ok := d.GetOk("connection_string"); ok {
 	//	opts = append(opts, option.WithKafkaConnectionString(v.(string)))
-	//}
+	// }
 
 	if v, ok := d.GetOk("bootstrap_servers"); ok {
 		opts = append(opts, option.WithKafkaBootstrapServers(v.(string)))
@@ -196,7 +197,7 @@ func resourceKafkaIntegrationCreate(ctx context.Context, d *schema.ResourceData,
 
 	r, err := rc.CreateKafkaIntegration(ctx, name, opts...)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	tflog.Info(ctx, "integration created", map[string]interface{}{
@@ -209,7 +210,7 @@ func resourceKafkaIntegrationCreate(ctx context.Context, d *schema.ResourceData,
 				"name": name,
 			})
 			if err = rc.Wait.UntilKafkaIntegrationActive(ctx, name); err != nil {
-				return diag.FromErr(err)
+				return DiagFromErr(err)
 			}
 		}
 	}
@@ -218,7 +219,7 @@ func resourceKafkaIntegrationCreate(ctx context.Context, d *schema.ResourceData,
 
 	if cs, ok := r.Kafka.GetConnectionStringOk(); ok {
 		if err = d.Set("connection_string", cs); err != nil {
-			return diag.FromErr(err)
+			return DiagFromErr(err)
 		}
 		tflog.Trace(ctx, "set connection_string", map[string]interface{}{
 			"value": cs,
@@ -246,29 +247,29 @@ func resourceKafkaIntegrationRead(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	if err = d.Set("name", response.Name); err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	if err = d.Set("description", response.Description); err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	if err = d.Set("kafka_data_format", response.Kafka.KafkaDataFormat); err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	if err = d.Set("use_v3", response.Kafka.UseV3); err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	if topics, ok := response.Kafka.GetKafkaTopicNamesOk(); ok {
 		if err = d.Set("kafka_topic_names", topics); err != nil {
-			return diag.FromErr(err)
+			return DiagFromErr(err)
 		}
 	}
 
 	if err = d.Set("bootstrap_servers", response.Kafka.BootstrapServers); err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	if response.Kafka.SecurityConfig != nil {
@@ -277,7 +278,7 @@ func resourceKafkaIntegrationRead(ctx context.Context, d *schema.ResourceData, m
 			"secret":  response.Kafka.SecurityConfig.Secret,
 		})
 		if err != nil {
-			return diag.FromErr(err)
+			return DiagFromErr(err)
 		}
 	}
 
@@ -288,13 +289,13 @@ func resourceKafkaIntegrationRead(ctx context.Context, d *schema.ResourceData, m
 			"secret": response.Kafka.SchemaRegistryConfig.Secret,
 		})
 		if err != nil {
-			return diag.FromErr(err)
+			return DiagFromErr(err)
 		}
 	}
 
 	if cs, ok := response.Kafka.GetConnectionStringOk(); ok {
 		if err = d.Set("connection_string", cs); err != nil {
-			return diag.FromErr(err)
+			return DiagFromErr(err)
 		}
 	}
 

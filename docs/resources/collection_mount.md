@@ -33,7 +33,6 @@ resource "rockset_collection_mount" "data" {
 - `id` (String) Unique ID of this mount, collection path and virtual instance id, joined by a `:`.
 - `last_refresh_time` (Number) UNIX timestamp in milliseconds for most recent refresh. Not applicable for live mounts.
 - `rrn` (String) RRN of this mount.
-- `snapshot_expiration_time` (Number) UNIX timestamp in milliseconds when the snapshot expires.
 - `state` (String) Mount state.
 - `virtual_instance_rrn` (String) Virtual Instance RRN
 

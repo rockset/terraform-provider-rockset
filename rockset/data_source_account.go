@@ -71,23 +71,23 @@ func dataSourceReadRocksetAccount(ctx context.Context, d *schema.ResourceData, m
 
 	org, err := rc.GetOrganization(ctx)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	if err = d.Set("account_id", accountID); err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 	if err = d.Set("external_id", org.ExternalId); err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 	if err = d.Set("organization", org.DisplayName); err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 	if err = d.Set("rockset_user", org.RocksetUser); err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 	if err = d.Set("clusters", flattenClusterParams(org.Clusters)); err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	d.SetId(accountID)

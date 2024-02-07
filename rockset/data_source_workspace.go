@@ -56,23 +56,23 @@ func dataSourceReadRocksetWorkspace(ctx context.Context, d *schema.ResourceData,
 
 	ws, err := rc.GetWorkspace(ctx, name)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	if err = d.Set("name", ws.GetName()); err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 	if err = d.Set("description", ws.GetDescription()); err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 	if err = d.Set("created_by", ws.GetCreatedBy()); err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 	if err = d.Set("created_at", ws.GetCreatedAt()); err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 	if err = d.Set("collection_count", ws.GetCollectionCount()); err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	d.SetId(name)

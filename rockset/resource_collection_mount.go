@@ -3,14 +3,15 @@ package rockset
 import (
 	"context"
 	"fmt"
+	"regexp"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/rockset/rockset-go-client"
 	"github.com/rockset/rockset-go-client/openapi"
-	"regexp"
-	"strings"
 )
 
 func resourceCollectionMount() *schema.Resource {
@@ -57,11 +58,6 @@ func resourceCollectionMount() *schema.Resource {
 				Type:        schema.TypeInt,
 				Computed:    true,
 			},
-			"snapshot_expiration_time": {
-				Description: "UNIX timestamp in milliseconds when the snapshot expires.",
-				Type:        schema.TypeInt,
-				Computed:    true,
-			},
 			"state": {
 				Description: "Mount state.",
 				Type:        schema.TypeString,
@@ -91,7 +87,7 @@ func resourceCollectionMountCreate(ctx context.Context, d *schema.ResourceData, 
 
 	mounts, err := rc.MountCollections(ctx, vid, []string{path})
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 	if len(mounts) != 1 {
 		return diag.Errorf("expected exactly one mount response, got %d", len(mounts))
@@ -108,16 +104,16 @@ func resourceCollectionMountCreate(ctx context.Context, d *schema.ResourceData, 
 	// TODO make it possible to skip waiting, and then parse the fields from the created vi
 	err = rc.Wait.UntilMountActive(ctx, vid, workspace, collection)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	// get the vi info, so we have updated value for current_size
 	m, err := rc.GetCollectionMount(ctx, vid, path)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 	if err = parseCollectionMountFields(m, d); err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	return diags
@@ -129,16 +125,16 @@ func resourceCollectionMountRead(ctx context.Context, d *schema.ResourceData, me
 
 	path, vid, err := idToMount(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	m, err := rc.GetCollectionMount(ctx, vid, path)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	if err = parseCollectionMountFields(m, d); err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	return diags
@@ -150,7 +146,7 @@ func resourceCollectionMountDelete(ctx context.Context, d *schema.ResourceData, 
 
 	path, vid, err := idToMount(d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	fields := strings.Split(path, ".")
@@ -160,12 +156,12 @@ func resourceCollectionMountDelete(ctx context.Context, d *schema.ResourceData, 
 
 	_, err = rc.UnmountCollection(ctx, vid, path)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	err = rc.Wait.UntilMountGone(ctx, vid, fields[0], fields[1])
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	return diags
@@ -188,9 +184,6 @@ func parseCollectionMountFields(m openapi.CollectionMount, d *schema.ResourceDat
 		return err
 	}
 	if err := setValue(d, "last_refresh_time", m.GetLastRefreshTimeMillisOk); err != nil {
-		return err
-	}
-	if err := setValue(d, "snapshot_expiration_time", m.GetSnapshotExpirationTimeMillisOk); err != nil {
 		return err
 	}
 	if err := setValue(d, "state", m.GetStateOk); err != nil {

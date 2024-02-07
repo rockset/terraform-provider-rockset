@@ -58,7 +58,7 @@ func resourceS3IntegrationCreate(ctx context.Context, d *schema.ResourceData, me
 	//   Authentication failed for AWS cross-account role integration with Role ARN
 	//   as it can be due to the role taking a few seconds to propagate
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	d.SetId(r.GetName())
@@ -92,7 +92,7 @@ func resourceIntegrationDelete(ctx context.Context, d *schema.ResourceData, meta
 
 	err := rc.DeleteIntegration(ctx, name)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	// d.SetId("") is automatically called assuming delete returns no errors,

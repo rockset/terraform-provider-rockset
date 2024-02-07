@@ -2,8 +2,9 @@ package rockset
 
 import (
 	"context"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	"github.com/rockset/rockset-go-client"
 	"github.com/rockset/rockset-go-client/option"
@@ -175,11 +176,11 @@ func resourceCollectionCreate(ctx context.Context, d *schema.ResourceData, meta 
 	params := createBaseCollectionRequest(d)
 	_, err := rc.CreateCollection(ctx, workspace, name, option.WithCollectionRequest(*params))
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	if err = waitForCollectionAndDocuments(ctx, rc, d, workspace, name); err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	d.SetId(toID(workspace, name))
@@ -201,7 +202,7 @@ func resourceCollectionRead(ctx context.Context, d *schema.ResourceData, meta in
 
 	err = parseBaseCollection(&collection, d)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	return diags
@@ -216,12 +217,12 @@ func resourceCollectionDelete(ctx context.Context, d *schema.ResourceData, meta 
 
 	err = rc.DeleteCollection(ctx, workspace, name)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	err = rc.Wait.UntilCollectionGone(ctx, workspace, name)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	return diags
@@ -244,7 +245,7 @@ func resourceCollectionUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 	_, err = rc.UpdateCollection(ctx, workspace, name, options...)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	return diags

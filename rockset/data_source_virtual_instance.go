@@ -2,6 +2,7 @@ package rockset
 
 import (
 	"context"
+
 	"github.com/rockset/rockset-go-client"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -71,32 +72,32 @@ func dataSourceReadRocksetVirtualInstance(ctx context.Context, d *schema.Resourc
 
 	vi, err := rc.GetVirtualInstance(ctx, id)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	if err = d.Set("name", vi.GetName()); err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 	if err = d.Set("description", vi.GetDescription()); err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 	if err = d.Set("auto_suspend_seconds", vi.GetAutoSuspendSeconds()); err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 	if err = d.Set("current_size", vi.GetCurrentSize()); err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 	if err = d.Set("desired_size", vi.GetDesiredSize()); err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 	if err = d.Set("default", vi.GetDefaultVi()); err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 	if err = d.Set("state", vi.GetState()); err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 	if err = d.Set("enable_remount_on_resume", vi.GetEnableRemountOnResume()); err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	d.SetId(id)

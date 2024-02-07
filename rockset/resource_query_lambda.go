@@ -116,20 +116,20 @@ func resourceQueryLambdaCreateOrUpdate(fn qlFn) schema.CreateContextFunc {
 
 		ql, err := fn(ctx, workspace, name, sql.Query, options...)
 		if err != nil {
-			return diag.FromErr(err)
+			return DiagFromErr(err)
 		}
 
 		if ql.Version != nil {
 			err = d.Set("version", ql.Version)
 			if err != nil {
-				return diag.FromErr(err)
+				return DiagFromErr(err)
 			}
 		}
 
 		if ql.State != nil {
 			err = d.Set("state", ql.State)
 			if err != nil {
-				return diag.FromErr(err)
+				return DiagFromErr(err)
 			}
 		}
 
@@ -163,32 +163,32 @@ func resourceQueryLambdaRead(ctx context.Context, d *schema.ResourceData, meta i
 
 	err = d.Set("workspace", ql.Workspace)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	err = d.Set("name", ql.Name)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	err = d.Set("description", ql.LatestVersion.Description)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	err = d.Set("version", ql.LatestVersion.Version)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	err = d.Set("state", ql.LatestVersion.State)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	err = d.Set("sql", flattenQueryLambdaSQL(ql.LatestVersion.Sql))
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	d.SetId(toID(workspace, name))

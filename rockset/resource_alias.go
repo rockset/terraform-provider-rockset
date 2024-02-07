@@ -98,14 +98,14 @@ func resourceAliasCreate(ctx context.Context, d *schema.ResourceData, meta inter
 
 	_, err := rc.CreateAlias(ctx, workspace, name, collections, option.WithAliasDescription(d.Get("description").(string)))
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	// There's a lag between create and update and the alias
 	// showing those collections in the response.
 	err = rc.RetryWithCheck(ctx, aliasCollectionsSet(ctx, rc, workspace, name, collections))
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	d.SetId(toID(workspace, name))
@@ -126,22 +126,22 @@ func resourceAliasRead(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	err = d.Set("name", alias.GetName())
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	err = d.Set("workspace", alias.GetWorkspace())
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	err = d.Set("description", alias.GetDescription())
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	err = d.Set("collections", alias.GetCollections())
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	return diags
@@ -157,14 +157,14 @@ func resourceAliasUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 
 	err := rc.UpdateAlias(ctx, workspace, name, collections, option.WithAliasDescription(d.Get("description").(string)))
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	// There's a lag between create and update and the alias
 	// showing those collections in the response.
 	err = rc.RetryWithCheck(ctx, aliasCollectionsSet(ctx, rc, workspace, name, collections))
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	return diags
@@ -178,12 +178,12 @@ func resourceAliasDelete(ctx context.Context, d *schema.ResourceData, meta inter
 
 	err := rc.DeleteAlias(ctx, workspace, name)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	err = rc.Wait.UntilAliasGone(ctx, workspace, name)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	return diags

@@ -3,9 +3,9 @@ package rockset
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -108,11 +108,10 @@ func resourceRoleCreate(ctx context.Context, d *schema.ResourceData, meta interf
 	if in != nil {
 		privs, err := expandRolePrivileges(in)
 		if err != nil {
-			return diag.FromErr(err)
+			return DiagFromErr(err)
 		}
 
 		for _, p := range privs {
-			log.Printf("privs: %s %s %s", p.GetAction(), p.GetResourceName(), p.GetCluster())
 			tflog.Info(ctx, "privs", map[string]interface{}{
 				"action":   p.GetAction(),
 				"resource": p.GetResourceName(),
@@ -122,14 +121,14 @@ func resourceRoleCreate(ctx context.Context, d *schema.ResourceData, meta interf
 
 		opts, err := rolePrivsToOptions(privs)
 		if err != nil {
-			return diag.FromErr(err)
+			return DiagFromErr(err)
 		}
 		options = append(options, opts...)
 	}
 
 	_, err := rc.CreateRole(ctx, name, options...)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	d.SetId(name)
@@ -152,19 +151,19 @@ func resourceRoleUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 	if in != nil {
 		privs, err := expandRolePrivileges(in)
 		if err != nil {
-			return diag.FromErr(err)
+			return DiagFromErr(err)
 		}
 
 		opts, err := rolePrivsToOptions(privs)
 		if err != nil {
-			return diag.FromErr(err)
+			return DiagFromErr(err)
 		}
 		options = append(options, opts...)
 	}
 
 	_, err := rc.UpdateRole(ctx, d.Id(), options...)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	return diags
@@ -182,27 +181,27 @@ func resourceRoleRead(ctx context.Context, d *schema.ResourceData, meta interfac
 
 	err = d.Set("name", role.GetRoleName())
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	err = d.Set("owner_email", role.GetOwnerEmail())
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	err = d.Set("created_by", role.GetCreatedBy())
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	err = d.Set("created_at", role.GetCreatedAt())
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	err = d.Set("privilege", flattenRolePrivileges(role.Privileges))
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	return diags
@@ -216,7 +215,7 @@ func resourceRoleDelete(ctx context.Context, d *schema.ResourceData, meta interf
 	err := rc.DeleteRole(ctx, name)
 
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	return diags
@@ -243,7 +242,6 @@ func flattenRolePrivileges(privs []openapi.Privilege) []interface{} {
 
 		// if
 		if m["cluster"] == "" && option.GetWorkspaceAction(p.GetAction()) != option.UnknownWorkspaceAction {
-			log.Printf("setting cluster for: %s", p.GetAction())
 			m["cluster"] = option.AllClusters
 		}
 
@@ -331,7 +329,6 @@ func rolePrivsToOptions(privs []openapi.Privilege) ([]option.RoleOption, error) 
 		if a := option.GetVirtualInstanceAction(p.GetAction()); a != option.UnknownVirtualInstanceAction {
 			var c []option.ClusterPrivileges
 			if p.GetCluster() != "" {
-				log.Printf("cluster: %s", p.GetCluster())
 				c = append(c, option.WithCluster(p.GetCluster()))
 			}
 			opts = append(opts, option.WithVirtualInstancePrivilege(a, p.GetResourceName(), c...))
@@ -341,7 +338,6 @@ func rolePrivsToOptions(privs []openapi.Privilege) ([]option.RoleOption, error) 
 		if a := option.GetWorkspaceAction(p.GetAction()); a != option.UnknownWorkspaceAction {
 			var c []option.ClusterPrivileges
 			if p.GetCluster() != "" {
-				log.Printf("cluster: %s", p.GetCluster())
 				c = append(c, option.WithCluster(p.GetCluster()))
 			}
 			opts = append(opts, option.WithWorkspacePrivilege(a, p.GetResourceName(), c...))

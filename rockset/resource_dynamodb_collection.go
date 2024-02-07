@@ -3,6 +3,7 @@ package rockset
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rockset/rockset-go-client"
@@ -124,11 +125,11 @@ func resourceDynamoDBCollectionCreate(ctx context.Context, d *schema.ResourceDat
 
 	_, err = rc.CreateCollection(ctx, workspace, name, option.WithCollectionRequest(*params))
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	if err = waitForCollectionAndDocuments(ctx, rc, d, workspace, name); err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	d.SetId(toID(workspace, name))
@@ -145,19 +146,19 @@ func resourceDynamoDBCollectionRead(ctx context.Context, d *schema.ResourceData,
 
 	collection, err := rc.GetCollection(ctx, workspace, name)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	// Gets all the fields any generic collection has
 	err = parseBaseCollection(&collection, d)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	// Gets all the fields relevant to a DynamoDB collection
 	err = parseDynamoDBCollection(&collection, d)
 	if err != nil {
-		return diag.FromErr(err)
+		return DiagFromErr(err)
 	}
 
 	return diags
