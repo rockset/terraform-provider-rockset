@@ -58,11 +58,6 @@ func resourceCollectionMount() *schema.Resource {
 				Type:        schema.TypeInt,
 				Computed:    true,
 			},
-			"snapshot_expiration_time": {
-				Description: "UNIX timestamp in milliseconds when the snapshot expires.",
-				Type:        schema.TypeInt,
-				Computed:    true,
-			},
 			"state": {
 				Description: "Mount state.",
 				Type:        schema.TypeString,
@@ -189,9 +184,6 @@ func parseCollectionMountFields(m openapi.CollectionMount, d *schema.ResourceDat
 		return err
 	}
 	if err := setValue(d, "last_refresh_time", m.GetLastRefreshTimeMillisOk); err != nil {
-		return err
-	}
-	if err := setValue(d, "snapshot_expiration_time", m.GetSnapshotExpirationTimeMillisOk); err != nil {
 		return err
 	}
 	if err := setValue(d, "state", m.GetStateOk); err != nil {
