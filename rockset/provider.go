@@ -27,6 +27,7 @@ func Provider() *schema.Provider {
 		ResourcesMap: map[string]*schema.Resource{
 			"rockset_alias":                resourceAlias(),
 			"rockset_api_key":              resourceApiKey(),
+			"rockset_autoscaling_policy":   resourceAutoScalingPolicy(),
 			"rockset_collection":           resourceCollection(),
 			"rockset_collection_mount":     resourceCollectionMount(),
 			"rockset_dynamodb_collection":  resourceDynamoDBCollection(),
