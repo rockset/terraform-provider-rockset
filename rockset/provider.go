@@ -19,6 +19,7 @@ import (
 type Config struct {
 	APIKey    string
 	APIServer string
+	OrgID     string
 }
 
 func Provider() *schema.Provider {
@@ -72,6 +73,14 @@ func Provider() *schema.Provider {
 				Default:     "",
 				Description: "The API server for accessing Rockset",
 			},
+			"organization_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "",
+				Description: "The ID of the organization to connect to. " +
+					"If this is set, the provider will validate that the organization_id matches the organization_id " +
+					"of the api key. If it does not match, the provider will return an error.\n",
+			},
 		},
 		ConfigureContextFunc: providerConfigure,
 	}
@@ -81,6 +90,7 @@ func providerConfigure(_ context.Context, d *schema.ResourceData) (interface{}, 
 	config := Config{
 		APIKey:    d.Get("api_key").(string),
 		APIServer: d.Get("api_server").(string),
+		OrgID:     d.Get("organization_id").(string),
 	}
 
 	return config.Client()
@@ -106,11 +116,23 @@ func (c *Config) Client() (interface{}, diag.Diagnostics) {
 		opts = append(opts, rockset.WithHTTPDebug())
 	}
 
-	// TODO pass rockset.WithUserAgent()
-
 	rc, err := rockset.NewClient(opts...)
 	if err != nil {
 		return nil, DiagFromErr(err)
+	}
+
+	// if we have an org id in the config, validate that it matches the org id of the api key
+	if c.OrgID != "" {
+		org, err := rc.GetOrganization(context.Background())
+		if err != nil {
+			return nil, DiagFromErr(err)
+		}
+
+		if org.GetId() != c.OrgID {
+			return nil, diag.Errorf(
+				"the organization configured in the provider `%s` does not match the organization of the api key: `%s`",
+				c.OrgID, org.GetId())
+		}
 	}
 
 	return rc, diags

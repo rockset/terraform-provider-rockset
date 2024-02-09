@@ -29,12 +29,15 @@ Creating an S3 integration and a collection from Rockset's sample datasets.
 
 * `api_key` - (optional) Your Rockset [API key](https://rockset.com/docs/rest-api/#createapikey). If not present it will be sourced from the `ROCKSET_APIKEY` environment variable.
 * `api_server` - (optional) Your Rockset API server. If not present it will be sourced from the `ROCKSET_APISERVER` environment variable.
+* `organization_id` - (optional) The ID of the organization to connect to. If this is set, the provider will validate that the `organization_id` matches the `organization_id` of the api key. If it does not match, the provider will return an error.
 
 The preferred configuration method is by environment variables, as it doesn't expose the API key in a configuration file.
 
 For a list of valid options for Rockset API server visit:
 
 https://rockset.com/docs/rest-api/
+
+-> If you use different organizations for development and production, the `organization_id` is useful for ensuring that the provider is connecting to the expected organization, as the API key doesn't have any visible identifier.
 
 ## Known issues
 
