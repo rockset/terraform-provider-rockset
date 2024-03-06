@@ -21,6 +21,7 @@ func TestAccCollection_Basic(t *testing.T) {
 		Description: description(),
 		Workspace:   "acc",
 		Retention:   0,
+		StorageCompressionType: "ZSTD",
 	}
 	updated := values
 	updated.Retention = 3600
@@ -37,6 +38,7 @@ func TestAccCollection_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr("rockset_collection.test", "name", values.Name),
 					resource.TestCheckResourceAttr("rockset_collection.test", "workspace", values.Workspace),
 					resource.TestCheckResourceAttr("rockset_collection.test", "description", values.Description),
+					resource.TestCheckResourceAttr("rockset_collection.test", "storage_compression_type", values.StorageCompressionType),
 					testAccCheckRetentionSecsMatches(&collection, values.Retention),
 				),
 				ExpectNonEmptyPlan: false,
@@ -48,6 +50,7 @@ func TestAccCollection_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr("rockset_collection.test", "name", values.Name),
 					resource.TestCheckResourceAttr("rockset_collection.test", "workspace", values.Workspace),
 					resource.TestCheckResourceAttr("rockset_collection.test", "description", values.Description),
+					resource.TestCheckResourceAttr("rockset_collection.test", "storage_compression_type", values.StorageCompressionType),
 					testAccCheckRetentionSecsMatches(&collection, updated.Retention),
 				),
 				ExpectNonEmptyPlan: false,

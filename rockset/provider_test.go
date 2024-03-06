@@ -221,6 +221,7 @@ type Values struct {
 	CreateTimeout        string
 	UseScanApi           *bool
 	RCU                  *int
+	StorageCompressionType string
 }
 
 const S3IntegrationRoleArn = "arn:aws:iam::469279130686:role/terraform-provider-rockset-tests"

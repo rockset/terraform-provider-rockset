@@ -5,6 +5,9 @@ resource rockset_collection test {
 {{ if (ne .Retention -1) }}
   retention_secs 	= "{{ .Retention }}"
 {{ end }}
+{{ if (ne .Retention -1) }}
+  storage_compression_type 	= "{{ .StorageCompressionType }}"
+{{ end }}
 {{ if (ne .IngestTransformation "") }}
   ingest_transformation = "{{ .IngestTransformation }}"
 {{ end }}
