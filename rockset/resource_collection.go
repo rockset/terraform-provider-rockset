@@ -59,7 +59,7 @@ For more information see https://rockset.com/docs/ingest-transformation/`,
 			),
 		},
 		"storage_compression_type": {
-			Description: "RocksDB storage compression type.. Possible values: ZSTD, LZ4.",
+			Description: "RocksDB storage compression type. Possible values: ZSTD, LZ4.",
 			Type:        schema.TypeString,
 			ForceNew:    true,
 			Optional:    true,
