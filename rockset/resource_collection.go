@@ -2,7 +2,6 @@ package rockset
 
 import (
 	"context"
-	"regexp"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -59,12 +58,11 @@ For more information see https://rockset.com/docs/ingest-transformation/`,
 			),
 		},
 		"storage_compression_type": {
-			Description: "RocksDB storage compression type. Possible values: ZSTD, LZ4.",
-			Type:        schema.TypeString,
-			ForceNew:    true,
-			Optional:    true,
-			ValidateFunc: validation.StringMatch(
-				regexp.MustCompile("^(ZSTD|LZ4)$"), "only 'ZSTD' or 'LZ4' is supported"),
+			Description:  "RocksDB storage compression type. Possible values: ZSTD, LZ4.",
+			Type:         schema.TypeString,
+			ForceNew:     true,
+			Optional:     true,
+			ValidateFunc: validation.StringInSlice([]string{"ZSTD", "LZ4"}, false),
 		},
 		"wait_for_collection": {
 			Description:  "Wait until the collection is ready.",
