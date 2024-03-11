@@ -17,10 +17,10 @@ func TestAccCollection_Basic(t *testing.T) {
 	var collection openapi.Collection
 
 	values := Values{
-		Name:        randomName("collection"),
-		Description: description(),
-		Workspace:   "acc",
-		Retention:   0,
+		Name:                   randomName("collection"),
+		Description:            description(),
+		Workspace:              "acc",
+		Retention:              0,
 		StorageCompressionType: "ZSTD",
 	}
 	updated := values

@@ -2,8 +2,8 @@ package rockset
 
 import (
 	"context"
-	"time"
 	"regexp"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 

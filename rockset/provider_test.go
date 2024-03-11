@@ -203,24 +203,24 @@ func description() string {
 }
 
 type Values struct {
-	Name                 string
-	Alias                string
-	Collection           string
-	Description          string
-	Workspace            string
-	SQL                  string
-	Email                string
-	FirstName            string
-	LastName             string
-	Roles                []string
-	Role                 string
-	Bucket               string
-	Tag                  string
-	Retention            int
-	IngestTransformation string
-	CreateTimeout        string
-	UseScanApi           *bool
-	RCU                  *int
+	Name                   string
+	Alias                  string
+	Collection             string
+	Description            string
+	Workspace              string
+	SQL                    string
+	Email                  string
+	FirstName              string
+	LastName               string
+	Roles                  []string
+	Role                   string
+	Bucket                 string
+	Tag                    string
+	Retention              int
+	IngestTransformation   string
+	CreateTimeout          string
+	UseScanApi             *bool
+	RCU                    *int
 	StorageCompressionType string
 }
 
