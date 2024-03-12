@@ -87,6 +87,7 @@ jobs:
       - checkout
       - run:
           name: Terraform Acceptance Tests
+          no_output_timeout: 40m
           command: go test -race -cover -coverprofile=$HOME/cover.out -timeout 40m -v ./rockset/*
           environment:
             TF_ACC: true
