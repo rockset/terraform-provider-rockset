@@ -59,6 +59,49 @@ func TestAccCollection_Basic(t *testing.T) {
 	})
 }
 
+func TestAccCollection_StorageCompressionType(t *testing.T) {
+	var collection openapi.Collection
+
+	values := Values{
+		Name:                   randomName("collection"),
+		Description:            description(),
+		Workspace:              "acc",
+		StorageCompressionType: "LZ4",
+	}
+	updated := values
+	updated.StorageCompressionType = "ZSTD"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories,
+		CheckDestroy:      testAccCheckRocksetCollectionDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: getHCLTemplate("collection_basic.tf", values),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRocksetCollectionExists("rockset_collection.test", &collection),
+					resource.TestCheckResourceAttr("rockset_collection.test", "name", values.Name),
+					resource.TestCheckResourceAttr("rockset_collection.test", "workspace", values.Workspace),
+					resource.TestCheckResourceAttr("rockset_collection.test", "description", values.Description),
+					resource.TestCheckResourceAttr("rockset_collection.test", "storage_compression_type", values.StorageCompressionType),
+				),
+				ExpectNonEmptyPlan: false,
+			},
+			{
+				Config: getHCLTemplate("collection_basic.tf", updated),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRocksetCollectionExists("rockset_collection.test", &collection),
+					resource.TestCheckResourceAttr("rockset_collection.test", "name", updated.Name),
+					resource.TestCheckResourceAttr("rockset_collection.test", "workspace", updated.Workspace),
+					resource.TestCheckResourceAttr("rockset_collection.test", "description", updated.Description),
+					resource.TestCheckResourceAttr("rockset_collection.test", "storage_compression_type", updated.StorageCompressionType),
+				),
+				ExpectNonEmptyPlan: false,
+			},
+		},
+	})
+}
+
 func TestAccCollection_Timeout(t *testing.T) {
 	values := Values{
 		Name:          randomName("collection"),

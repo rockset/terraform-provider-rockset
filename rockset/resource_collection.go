@@ -63,6 +63,10 @@ For more information see https://rockset.com/docs/ingest-transformation/`,
 			ForceNew:     true,
 			Optional:     true,
 			ValidateFunc: validation.StringInSlice([]string{"ZSTD", "LZ4"}, false),
+			DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+				// ignore unspecified storage_compression_type
+				return new == ""
+			},
 		},
 		"wait_for_collection": {
 			Description:  "Wait until the collection is ready.",
