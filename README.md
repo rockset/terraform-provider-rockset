@@ -81,6 +81,12 @@ To run a specific test:
 TF_ACC=true go test -timeout 40m -v ./rockset/* -run TestAccS3Collection_Basic
 ```
 
+You may want to run tests with local changes in a dependency, such as in the [Rockset Go Client](https://github.com/rockset/rockset-go-client). (For example, you may be adding a field in both the Rockset Go client and the Terraform Provider) Use the `replace` keyword in the `go.mod` file to use the local version of the dependency instead.
+```
+module github.com/rockset/terraform-provider-rockset
+replace github.com/rockset/rockset-go-client => ../rockset-go-client
+```
+
 ### Pre-commit hooks
 
 The repo comes with a `.pre-commit-config.yaml` file which can be enabled using `pre-commit install`,

@@ -57,6 +57,7 @@ This is referred to as the collection’s ingest transformation or, historically
 For more information see https://rockset.com/docs/ingest-transformation/
 - `retention_secs` (Number) Number of seconds after which data is purged. Based on event time.
 - `source` (Block Set) Defines a source for this collection. (see [below for nested schema](#nestedblock--source))
+- `storage_compression_type` (String) RocksDB storage compression type. Possible values: ZSTD, LZ4.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 - `wait_for_collection` (Boolean) Wait until the collection is ready.
 - `wait_for_documents` (Number) Wait until the collection has documents. The default is to wait for 0 documents, which means it doesn't wait.

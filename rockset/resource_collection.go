@@ -57,6 +57,17 @@ For more information see https://rockset.com/docs/ingest-transformation/`,
 				validation.IntBetween(3_600, 315_360_000),
 			),
 		},
+		"storage_compression_type": {
+			Description:  "RocksDB storage compression type. Possible values: ZSTD, LZ4.",
+			Type:         schema.TypeString,
+			ForceNew:     true,
+			Optional:     true,
+			ValidateFunc: validation.StringInSlice([]string{"ZSTD", "LZ4"}, false),
+			DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+				// ignore unspecified storage_compression_type
+				return new == ""
+			},
+		},
 		"wait_for_collection": {
 			Description:  "Wait until the collection is ready.",
 			Type:         schema.TypeBool,
@@ -108,6 +119,11 @@ func parseBaseCollection(collection *openapi.Collection, d *schema.ResourceData)
 		return err
 	}
 
+	err = d.Set("storage_compression_type", collection.GetStorageCompressionType())
+	if err != nil {
+		return err
+	}
+
 	err = d.Set("ingest_transformation", collection.GetFieldMappingQuery().Sql)
 	if err != nil {
 		return err
@@ -134,6 +150,10 @@ func createBaseCollectionRequest(d *schema.ResourceData) *openapi.CreateCollecti
 		retentionSecondsDuration := time.Duration(v.(int)) * time.Second
 		retentionSeconds := int64(retentionSecondsDuration.Seconds())
 		params.RetentionSecs = &retentionSeconds
+	}
+
+	if v, ok := d.GetOk("storage_compression_type"); ok {
+		params.SetStorageCompressionType(v.(string))
 	}
 
 	if v, ok := d.GetOk("ingest_transformation"); ok {
