@@ -43,6 +43,7 @@ func flattenBucketSourceParams(sourceType string, sources *[]openapi.Source) []i
 		mssqlParams, mssqlOk := source.FormatParams.GetMssqlDmsOk()
 		mysqlParams, mysqlOk := source.FormatParams.GetMysqlDmsOk()
 		oracleParams, oracleOk := source.FormatParams.GetOracleDmsOk()
+		postgresParams, postgresOk := source.FormatParams.GetPostgresDmsOk()
 		if jsonOk && *isJson {
 			m["format"] = "json"
 		} else if mssqlOk && *mssqlParams {
@@ -50,6 +51,8 @@ func flattenBucketSourceParams(sourceType string, sources *[]openapi.Source) []i
 		} else if mysqlOk && *mysqlParams {
 			m["format"] = "json"
 		} else if oracleOk && *oracleParams {
+			m["format"] = "json"
+		} else if postgresOk && *postgresParams {
 			m["format"] = "json"
 		} else if csvOk && csvParams != nil {
 			m["format"] = "csv"
