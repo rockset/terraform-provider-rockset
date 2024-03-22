@@ -98,7 +98,13 @@ func resourceAliasCreate(ctx context.Context, d *schema.ResourceData, meta inter
 
 	_, err := rc.CreateAlias(ctx, workspace, name, collections, option.WithAliasDescription(d.Get("description").(string)))
 	if err != nil {
-		return DiagFromErr(err)
+        if !strings.Contains(err.Error(), "already exists in workspace") {
+		    return DiagFromErr(err)
+		}
+		err = rc.UpdateAlias(ctx, workspace, name, collections, option.WithAliasDescription(d.Get("description").(string)))
+		if err != nil {
+		    return DiagFromErr(err)
+		}
 	}
 
 	// There's a lag between create and update and the alias
