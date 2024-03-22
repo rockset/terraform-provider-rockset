@@ -3,6 +3,7 @@ package rockset
 import (
 	"context"
 	"reflect"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -98,12 +99,12 @@ func resourceAliasCreate(ctx context.Context, d *schema.ResourceData, meta inter
 
 	_, err := rc.CreateAlias(ctx, workspace, name, collections, option.WithAliasDescription(d.Get("description").(string)))
 	if err != nil {
-        if !strings.Contains(err.Error(), "already exists in workspace") {
-		    return DiagFromErr(err)
+		if !strings.Contains(err.Error(), "already exists in workspace") {
+			return DiagFromErr(err)
 		}
 		err = rc.UpdateAlias(ctx, workspace, name, collections, option.WithAliasDescription(d.Get("description").(string)))
 		if err != nil {
-		    return DiagFromErr(err)
+			return DiagFromErr(err)
 		}
 	}
 
