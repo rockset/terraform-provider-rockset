@@ -40,6 +40,13 @@ func resourceAlias() *schema.Resource {
 				Required:     true,
 				ValidateFunc: rocksetNameValidator,
 			},
+			"overwrite": {
+				Description: "Whether existing alias should be overwritten.",
+				Type:        schema.TypeString,
+				Default:     "false",
+				ForceNew:    false,
+				Optional:    true,
+			},
 			"description": {
 				Description: "Text describing the alias.",
 				Type:        schema.TypeString,
@@ -100,6 +107,10 @@ func resourceAliasCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	_, err := rc.CreateAlias(ctx, workspace, name, collections, option.WithAliasDescription(d.Get("description").(string)))
 	if err != nil {
 		if !strings.Contains(err.Error(), "already exists in workspace") {
+			return DiagFromErr(err)
+		}
+		overwrite := d.Get("overwrite").(string)
+		if overwrite != "true" {
 			return DiagFromErr(err)
 		}
 		err = rc.UpdateAlias(ctx, workspace, name, collections, option.WithAliasDescription(d.Get("description").(string)))
