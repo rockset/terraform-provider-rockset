@@ -23,7 +23,12 @@ func parseBucketCollection(sourceType string, collection *openapi.Collection, d 
 		return fmt.Errorf("expected %s to have at least 1 source", collection.GetName())
 	}
 
-	err = d.Set("source", flattenBucketSourceParams(sourceType, &sourcesList))
+	sourceParams, err := flattenBucketSourceParams(sourceType, &sourcesList)
+	if err != nil {
+		return err
+	}
+
+	err = d.Set("source", sourceParams)
 	if err != nil {
 		return err
 	}
@@ -31,7 +36,7 @@ func parseBucketCollection(sourceType string, collection *openapi.Collection, d 
 	return nil // No errors
 }
 
-func flattenBucketSourceParams(sourceType string, sources *[]openapi.Source) []interface{} {
+func flattenBucketSourceParams(sourceType string, sources *[]openapi.Source) ([]interface{}, error) {
 	convertedList := make([]interface{}, 0, len(*sources))
 	for _, source := range *sources {
 		m := make(map[string]interface{})
@@ -58,19 +63,25 @@ func flattenBucketSourceParams(sourceType string, sources *[]openapi.Source) []i
 		m["integration_name"] = source.IntegrationName
 		switch sourceType {
 		case "gcs":
+			if source.Gcs == nil {
+				return nil, fmt.Errorf("source type is %s but not GCS parameters found", sourceType)
+			}
 			m["prefix"] = source.Gcs.Prefix
 			m["bucket"] = source.Gcs.Bucket
 		case "s3":
+			if source.S3 == nil {
+				return nil, fmt.Errorf("source type is %s but not S3 parameters found", sourceType)
+			}
 			m["prefix"] = source.S3.Prefix
 			m["pattern"] = source.S3.Pattern
 			m["bucket"] = source.S3.Bucket
 		default:
-			panic("unknown source type " + sourceType)
+			return nil, fmt.Errorf("unknown source type %s", sourceType)
 		}
 		convertedList = append(convertedList, m)
 	}
 
-	return convertedList
+	return convertedList, nil
 }
 
 func makeBucketSourceParams(sourceType string, in interface{}) ([]openapi.Source, error) {
