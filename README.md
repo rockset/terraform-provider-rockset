@@ -107,7 +107,7 @@ provider_installation {
 }
 ```
 
-and you should see this warning when you run `terraform`
+or set `TF_CLI_CONFIG_FILE` to the above file, and you should see this warning when you run `terraform`
 
 ```
 │ Warning: Provider development overrides are in effect
@@ -116,6 +116,14 @@ and you should see this warning when you run `terraform`
 │  - rockset/rockset in /Users/pme/src/rockset/terraform-provider-rockset
 │
 │ The behavior may therefore not match any released version of the provider and applying changes may cause the state to become incompatible with published releases.
+```
+
+### Debugging
+
+If you want to debug the provider, you can set the `TF_LOG_PROVIDER` environment variable to `debug` or `trace` to see more detailed logs.
+
+```
+TF_LOG_PROVIDER=trace terraform plan
 ```
 
 ### Configure Terraform
