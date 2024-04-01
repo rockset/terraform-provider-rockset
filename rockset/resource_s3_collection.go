@@ -2,9 +2,12 @@ package rockset
 
 import (
 	"context"
+	"strconv"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/rockset/rockset-go-client/openapi"
 	"github.com/rockset/rockset-go-client/option"
 
 	"github.com/rockset/rockset-go-client"
@@ -97,10 +100,12 @@ func resourceS3CollectionCreate(ctx context.Context, d *schema.ResourceData, met
 	}
 	params.Sources = sources
 
-	_, err = rc.CreateCollection(ctx, workspace, name, option.WithCollectionRequest(*params))
+	c, err := rc.CreateCollection(ctx, workspace, name, option.WithCollectionRequest(*params))
 	if err != nil {
 		return DiagFromErr(err)
 	}
+	tflog.Trace(ctx, "created Rockset collection", map[string]interface{}{"workspace": workspace, "name": name},
+		sourcesToTraceInfo(c.Sources))
 
 	if err = waitForCollectionAndDocuments(ctx, rc, d, workspace, name); err != nil {
 		return DiagFromErr(err)
@@ -122,6 +127,8 @@ func resourceS3CollectionRead(ctx context.Context, d *schema.ResourceData, meta 
 	if err != nil {
 		return checkForNotFoundError(d, err)
 	}
+	tflog.Trace(ctx, "read Rockset collection", map[string]interface{}{"workspace": workspace, "name": name},
+		sourcesToTraceInfo(collection.Sources))
 
 	// Gets all the fields any generic collection has
 	err = parseBaseCollection(&collection, d)
@@ -129,11 +136,19 @@ func resourceS3CollectionRead(ctx context.Context, d *schema.ResourceData, meta 
 		return DiagFromErr(err)
 	}
 
-	// Gets all the fields relevant to an s3 collection
+	// Gets all the fields relevant to a s3 collection
 	err = parseBucketCollection("s3", &collection, d)
 	if err != nil {
 		return DiagFromErr(err)
 	}
 
 	return diags
+}
+
+func sourcesToTraceInfo(sources []openapi.Source) map[string]any {
+	trace := make(map[string]any)
+	for i, source := range sources {
+		trace["source_"+strconv.Itoa(i)] = source
+	}
+	return trace
 }
