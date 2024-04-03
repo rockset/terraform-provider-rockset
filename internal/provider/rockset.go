@@ -2,15 +2,21 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"net/http"
 	"os"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/rockset/rockset-go-client"
+	rockerr "github.com/rockset/rockset-go-client/errors"
 )
 
 var (
@@ -83,12 +89,12 @@ func (p *rocksetProvider) Configure(ctx context.Context, req provider.ConfigureR
 	tflog.Info(ctx, "connected to Rockset", map[string]interface{}{"org_id": org.GetId()})
 
 	resp.DataSourceData = rc
+	resp.ResourceData = rc
 }
 
 func (p *rocksetProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
 	resp.TypeName = "rockset"
 	resp.Version = p.version
-
 }
 
 func (p *rocksetProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
@@ -100,7 +106,9 @@ func (p *rocksetProvider) DataSources(ctx context.Context) []func() datasource.D
 }
 
 func (p *rocksetProvider) Resources(ctx context.Context) []func() resource.Resource {
-	return []func() resource.Resource{}
+	return []func() resource.Resource{
+		func() resource.Resource { return &CollectionResource{} },
+	}
 }
 
 func (p *rocksetProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
@@ -123,4 +131,84 @@ func (p *rocksetProvider) Schema(ctx context.Context, req provider.SchemaRequest
 			},
 		},
 	}
+}
+
+func rocksetResourceClient(req resource.ConfigureRequest, resp *resource.ConfigureResponse) *rockset.RockClient {
+	client, errDiag := rocksetClient(req.ProviderData)
+	if errDiag.Summary() != "" {
+		resp.Diagnostics.Append(errDiag)
+		return nil
+	}
+
+	return client
+}
+
+func rocksetDataSourceClient(req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) *rockset.RockClient {
+	client, errDiag := rocksetClient(req.ProviderData)
+	if errDiag.Summary() != "" {
+		resp.Diagnostics.Append(errDiag)
+		return nil
+	}
+
+	return client
+}
+
+func rocksetClient(providerData any) (*rockset.RockClient, diag.ErrorDiagnostic) {
+	client, ok := providerData.(*rockset.RockClient)
+	if !ok {
+		return nil, diag.NewErrorDiagnostic(
+			"Unexpected Data Source Configure Type",
+			fmt.Sprintf("Expected *rockset.RockClient, got: %T. Please report this issue to the provider developers.", providerData),
+		)
+	}
+
+	return client, diag.ErrorDiagnostic{}
+}
+
+func DiagFromErr(err error) diag.Diagnostic {
+	if err == nil {
+		return nil
+	}
+
+	var detail string
+	var re rockerr.Error
+	if errors.As(err, &re) {
+		var sb strings.Builder
+		var msgs []string
+
+		sb.WriteString(re.GetMessage())
+		sb.WriteString(": ")
+
+		if t, ok := re.GetTypeOk(); ok {
+			msgs = append(msgs, fmt.Sprintf("Error Type: %s", *t))
+		}
+		if re.StatusCode != 0 {
+			msgs = append(msgs, fmt.Sprintf("HTTP status code (%d) %s", re.StatusCode, http.StatusText(re.StatusCode)))
+		}
+		if re.GetTraceId() != "" {
+			msgs = append(msgs, fmt.Sprintf("Trace ID: %s", re.GetTraceId()))
+		}
+		if re.GetErrorId() != "" {
+			msgs = append(msgs, fmt.Sprintf("Error ID: %s", re.GetErrorId()))
+		}
+		if re.GetQueryId() != "" {
+			msgs = append(msgs, fmt.Sprintf("Query ID: %s", re.GetQueryId()))
+		}
+		if re.HasLine() {
+			msgs = append(msgs, fmt.Sprintf("Line: %d", re.GetLine()))
+		}
+		if re.HasColumn() {
+			msgs = append(msgs, fmt.Sprintf("Column: %d", re.GetColumn()))
+		}
+
+		sb.WriteString(strings.Join(msgs, ", "))
+
+		detail = sb.String()
+	}
+
+	return diag.NewErrorDiagnostic(err.Error(), detail)
+}
+
+func toID(workspace, collection types.String) types.String {
+	return types.StringValue(workspace.ValueString() + "." + collection.ValueString())
 }

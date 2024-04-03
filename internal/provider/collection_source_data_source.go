@@ -118,17 +118,7 @@ func (d *CollectionSourceDataSource) Configure(ctx context.Context, req datasour
 		return
 	}
 
-	client, ok := req.ProviderData.(*rockset.RockClient)
-	if !ok {
-		resp.Diagnostics.AddError(
-			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *http.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
-		)
-
-		return
-	}
-
-	d.client = client
+	d.client = rocksetDataSourceClient(req, resp)
 }
 
 func (d *CollectionSourceDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
