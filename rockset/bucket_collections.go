@@ -1,9 +1,11 @@
 package rockset
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/rockset/rockset-go-client/openapi"
@@ -14,7 +16,7 @@ Takes in a collection returned from the api.
 Parses the fields relevant to an s3 source and
 puts them into the schema object.
 */
-func parseBucketCollection(sourceType string, collection *openapi.Collection, d *schema.ResourceData) error {
+func parseBucketCollection(ctx context.Context, sourceType string, collection *openapi.Collection, d *schema.ResourceData) error {
 	var err error
 
 	sourcesList := collection.Sources
@@ -23,7 +25,7 @@ func parseBucketCollection(sourceType string, collection *openapi.Collection, d 
 		return fmt.Errorf("expected %s to have at least 1 source", collection.GetName())
 	}
 
-	sourceParams, err := flattenBucketSourceParams(sourceType, &sourcesList)
+	sourceParams, err := flattenBucketSourceParams(ctx, sourceType, &sourcesList)
 	if err != nil {
 		return err
 	}
@@ -36,9 +38,16 @@ func parseBucketCollection(sourceType string, collection *openapi.Collection, d 
 	return nil // No errors
 }
 
-func flattenBucketSourceParams(sourceType string, sources *[]openapi.Source) ([]interface{}, error) {
+func flattenBucketSourceParams(ctx context.Context, sourceType string, sources *[]openapi.Source) ([]interface{}, error) {
 	convertedList := make([]interface{}, 0, len(*sources))
 	for _, source := range *sources {
+		if source.WriteApi != nil {
+			// we automatically add a write api source, so we can ignore it as there is no way
+			// to change the configuration
+			tflog.Debug(ctx, "Ignoring write api source")
+			continue
+		}
+
 		m := make(map[string]interface{})
 		formatParams := source.FormatParams
 

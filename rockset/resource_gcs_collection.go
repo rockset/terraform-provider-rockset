@@ -120,7 +120,7 @@ func resourceGCSCollectionRead(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	// Gets all the fields relevant to an s3 collection
-	err = parseBucketCollection("gcs", &collection, d)
+	err = parseBucketCollection(ctx, "gcs", &collection, d)
 	if err != nil {
 		return DiagFromErr(err)
 	}

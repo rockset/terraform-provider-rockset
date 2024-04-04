@@ -137,7 +137,7 @@ func resourceS3CollectionRead(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	// Gets all the fields relevant to a s3 collection
-	err = parseBucketCollection("s3", &collection, d)
+	err = parseBucketCollection(ctx, "s3", &collection, d)
 	if err != nil {
 		return DiagFromErr(err)
 	}
