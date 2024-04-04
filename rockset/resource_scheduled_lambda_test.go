@@ -15,7 +15,7 @@ func TestAccScheduledLambda_Basic(t *testing.T) {
 	scheduledLambda := "rockset_scheduled_lambda.test_scheduled_lambda"
 
 	type cfg struct {
-		CronString       string
+		CronString          string
 		TotalTimesToExecute int64
 	}
 	s1 := cfg{"0 0 0 ? * * *", 1}

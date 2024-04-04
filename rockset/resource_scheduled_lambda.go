@@ -39,10 +39,10 @@ func resourceScheduledLambda() *schema.Resource {
 				ValidateFunc: rocksetNameValidator,
 			},
 			"apikey": {
-				Description:  "The apikey to use when triggering execution of the associated query lambda.",
-				Type:         schema.TypeString,
-				Required: true,
-				Sensitive: true,
+				Description: "The apikey to use when triggering execution of the associated query lambda.",
+				Type:        schema.TypeString,
+				Required:    true,
+				Sensitive:   true,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					// apikey is not returned for security reasons
 					return new == ""
@@ -51,26 +51,26 @@ func resourceScheduledLambda() *schema.Resource {
 			"cron_string": {
 				Description: "The UNIX-formatted cron string for this scheduled query lambda.",
 				Type:        schema.TypeString,
-				ForceNew:     true,
+				ForceNew:    true,
 				Required:    true,
 			},
 			"ql_name": {
 				Description: "The name of the QL to use for scheduled execution.",
 				Type:        schema.TypeString,
-				ForceNew:     true,
+				ForceNew:    true,
 				Required:    true,
 			},
 			"tag": {
-				Description:  "The QL tag to use for scheduled execution.",
-				Type:         schema.TypeString,
-				ForceNew:     true,
-				Optional: true,
+				Description: "The QL tag to use for scheduled execution.",
+				Type:        schema.TypeString,
+				ForceNew:    true,
+				Optional:    true,
 			},
 			"version": {
-				Description:  "The version of the QL to use for scheduled execution.",
-				Type:         schema.TypeString,
-				ForceNew:     true,
-				Optional: true,
+				Description: "The version of the QL to use for scheduled execution.",
+				Type:        schema.TypeString,
+				ForceNew:    true,
+				Optional:    true,
 			},
 			"total_times_to_execute": {
 				Description:  "The number of times to execute this scheduled query lambda. Once this scheduled query lambda has been executed this many times, it will no longer be executed.",
@@ -79,24 +79,24 @@ func resourceScheduledLambda() *schema.Resource {
 				ValidateFunc: validation.IntAtLeast(0),
 			},
 			"webhook_auth_header": {
-				Description:  "The value to use as the authorization header when hitting the webhook.",
-				Type:         schema.TypeString,
-				Optional: true,
-				Sensitive: true,
+				Description: "The value to use as the authorization header when hitting the webhook.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Sensitive:   true,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					// auth header is not returned for security reasons
 					return new == ""
 				},
 			},
 			"webhook_payload": {
-				Description:  "The payload that should be sent to the webhook. JSON format.",
-				Type:         schema.TypeString,
-				Optional: true,
+				Description: "The payload that should be sent to the webhook. JSON format.",
+				Type:        schema.TypeString,
+				Optional:    true,
 			},
 			"webhook_url": {
-				Description:  "The URL of the webhook that should be triggered after this scheduled query lambda completes.",
-				Type:         schema.TypeString,
-				Optional: true,
+				Description: "The URL of the webhook that should be triggered after this scheduled query lambda completes.",
+				Type:        schema.TypeString,
+				Optional:    true,
 			},
 		},
 	}
@@ -110,7 +110,7 @@ func resourceScheduledLambdaCreate(ctx context.Context, d *schema.ResourceData, 
 	apikey := d.Get("apikey").(string)
 	cronString := d.Get("cron_string").(string)
 	qlName := d.Get("ql_name").(string)
-	
+
 	options := getScheduledLambdaOptions(d)
 
 	scheduledLambda, err := rc.CreateScheduledLambda(ctx, workspace, apikey, cronString, qlName, options...)
@@ -187,7 +187,7 @@ func resourceScheduledLambdaDelete(ctx context.Context, d *schema.ResourceData, 
 
 func getScheduledLambdaOptions(d *schema.ResourceData) []option.ScheduledLambdaOption {
 	var options []option.ScheduledLambdaOption
-    addOptionIfChanged(d, "tag", &options, func(a any) option.ScheduledLambdaOption {
+	addOptionIfChanged(d, "tag", &options, func(a any) option.ScheduledLambdaOption {
 		return option.WithScheduledLambdaTag(a.(string))
 	})
 	addOptionIfChanged(d, "version", &options, func(a any) option.ScheduledLambdaOption {
