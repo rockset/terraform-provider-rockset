@@ -10,7 +10,7 @@ require (
 	github.com/hashicorp/terraform-plugin-mux v0.15.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.33.0
 	github.com/hashicorp/terraform-plugin-testing v1.7.0
-	github.com/rockset/rockset-go-client v0.24.1
+	github.com/rockset/rockset-go-client v0.24.2
 	github.com/rs/zerolog v1.32.0
 	github.com/stretchr/testify v1.9.0
 )
