@@ -50,6 +50,7 @@ func Provider() *schema.Provider {
 			"rockset_view":                 resourceView(),
 			"rockset_virtual_instance":     resourceVirtualInstance(),
 			"rockset_workspace":            resourceWorkspace(),
+			"rockset_scheduled_lambda":     resourceScheduledLambda(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"rockset_account":          dataSourceRocksetAccount(),
