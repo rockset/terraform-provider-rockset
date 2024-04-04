@@ -206,7 +206,7 @@ func getScheduledLambdaOptions(d *schema.ResourceData) []option.ScheduledLambdaO
 		return option.WithScheduledLambdaWebhookPayload(a.(string))
 	})
 	addOptionIfChanged(d, "webhook_url", &options, func(a any) option.ScheduledLambdaOption {
-		return option.WithScheduledLambdaWebhookUrl(a.(string))
+		return option.WithScheduledLambdaWebhookURL(a.(string))
 	})
 
 	return options
