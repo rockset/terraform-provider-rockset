@@ -1,10 +1,15 @@
 package rockset
 
 import (
+	"context"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/rockset/rockset-go-client"
 	"github.com/rockset/rockset-go-client/openapi"
+	"github.com/rockset/rockset-go-client/wait"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAccS3Collection_Basic(t *testing.T) {
@@ -67,6 +72,33 @@ func TestAccS3Collection_Json(t *testing.T) {
 					resource.TestCheckResourceAttr("rockset_s3_collection.test", "source.0.format", "json"),
 				),
 			},
+			{
+				PreConfig: func() {
+					triggerWriteAPISourceAdd(t, values.Workspace, values.Collection)
+				},
+				Config: getHCLTemplate("s3_collection.tf", values),
+				Check: resource.ComposeTestCheckFunc(
+					// check that we still just have two sources
+					resource.TestCheckResourceAttr("rockset_s3_collection.test", "source.#", "2"),
+				),
+			},
 		},
 	})
+}
+
+func triggerWriteAPISourceAdd(t *testing.T, workspace, collection string) {
+	ctx := context.Background()
+	rs := testAccProvider.Meta().(*rockset.RockClient)
+
+	doc := map[string]interface{}{"foo": "bar"}
+
+	// write a document to the collection to trigger a write api source to be added
+	response, err := rs.AddDocumentsWithOffset(ctx, workspace, collection, []interface{}{doc})
+	require.NoError(t, err)
+	assert.Equal(t, 1, len(response.GetData()))
+
+	// wait for the document to be available, which also means the write api source has been added
+	w := wait.New(rs)
+	err = w.UntilQueryable(ctx, workspace, collection, []string{response.GetLastOffset()})
+	assert.NoError(t, err)
 }
