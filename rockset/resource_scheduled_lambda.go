@@ -53,8 +53,9 @@ func resourceScheduledLambda() *schema.Resource {
 				Type:        schema.TypeString,
 				ForceNew:    true,
 				Required:    true,
+				// TODO: add a validator
 			},
-			"ql_name": {
+			"query_lambda_name": {
 				Description: "The name of the QL to use for scheduled execution.",
 				Type:        schema.TypeString,
 				ForceNew:    true,
@@ -109,7 +110,7 @@ func resourceScheduledLambdaCreate(ctx context.Context, d *schema.ResourceData, 
 	workspace := d.Get("workspace").(string)
 	apikey := d.Get("apikey").(string)
 	cronString := d.Get("cron_string").(string)
-	qlName := d.Get("ql_name").(string)
+	qlName := d.Get("query_lambda_name").(string)
 
 	options := getScheduledLambdaOptions(d)
 
@@ -222,7 +223,7 @@ func parseScheduledLambdaFields(scheduledLambda openapi.ScheduledLambda, d *sche
 	if err := setValue(d, "cron_string", scheduledLambda.GetCronStringOk); err != nil {
 		return err
 	}
-	if err := setValue(d, "ql_name", scheduledLambda.GetQlNameOk); err != nil {
+	if err := setValue(d, "query_lambda_name", scheduledLambda.GetQlNameOk); err != nil {
 		return err
 	}
 	if err := setValue(d, "tag", scheduledLambda.GetTagOk); err != nil {

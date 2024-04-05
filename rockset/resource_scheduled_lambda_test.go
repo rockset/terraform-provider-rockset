@@ -17,10 +17,12 @@ func TestAccScheduledLambda_Basic(t *testing.T) {
 	type cfg struct {
 		CronString          string
 		TotalTimesToExecute int64
+		QueryLambdaName     string
 	}
-	s1 := cfg{"0 0 0 ? * * *", 1}
-	s2 := cfg{"0 0 0 ? * * *", 2}
-	s3 := cfg{"0 0 * ? * * *", 3}
+	qlName := randomName("test_query_lambda_name")
+	s1 := cfg{"0 0 0 ? * * *", 1, qlName}
+	s2 := cfg{"0 0 0 ? * * *", 2, qlName}
+	s3 := cfg{"0 0 * ? * * *", 3, qlName}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -34,7 +36,7 @@ func TestAccScheduledLambda_Basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(scheduledLambda, "apikey"),
 					resource.TestCheckResourceAttr(scheduledLambda, "workspace", "acc"),
 					resource.TestCheckResourceAttr(scheduledLambda, "cron_string", s1.CronString),
-					resource.TestCheckResourceAttr(scheduledLambda, "ql_name", "test_query_lambda_name"),
+					resource.TestCheckResourceAttr(scheduledLambda, "query_lambda_name", qlName),
 					resource.TestCheckResourceAttr(scheduledLambda, "tag", "latest"),
 					resource.TestCheckResourceAttr(scheduledLambda, "total_times_to_execute", strconv.FormatInt(s1.TotalTimesToExecute, 10)),
 				),
@@ -46,7 +48,7 @@ func TestAccScheduledLambda_Basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(scheduledLambda, "apikey"),
 					resource.TestCheckResourceAttr(scheduledLambda, "workspace", "acc"),
 					resource.TestCheckResourceAttr(scheduledLambda, "cron_string", s2.CronString),
-					resource.TestCheckResourceAttr(scheduledLambda, "ql_name", "test_query_lambda_name"),
+					resource.TestCheckResourceAttr(scheduledLambda, "query_lambda_name", qlName),
 					resource.TestCheckResourceAttr(scheduledLambda, "tag", "latest"),
 					resource.TestCheckResourceAttr(scheduledLambda, "total_times_to_execute", strconv.FormatInt(s2.TotalTimesToExecute, 10)),
 				),
@@ -58,7 +60,7 @@ func TestAccScheduledLambda_Basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(scheduledLambda, "apikey"),
 					resource.TestCheckResourceAttr(scheduledLambda, "workspace", "acc"),
 					resource.TestCheckResourceAttr(scheduledLambda, "cron_string", s3.CronString),
-					resource.TestCheckResourceAttr(scheduledLambda, "ql_name", "test_query_lambda_name"),
+					resource.TestCheckResourceAttr(scheduledLambda, "query_lambda_name", qlName),
 					resource.TestCheckResourceAttr(scheduledLambda, "tag", "latest"),
 					resource.TestCheckResourceAttr(scheduledLambda, "total_times_to_execute", strconv.FormatInt(s3.TotalTimesToExecute, 10)),
 				),
