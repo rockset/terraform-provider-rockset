@@ -68,17 +68,17 @@ Running acceptance tests creates real resources. Some acceptance tests may use f
 
 To run all tests:
 ```
-TF_ACC=true go test -timeout 40m ./rockset/*
+TF_ACC=true go test -timeout 40m ./...
 ```
 
 To run all tests with debug output:
 ```
-TF_ACC=true go test -timeout 40m -v ./rockset/*
+TF_ACC=true go test -timeout 40m -v ./...
 ```
 
 To run a specific test:
 ```
-TF_ACC=true go test -timeout 40m -v ./rockset/* -run TestAccS3Collection_Basic
+TF_ACC=true go test -timeout 40m -v ./... -run TestAccS3Collection_Basic
 ```
 
 You may want to run tests with local changes in a dependency, such as in the [Rockset Go Client](https://github.com/rockset/rockset-go-client). (For example, you may be adding a field in both the Rockset Go client and the Terraform Provider) Use the `replace` keyword in the `go.mod` file to use the local version of the dependency instead.
@@ -157,7 +157,12 @@ If the above is all done correctly you are now able to run `terraform init`.
 It will see the provider in the folder and treat it as if it's already downloaded.
 
 ## Release Steps
+
+To create a new release
+
 - Merge branch to master
 - On master branch create new tag: `git tag v{version_number}`
 - Push tag: `git push origin v{version_number}`
-Pushing the tag should trigger circle ci to create a draft release and build all necesary assets. Then you can navigate to github and publish the release. 
+
+Pushing the tag triggers circle ci to create a draft release and build all necessary assets.
+Then you can navigate to [github](https://github.com/rockset/terraform-provider-rockset/releases) and publish the release.
