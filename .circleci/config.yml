@@ -25,7 +25,7 @@ workflows:
 jobs:
   validate:
     docker:
-      - image: cimg/go:1.20
+      - image: cimg/go:1.21
     steps:
       - checkout
       - run:
@@ -33,7 +33,10 @@ jobs:
           command: sudo apt update && sudo apt install python3 python3-pip
       - run:
           name: Install terraform
-          command: wget -q -O terraform.zip https://releases.hashicorp.com/terraform/1.3.2/terraform_1.3.2_linux_amd64.zip && unzip -d $HOME/bin terraform.zip
+          command: wget -q -O terraform.zip https://releases.hashicorp.com/terraform/1.7.5/terraform_1.7.5_linux_amd64.zip && unzip -d $HOME/bin terraform.zip
+      - run:
+          name: Install tfplugindocs
+          command: go install github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
       - run:
           name: Install pre-commit
           command: pip install pre-commit
@@ -41,26 +44,17 @@ jobs:
           name: Run pre-commit
           command: pre-commit run --all-files
       - run:
-          name: Install tfplugindocs
-          command: wget -q -O tfplugindocs.zip https://github.com/hashicorp/terraform-plugin-docs/releases/download/v0.14.1/tfplugindocs_0.14.1_linux_amd64.zip && unzip -n tfplugindocs.zip tfplugindocs -d $HOME/bin
-      - run:
-          name: Generate documentation
-          command: tfplugindocs generate
-      - run:
-          name: Check if there are uncommitted document changes
-          command: git diff --exit-code ./docs || echo "must run tfplugindocs before committing"
-      - run:
           name: 'TODO: add unit tests'
           command: 'echo "TODO: add unit tests"'
   release:
     docker:
-      - image: cimg/go:1.20
+      - image: cimg/go:1.21
     steps:
       - checkout
       - run:
           name: "Import GPG Key and Test Signing"
           command: |
-            echo GPG_TTY=$(tty)
+            export GPG_TTY=$(tty)
             echo "$GPG_PRIVATE_KEY" | base64 -d > key.pem
             echo "$PASSPHRASE" | gpg --batch --import ./key.pem
             rm key.pem
@@ -71,24 +65,25 @@ jobs:
           name: "Publish Release on GitHub"
           no_output_timeout: 30m
           command: |
+            export GPG_TTY=$(tty)
             curl -sL https://git.io/goreleaser | bash
   test:
     docker:
-      - image: cimg/go:1.20
+      - image: cimg/go:1.21
     steps:
       - checkout
       - run:
           name: Terraform Unit Tests
-          command: go test -v ./rockset/*
+          command: go test -v ./...
   acceptance:
     docker:
-      - image: cimg/go:1.20
+      - image: cimg/go:1.21
     steps:
       - checkout
       - run:
           name: Terraform Acceptance Tests
           no_output_timeout: 40m
-          command: go test -race -cover -coverprofile=$HOME/cover.out -timeout 40m -v ./rockset/*
+          command: go test -race -cover -coverprofile=$HOME/cover.out -timeout 40m -v ./...
           environment:
             TF_ACC: true
       - run:
