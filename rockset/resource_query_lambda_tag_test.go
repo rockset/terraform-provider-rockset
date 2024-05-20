@@ -16,7 +16,6 @@ func TestAccQueryLambdaTag_Basic(t *testing.T) {
 	v1 := Values{
 		Name:        randomName("ql"),
 		Tag:         randomName("tag"),
-		Alias:       "commons._events",
 		Workspace:   randomName("ws"),
 		Description: description(),
 		SQL:         "SELECT 1",
