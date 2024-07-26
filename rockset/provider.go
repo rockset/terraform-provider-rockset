@@ -45,6 +45,7 @@ func Provider() *schema.Provider {
 			"rockset_query_lambda_tag":               resourceQueryLambdaTag(),
 			"rockset_role":                           resourceRole(),
 			"rockset_s3_collection":                  resourceS3Collection(),
+			"rockset_azure_blob_storage_collection":  resourceAzureBlobStorageCollection(),
 			"rockset_s3_integration":                 resourceS3Integration(),
 			"rockset_azure_blob_storage_integration": resourceAzureBlobStorageIntegration(),
 			"rockset_user":                           resourceUser(),

@@ -84,6 +84,13 @@ func flattenBucketSourceParams(ctx context.Context, sourceType string, sources *
 			m["prefix"] = source.S3.Prefix
 			m["pattern"] = source.S3.Pattern
 			m["bucket"] = source.S3.Bucket
+		case "azure_blob_storage":
+			if source.AzureBlobStorage == nil {
+				return nil, fmt.Errorf("source type is %s but not Azure Blob Storage parameters found", sourceType)
+			}
+			m["prefix"] = source.AzureBlobStorage.Prefix
+			m["pattern"] = source.AzureBlobStorage.Pattern
+			m["container"] = source.AzureBlobStorage.Container
 		default:
 			return nil, fmt.Errorf("unknown source type %s", sourceType)
 		}
@@ -114,6 +121,12 @@ func makeBucketSourceParams(sourceType string, in interface{}) ([]openapi.Source
 				source.S3.Prefix = toStringPtrNilIfEmpty(val["prefix"].(string))
 				source.S3.Pattern = toStringPtrNilIfEmpty(val["pattern"].(string))
 				source.S3.Bucket = val["bucket"].(string)
+			case "azure_blob_storage":
+				source.AzureBlobStorage = openapi.NewSourceAzureBlobStorageWithDefaults()
+				source.AzureBlobStorage.Prefix = toStringPtrNilIfEmpty(val["prefix"].(string))
+				source.AzureBlobStorage.Pattern = toStringPtrNilIfEmpty(val["pattern"].(string))
+				container := val["container"].(string)
+				source.AzureBlobStorage.Container = &container
 			default:
 				panic("unknown source type " + sourceType)
 			}
